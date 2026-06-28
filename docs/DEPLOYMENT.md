@@ -8,7 +8,8 @@ docker compose up -d --build
 docker compose run --rm migrator pnpm --filter @judilen/db seed
 ```
 
-Compose запускает `migrate` как one-shot service и поднимает приложение только после успешных миграций. Seed запускается вручную и не является частью production startup.
+Compose запускает `migrate` как one-shot service, применяет миграции и
+идемпотентный seed, а приложение поднимает только после их успешного завершения.
 
 ## Portainer
 
@@ -20,7 +21,13 @@ Compose запускает `migrate` как one-shot service и поднимае
 
 Portainer не должен создавать или монтировать `.env`: Compose явно передает
 переменные Stack в контейнер `app`. Как минимум настройте `POSTGRES_PASSWORD`,
-`AUTH_SECRET`, `APP_URL` и `NEXT_PUBLIC_SITE_URL` в Environment variables Stack.
+`AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_SITE_URL`, `SEED_ADMIN_EMAIL` и
+`SEED_ADMIN_PASSWORD` в Environment variables Stack.
+
+One-shot service `migrate` последовательно применяет миграции и запускает
+идемпотентный seed. При первом deploy он создаёт администратора из
+`SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`; при следующих deploy существующий
+пароль не изменяется.
 
 `Dev CI` запускается для pull request в `dev` и push в `dev`; он выполняет проверки без деплоя. `Production` запускается только после push в `main`. Portainer webhook является последним шагом production job, поэтому он не вызывается при ошибке install, lint, typecheck, migration, seed, tests, Next.js build, Compose validation или Docker build.
 

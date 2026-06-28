@@ -20,7 +20,10 @@ services:
       dockerfile: Dockerfile
       target: migrator
     environment:
+      NODE_ENV: production
       DATABASE_URL: postgres://judilen:${POSTGRES_PASSWORD:-judilen}@db:5432/judilen
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@judilen.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required}
     depends_on:
       db:
         condition: service_healthy
