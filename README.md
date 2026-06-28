@@ -14,7 +14,7 @@ Production-oriented веб-платформа для аренды домиков
 
 ## Быстрый запуск
 
-Требуются Node.js 20+, pnpm 11+ и Docker.
+Требуются Node.js 24+, pnpm 11+ и Docker.
 
 ```bash
 cp .env.example .env

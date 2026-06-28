@@ -31,13 +31,13 @@ jobs:
       AUTH_SECRET: ci-only-secret-at-least-32-characters-long
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
         with:
           version: 11.7.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:migrate
