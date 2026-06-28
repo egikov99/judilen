@@ -16,15 +16,25 @@ Compose запускает `migrate` как one-shot service и поднимае
 2. Передайте runtime secrets через Portainer environment/secrets.
 3. Создайте webhook redeploy.
 4. В GitHub repository settings добавьте Actions secret `PORTAINER_WEBHOOK_URL`.
-5. Защитите ветки `dev` и `production`.
+5. Защитите ветки `dev` и `main`.
 
-Workflow запускает lint, typecheck, tests, production build и Docker build. Job `deploy` имеет `needs: verify`, условие `push` в `dev` и `curl -f`, поэтому webhook не вызывается при любой неуспешной проверке.
+`Dev CI` запускается для pull request в `dev` и push в `dev`; он выполняет проверки без деплоя. `Production` запускается только после push в `main`. Job `deploy` зависит от `verify-production`, поэтому webhook не вызывается при ошибке install, migration, lint, typecheck, tests, Next.js build, Compose validation или Docker build.
 
 ## Ветки
 
-- работа: `feature/*` или `codex/*`;
+- работа: `feature/*`;
 - интеграция: PR в `dev`;
-- production: PR `dev` → `production`.
+- production: после проверки `dev` создается PR `dev` → `main`;
+- автоматических merge между ветками нет.
+
+## Настройки GitHub
+
+- Settings → Actions → General → Workflow permissions: **Read and write permissions**.
+- Secret `PORTAINER_WEBHOOK_URL` должен быть добавлен в repository secrets или в environment `production`.
+- Для `dev` требуется pull request и успешный check `Lint, typecheck, tests and build`.
+- Для `main` требуется pull request из `dev`; проверенный SHA уже имеет успешный check `Lint, typecheck, tests and build` после push в `dev`.
+- Production check выполняется после merge/push в `main` и блокирует деплой, а не сам merge.
+- GitHub Actions не выполняет `git push`, поэтому bypass branch protection для workflow не нужен.
 
 ## Production checklist
 

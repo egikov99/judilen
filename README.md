@@ -89,4 +89,5 @@ docs/                     архитектура, API и деплой
 - [Архитектура](./docs/ARCHITECTURE.md)
 - [REST API](./docs/API.md)
 - [Docker и Portainer](./docs/DEPLOYMENT.md)
+- [CI/CD и ветки](./docs/CI_CD.md)
 - [Исходники Stitch](./design/stitch/README.md)

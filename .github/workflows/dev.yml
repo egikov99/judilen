@@ -1,0 +1,91 @@
+# CI for feature/* pull requests into dev and for the resulting dev branch.
+# This workflow never deploys and never merges branches automatically.
+name: Dev CI
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+# Repository Actions settings should use "Read and write permissions".
+# No git push is performed here; write permission keeps required checks and
+# future PR annotations available through GITHUB_TOKEN.
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: dev-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: judilen_test
+          POSTGRES_USER: judilen
+          POSTGRES_PASSWORD: judilen
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U judilen -d judilen_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://judilen:judilen@localhost:5432/judilen_test
+      AUTH_SECRET: ci-only-secret-at-least-32-characters-long
+      APP_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      # Install the exact package-manager version before setup-node enables
+      # dependency caching. The selected runtime remains Node.js 24.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate database migrations
+        run: pnpm db:migrate
+
+      - name: Seed test database
+        run: pnpm db:seed
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Production build
+        run: pnpm build
+
