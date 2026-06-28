@@ -30,21 +30,21 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:16
         env:
-          POSTGRES_DB: judilen_test
           POSTGRES_USER: judilen
           POSTGRES_PASSWORD: judilen
+          POSTGRES_DB: judilen_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U judilen -d judilen_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+          --health-cmd="pg_isready -U judilen -d judilen_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
-      DATABASE_URL: postgres://judilen:judilen@localhost:5432/judilen_test
+      DATABASE_URL: postgresql://judilen:judilen@localhost:5432/judilen_test
       AUTH_SECRET: ci-only-secret-at-least-32-characters-long
       APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -71,21 +71,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate database migrations
-        run: pnpm db:migrate
-
-      - name: Seed test database
-        run: pnpm db:seed
-
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Unit tests
+      - name: Run database migrations
+        run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
+
+      - name: Run tests
         run: pnpm test
 
-      - name: Production build
+      - name: Build
         run: pnpm build
-

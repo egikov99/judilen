@@ -20,10 +20,9 @@ flowchart TD
     B --> R["готово к ручному merge"]
     R -->|"Pull Request dev → main"| M["main"]
     M --> PC["Production workflow"]
-    PC --> PV["install + migrations + lint + typecheck + tests + build"]
+    PC --> PV["install + lint + typecheck + migrations + seed + tests + build"]
     PV --> CV["docker compose config"]
-    CV --> DF["Dockerfile check"]
-    DF --> DB["docker build: migrator + app"]
+    CV --> DB["docker build: judilen-app"]
     DB -->|"только success"| P["Portainer webhook"]
 ```
 
@@ -56,21 +55,21 @@ Settings → Branches / Rulesets:
 
 - `dev`: require pull request и check `Lint, typecheck, tests and build`;
 - `main`: require pull request из `dev`; при необходимости требовать check `Lint, typecheck, tests and build`, уже выполненный для SHA ветки `dev`;
-- `Verify production artifact` запускается после push в `main`, поэтому он защищает deploy, но не может быть pre-merge check;
+- `Test, build and deploy` запускается после push в `main`, поэтому он защищает deploy, но не может быть pre-merge check;
 - запретить force push и deletion;
 - не настраивать автоматический merge `main → dev`;
 - GITHUB_TOKEN не требует bypass: workflows не выполняют push.
 
 ## Deploy
 
-После ручного merge `dev → main`:
+После любого push в `main`:
 
 1. Production workflow устанавливает зависимости через pnpm cache.
-2. Применяет миграции к изолированной CI PostgreSQL и запускает seed.
-3. Выполняет lint, typecheck, unit tests и Next.js production build.
-4. Проверяет `docker-compose.yml` командой `ENV_FILE=.env.example docker compose config --quiet`.
-5. Проверяет Dockerfile через `docker buildx build --check .`.
-6. Собирает migrator и application images.
-7. Отдельный job `deploy`, зависящий от всех проверок, вызывает `PORTAINER_WEBHOOK_URL`.
+2. Выполняет lint и typecheck.
+3. Применяет миграции к изолированной PostgreSQL 16 и запускает seed.
+4. Выполняет unit tests и Next.js production build.
+5. Проверяет `docker-compose.yml` командой `docker compose config`.
+6. Валидирует Dockerfile сборкой image `judilen-app`.
+7. Последним шагом вызывает repository secret `PORTAINER_WEBHOOK_URL`.
 
-Если любой шаг завершается с ошибкой, job `deploy` не запускается.
+Если любой предыдущий шаг завершается с ошибкой, webhook не вызывается.

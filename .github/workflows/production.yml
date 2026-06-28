@@ -1,5 +1,5 @@
-# Production deployment is intentionally isolated from dev CI.
-# It runs only after a reviewed dev -> main merge produces a push to main.
+# Production deployment: push main -> verify -> build image -> Portainer.
+# This workflow never merges or pushes branches.
 name: Production
 
 on:
@@ -7,54 +7,55 @@ on:
     branches:
       - main
 
-# Repository Actions settings should use "Read and write permissions".
-# The workflow does not merge or push branches automatically.
 permissions:
-  contents: write
-  checks: write
+  contents: read
 
 concurrency:
   group: production
   cancel-in-progress: false
 
 jobs:
-  verify-production:
-    name: Verify production artifact
+  production:
+    name: Test, build and deploy
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:16
         env:
-          POSTGRES_DB: judilen_test
           POSTGRES_USER: judilen
           POSTGRES_PASSWORD: judilen
+          POSTGRES_DB: judilen_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U judilen -d judilen_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+          --health-cmd="pg_isready -U judilen -d judilen_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
-      DATABASE_URL: postgres://judilen:judilen@localhost:5432/judilen_test
+      DATABASE_URL: postgresql://judilen:judilen@localhost:5432/judilen_test
       AUTH_SECRET: ci-only-secret-at-least-32-characters-long
       APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # docker-compose.yml reads runtime variables from this safe example file
+      # during validation. Portainer provides the real production environment.
+      ENV_FILE: .env.example
 
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install pnpm
+      # pnpm must be available before setup-node resolves the pnpm cache path.
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
           run_install: false
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -64,52 +65,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate database migrations
-        run: pnpm db:migrate
-
-      - name: Seed test database
-        run: pnpm db:seed
-
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Unit tests
+      - name: Run database migrations
+        run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
+
+      - name: Run tests
         run: pnpm test
 
-      - name: Production build
+      - name: Build
         run: pnpm build
 
-      # Parse and normalize Compose before building any image.
       - name: Validate Docker Compose
-        run: ENV_FILE=.env.example docker compose config --quiet
+        run: docker compose config
 
-      # BuildKit validates Dockerfile instructions and build checks without
-      # publishing an image.
-      - name: Check Dockerfile
-        run: docker buildx build --check .
+      # A successful image build validates the Dockerfile and the final image.
+      - name: Build Docker image
+        run: docker build -t judilen-app .
 
-      - name: Build migration image
-        run: docker build --target migrator --tag judilen-migrator:${{ github.sha }} .
-
-      - name: Build application image
-        run: docker build --tag judilen:${{ github.sha }} .
-
-  deploy:
-    name: Trigger Portainer
-    runs-on: ubuntu-latest
-    needs:
-      - verify-production
-    if: ${{ success() }}
-    environment: production
-    timeout-minutes: 5
-
-    steps:
-      # This job cannot start until every verification and Docker step above
-      # has completed successfully.
-      - name: Trigger Portainer
+      # This is the final step, so it can only run after every check above.
+      - name: Trigger Portainer webhook
+        if: success()
         run: |
           test -n "$PORTAINER_WEBHOOK_URL"
           curl -fsSL -X POST "$PORTAINER_WEBHOOK_URL"

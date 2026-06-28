@@ -1,10 +1,16 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+--> statement-breakpoint
 CREATE EXTENSION IF NOT EXISTS "btree_gist";
+--> statement-breakpoint
 
 CREATE TYPE "role_name" AS ENUM ('client', 'admin', 'content_manager', 'manager');
+--> statement-breakpoint
 CREATE TYPE "booking_status" AS ENUM ('new', 'awaiting_confirmation', 'confirmed', 'awaiting_payment', 'paid', 'cancelled', 'completed');
+--> statement-breakpoint
 CREATE TYPE "payment_status" AS ENUM ('pending', 'authorized', 'paid', 'failed', 'refunded');
+--> statement-breakpoint
 CREATE TYPE "integration_kind" AS ENUM ('ical', 'booking', 'airbnb', 'ostrovok', 'expedia', 'google_travel');
+--> statement-breakpoint
 
 CREATE TABLE "roles" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -13,6 +19,7 @@ CREATE TABLE "roles" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "permissions" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "key" text NOT NULL UNIQUE,
@@ -20,11 +27,14 @@ CREATE TABLE "permissions" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "role_permissions" (
   "role_id" uuid NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
   "permission_id" uuid NOT NULL REFERENCES permissions(id) ON DELETE CASCADE
 );
+--> statement-breakpoint
 CREATE UNIQUE INDEX "role_permission_unique" ON "role_permissions" ("role_id", "permission_id");
+--> statement-breakpoint
 CREATE TABLE "users" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "email" text NOT NULL,
@@ -38,7 +48,9 @@ CREATE TABLE "users" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE UNIQUE INDEX "users_email_unique" ON "users" ("email");
+--> statement-breakpoint
 CREATE TABLE "customers" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" uuid UNIQUE REFERENCES users(id) ON DELETE SET NULL,
@@ -50,7 +62,9 @@ CREATE TABLE "customers" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE UNIQUE INDEX "customers_email_unique" ON "customers" ("email");
+--> statement-breakpoint
 CREATE TABLE "houses" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "slug" text NOT NULL UNIQUE,
@@ -68,6 +82,7 @@ CREATE TABLE "houses" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "house_images" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "house_id" uuid NOT NULL REFERENCES houses(id) ON DELETE CASCADE,
@@ -77,7 +92,9 @@ CREATE TABLE "house_images" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE UNIQUE INDEX "house_images_position_unique" ON "house_images" ("house_id", "position");
+--> statement-breakpoint
 CREATE TABLE "house_prices" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "house_id" uuid NOT NULL REFERENCES houses(id) ON DELETE CASCADE,
@@ -89,6 +106,7 @@ CREATE TABLE "house_prices" (
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   CHECK ("end_date" > "start_date")
 );
+--> statement-breakpoint
 CREATE TABLE "bookings" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "public_number" text NOT NULL UNIQUE,
@@ -108,14 +126,17 @@ CREATE TABLE "bookings" (
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   CHECK ("check_out" > "check_in")
 );
+--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_no_overlap"
   EXCLUDE USING gist (
     "house_id" WITH =,
     daterange("check_in", "check_out", '[)') WITH &&
   ) WHERE ("status" IN ('awaiting_confirmation', 'confirmed', 'awaiting_payment', 'paid'));
+--> statement-breakpoint
 CREATE UNIQUE INDEX "bookings_external_unique"
   ON "bookings" ("external_source", "external_id")
   WHERE "external_id" IS NOT NULL;
+--> statement-breakpoint
 CREATE TABLE "booking_status_history" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "booking_id" uuid NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
@@ -125,6 +146,7 @@ CREATE TABLE "booking_status_history" (
   "comment" text,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "payments" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "booking_id" uuid NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
@@ -137,6 +159,7 @@ CREATE TABLE "payments" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "content_pages" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "slug" text NOT NULL UNIQUE,
@@ -148,6 +171,7 @@ CREATE TABLE "content_pages" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "integrations" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "house_id" uuid REFERENCES houses(id) ON DELETE CASCADE,
@@ -159,6 +183,7 @@ CREATE TABLE "integrations" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "integration_logs" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "integration_id" uuid NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
@@ -167,12 +192,14 @@ CREATE TABLE "integration_logs" (
   "context" jsonb,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "settings" (
   "key" text PRIMARY KEY,
   "value" jsonb NOT NULL,
   "is_secret" boolean NOT NULL DEFAULT false,
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "audit_logs" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "actor_id" uuid REFERENCES users(id) ON DELETE SET NULL,
@@ -185,9 +212,13 @@ CREATE TABLE "audit_logs" (
   "user_agent" text,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE INDEX "bookings_house_dates_idx" ON "bookings" ("house_id", "check_in", "check_out");
+--> statement-breakpoint
 CREATE INDEX "bookings_customer_idx" ON "bookings" ("customer_id");
+--> statement-breakpoint
 CREATE INDEX "audit_logs_entity_idx" ON "audit_logs" ("entity_type", "entity_id");
+--> statement-breakpoint
 CREATE TABLE "reviews" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "booking_id" uuid NOT NULL UNIQUE REFERENCES bookings(id) ON DELETE CASCADE,
@@ -199,6 +230,7 @@ CREATE TABLE "reviews" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "customer_messages" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "booking_id" uuid NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
@@ -207,6 +239,7 @@ CREATE TABLE "customer_messages" (
   "is_internal" boolean NOT NULL DEFAULT false,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE TABLE "password_reset_tokens" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -215,4 +248,5 @@ CREATE TABLE "password_reset_tokens" (
   "used_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT now()
 );
+--> statement-breakpoint
 CREATE INDEX "password_reset_tokens_user_idx" ON "password_reset_tokens" ("user_id");

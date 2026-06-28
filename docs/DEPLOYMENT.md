@@ -18,7 +18,7 @@ Compose запускает `migrate` как one-shot service и поднимае
 4. В GitHub repository settings добавьте Actions secret `PORTAINER_WEBHOOK_URL`.
 5. Защитите ветки `dev` и `main`.
 
-`Dev CI` запускается для pull request в `dev` и push в `dev`; он выполняет проверки без деплоя. `Production` запускается только после push в `main`. Job `deploy` зависит от `verify-production`, поэтому webhook не вызывается при ошибке install, migration, lint, typecheck, tests, Next.js build, Compose validation или Docker build.
+`Dev CI` запускается для pull request в `dev` и push в `dev`; он выполняет проверки без деплоя. `Production` запускается только после push в `main`. Portainer webhook является последним шагом production job, поэтому он не вызывается при ошибке install, lint, typecheck, migration, seed, tests, Next.js build, Compose validation или Docker build.
 
 ## Ветки
 
@@ -35,6 +35,13 @@ Compose запускает `migrate` как one-shot service и поднимае
 - Для `main` требуется pull request из `dev`; проверенный SHA уже имеет успешный check `Lint, typecheck, tests and build` после push в `dev`.
 - Production check выполняется после merge/push в `main` и блокирует деплой, а не сам merge.
 - GitHub Actions не выполняет `git push`, поэтому bypass branch protection для workflow не нужен.
+
+## Настройки Portainer
+
+- Stack должен быть подключен к актуальному GitHub repository.
+- Reference/branch для Stack: `main`.
+- Compose path: `docker-compose.yml`.
+- Webhook должен принадлежать именно этому Stack и выполнять pull/redeploy.
 
 ## Production checklist
 
