@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#b8c8aa",
+                        "on-secondary-fixed": "#3b0900",
+                        "background": "#f9faf2",
+                        "outline": "#72796e",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#3d4b34",
+                        "surface-container-highest": "#e2e3dc",
+                        "surface-container-high": "#e7e9e1",
+                        "on-background": "#191c18",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e3dc",
+                        "inverse-on-surface": "#f0f1ea",
+                        "on-secondary-container": "#772e1a",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2e312c",
+                        "tertiary-container": "#47543d",
+                        "secondary-fixed": "#ffdbd1",
+                        "secondary": "#974730",
+                        "on-primary-fixed": "#002201",
+                        "on-primary-container": "#9dd090",
+                        "secondary-container": "#fe987c",
+                        "on-surface-variant": "#42493e",
+                        "secondary-fixed-dim": "#ffb5a1",
+                        "surface-tint": "#3b6934",
+                        "surface-container": "#edefe7",
+                        "on-tertiary-fixed": "#131f0c",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#c2c9bb",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#a1d494",
+                        "primary": "#154212",
+                        "surface-bright": "#f9faf2",
+                        "tertiary-fixed": "#d8e8c8",
+                        "primary-container": "#2d5a27",
+                        "tertiary": "#303d27",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d9dbd3",
+                        "surface": "#f9faf2",
+                        "on-secondary-fixed-variant": "#79301b",
+                        "surface-container-low": "#f3f4ed",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#bcf0ae",
+                        "inverse-primary": "#a1d494",
+                        "on-primary-fixed-variant": "#23501e",
+                        "tertiary-fixed-dim": "#bccbae",
+                        "on-surface": "#191c18"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "section-margin": "40px",
+                        "base": "8px",
+                        "card-gap": "24px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"],
+                        "label-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "display-lg": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .star-rating input:checked ~ label .material-symbols-outlined,
+        .star-rating label:hover ~ label .material-symbols-outlined,
+        .star-rating label:hover .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+            color: #154212;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface shadow-sm sticky top-0 z-50 transition-all duration-300">
+<div class="flex justify-between items-center w-full px-gutter py-4 max-w-full mx-auto">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">
+                Estate Management System
+            </div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-outline-variant font-medium hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#">Estate</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#">Bookings</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200" href="#">Concierge</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed pb-1 transition-colors duration-200" href="#">Reviews</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of an estate administrator in a well-lit modern office environment. The person is smiling warmly, wearing smart casual attire. Soft, natural lighting filters through the window, highlighting the crisp textures of their professional clothing. The background shows a hint of lush greenery through a window, maintaining the Eco-Premium brand aesthetic of Greenwood Estate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXv7CDhmaCCHMNHuJEYgzFeOfN9VbipOMSb7RGPLZ3RvrsMyEx1GIbm2g5PM_erey7RTjPk3oelR2NwOZO1JGeOU8uwGHc6wUk3XTvIpA0SzrMrTOvCOwfSP0E8nAsKVqvS7sF3tzZuhJk9EcMgOrmSQn7hNJXrgBO6EgF5TjdHoJgkJJMNajSKOzBA-dYb2RXOuJ9vH-oU8GvvXCdFhQelagWB00PiaYUGDdI-e-jrUVziiLyC0_p"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow relative flex items-center justify-center py-section-margin px-4">
+<!-- Background Image Container -->
+<div class="absolute inset-0 z-0 overflow-hidden">
+<div class="w-full h-full bg-cover bg-fixed bg-center opacity-10" data-alt="A serene and misty morning in an ancient forest, featuring towering deciduous trees with soft green leaves. The morning sun pierces through the dense canopy, creating ethereal rays of light and long shadows on the moss-covered ground. The atmosphere is peaceful, grounded, and luxurious, mirroring the Rustic Modern aesthetic of a high-end country estate. The color palette is dominated by deep forest greens, earthy browns, and soft golden light." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCCPAZanZYQ7ok72DIGf8FSAIUyi4XwAeLzlevleyvSveH7LAWNhPhOcVqnxrN8AXFfFVIstg1R_IfUBGLiNVjfLrHrHbY_q8kTED0Yx1YgzhUIFEWamlSoMk70OaQIJbvr-GXt8PNewwShMA6gFKHpETbeK-YFZT9w5lktFXoRYqsK_tNAWuXGH_ujrOMoSXdqCIJu3vQZzQTbHs757qFrJgQE92fqduc14F1Tf0J6EZl-l-17zHuE')"></div>
+</div>
+<!-- Review Form Card -->
+<div class="relative z-10 w-full max-w-2xl glass-effect rounded-xl shadow-2xl shadow-primary/10 overflow-hidden border border-outline-variant/30">
+<div class="p-8 md:p-12">
+<div class="text-center mb-10">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-3">Поделитесь вашими впечатлениями</h1>
+<p class="text-on-surface-variant font-body-lg">Ваш отзыв помогает нам создавать исключительную атмосферу Greenwood Estate</p>
+</div>
+<form class="space-y-8" id="reviewForm">
+<!-- Star Rating -->
+<div class="flex flex-col items-center gap-4">
+<label class="font-title-lg text-title-lg text-on-surface">Ваша оценка</label>
+<div class="flex flex-row-reverse gap-2 star-rating">
+<input class="hidden" id="star5" name="rating" type="radio" value="5"/>
+<label class="cursor-pointer transition-transform hover:scale-110 active:scale-95" for="star5">
+<span class="material-symbols-outlined text-4xl text-outline-variant">star</span>
+</label>
+<input class="hidden" id="star4" name="rating" type="radio" value="4"/>
+<label class="cursor-pointer transition-transform hover:scale-110 active:scale-95" for="star4">
+<span class="material-symbols-outlined text-4xl text-outline-variant">star</span>
+</label>
+<input class="hidden" id="star3" name="rating" type="radio" value="3"/>
+<label class="cursor-pointer transition-transform hover:scale-110 active:scale-95" for="star3">
+<span class="material-symbols-outlined text-4xl text-outline-variant">star</span>
+</label>
+<input class="hidden" id="star2" name="rating" type="radio" value="2"/>
+<label class="cursor-pointer transition-transform hover:scale-110 active:scale-95" for="star2">
+<span class="material-symbols-outlined text-4xl text-outline-variant">star</span>
+</label>
+<input class="hidden" id="star1" name="rating" type="radio" value="1"/>
+<label class="cursor-pointer transition-transform hover:scale-110 active:scale-95" for="star1">
+<span class="material-symbols-outlined text-4xl text-outline-variant">star</span>
+</label>
+</div>
+</div>
+<!-- Input Fields -->
+<div class="space-y-6">
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="guest_name">Имя</label>
+<input class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 font-body-md" id="guest_name" placeholder="Введите ваше имя" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="guest_review">Ваш отзыв</label>
+<textarea class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all duration-200 font-body-md resize-none" id="guest_review" placeholder="Опишите ваши впечатления от пребывания у нас..." rows="5"></textarea>
+</div>
+</div>
+<!-- Photo Upload -->
+<div class="flex flex-col items-center gap-4">
+<button class="flex items-center gap-3 px-6 py-3 rounded-full border-2 border-dashed border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-300 group" type="button">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_a_photo</span>
+<span class="font-title-lg">Добавить фото</span>
+</button>
+<p class="text-label-md text-on-surface-variant/70 italic">Максимально 5 фотографий в формате JPG или PNG</p>
+</div>
+<!-- Submit Button -->
+<div class="pt-4">
+<button class="w-full py-4 rounded-full bg-primary-container text-on-primary font-title-lg text-title-lg shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2" type="submit">
+                            Отправить отзыв
+                            <span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface-container shadow-[0_-4px_16px_rgba(0,0,0,0.05)] z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">event</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md">Reviews</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">menu</span>
+<span class="font-label-md text-label-md">Menu</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="bg-surface-container py-12 mt-auto">
+<div class="max-w-7xl mx-auto px-gutter grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+<div>
+<h3 class="font-headline-md text-primary mb-4">Greenwood Estate</h3>
+<p class="text-on-surface-variant font-body-md max-w-xs mx-auto md:mx-0">
+                    Премиальный эко-курорт, где природа встречается с безупречным сервисом. Ваше спокойствие — наш приоритет.
+                </p>
+</div>
+<div>
+<h4 class="font-title-lg text-on-surface mb-4">Навигация</h4>
+<ul class="space-y-2 text-on-surface-variant font-body-md">
+<li><a class="hover:text-primary transition-colors" href="#">Об имении</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Бронирование</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Сервисы</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Галерея</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-title-lg text-on-surface mb-4">Связаться с нами</h4>
+<div class="flex flex-col gap-2 text-on-surface-variant font-body-md">
+<p class="flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-primary text-sm">location_on</span>
+                        Лесной массив, д. 42
+                    </p>
+<p class="flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-primary text-sm">phone</span>
+                        +7 (999) 000-00-00
+                    </p>
+<div class="flex gap-4 mt-4 justify-center md:justify-start">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">public</span>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">mail</span>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">share</span>
+</div>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-gutter mt-12 pt-8 border-t border-outline-variant/30 text-center text-on-surface-variant text-label-md uppercase tracking-widest">
+            © 2024 Greenwood Estate Eco-Premium Management. Все права защищены.
+        </div>
+</footer>
+<script>
+        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Basic UI interaction feedback
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Отправка...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Благодарим за ваш отзыв! Он появится на сайте после модерации.');
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                e.target.reset();
+                // Clear stars
+                document.querySelectorAll('.star-rating input').forEach(input => input.checked = false);
+            }, 1500);
+        });
+
+        // Hover effect for stars logic
+        const labels = document.querySelectorAll('.star-rating label');
+        labels.forEach((label, index) => {
+            label.addEventListener('mouseenter', () => {
+                // Not strictly needed with CSS reverse-flex approach but adds polish if needed for custom logic
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Отзывы наших гостей | Greenwood Estate</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#d8e8c8",
+                    "on-secondary-fixed": "#3b0900",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#131f0c",
+                    "surface-variant": "#e2e3dc",
+                    "secondary-fixed": "#ffdbd1",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#974730",
+                    "on-surface-variant": "#42493e",
+                    "on-tertiary-container": "#b8c8aa",
+                    "inverse-primary": "#a1d494",
+                    "on-primary-container": "#9dd090",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f3f4ed",
+                    "on-background": "#191c18",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "on-surface": "#191c18",
+                    "on-primary-fixed-variant": "#23501e",
+                    "surface-container": "#edefe7",
+                    "primary-container": "#2d5a27",
+                    "surface": "#f9faf2",
+                    "surface-bright": "#f9faf2",
+                    "primary-fixed-dim": "#a1d494",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f0f1ea",
+                    "tertiary-container": "#47543d",
+                    "primary": "#154212",
+                    "outline-variant": "#c2c9bb",
+                    "primary-fixed": "#bcf0ae",
+                    "inverse-surface": "#2e312c",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "surface-container-highest": "#e2e3dc",
+                    "background": "#f9faf2",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#d9dbd3",
+                    "on-secondary-container": "#772e1a",
+                    "on-primary-fixed": "#002201",
+                    "surface-container-high": "#e7e9e1",
+                    "surface-tint": "#3b6934",
+                    "tertiary": "#303d27",
+                    "secondary-container": "#fe987c",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "outline": "#72796e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-margin": "40px",
+                    "card-gap": "24px",
+                    "gutter": "24px",
+                    "container-padding": "32px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Playfair Display"],
+                    "headline-md": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "title-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .review-card-shadow {
+            box-shadow: 0 16px 24px -12px rgba(21, 66, 18, 0.08);
+        }
+        .text-clay { color: #974730; }
+        .bg-clay { background-color: #974730; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface shadow-sm h-20 transition-all duration-300">
+<nav class="flex justify-between items-center w-full px-container-padding max-w-7xl mx-auto h-full">
+<div class="text-headline-md font-headline-md text-primary">Greenwood Estate</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Our Cabins</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Heritage</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Dining</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Wellness</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden lg:block text-primary font-bold hover:opacity-80 transition-opacity px-4 py-2 font-body-lg text-body-lg">Member Login</button>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-full font-bold active:scale-95 transition-all duration-150 shadow-sm hover:shadow-md">Book Now</button>
+<button class="md:hidden flex items-center justify-center p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="pt-32 pb-section-margin max-w-7xl mx-auto px-container-padding">
+<!-- Header Section -->
+<section class="mb-12">
+<h1 class="font-display-lg text-display-lg md:text-display-lg mb-4 text-primary">Отзывы наших гостей</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                Ваши впечатления — это сердце нашего поместья. Мы стремимся создать атмосферу безупречного комфорта и единения с природой, и каждое ваше слово помогает нам становиться лучше.
+            </p>
+</section>
+<!-- Filter & Sorting Bar -->
+<section class="bg-white p-6 rounded-xl review-card-shadow mb-10 flex flex-col md:flex-row gap-6 items-center justify-between">
+<div class="flex flex-wrap items-center gap-6 w-full md:w-auto">
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-outline uppercase tracking-widest">Рейтинг</span>
+<select class="border-outline-variant bg-surface rounded-lg py-2 px-4 focus:ring-primary focus:border-primary font-body-md">
+<option>Все оценки</option>
+<option>5 звезд</option>
+<option>4 звезды</option>
+<option>3 звезды и ниже</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-outline uppercase tracking-widest">Сортировка</span>
+<select class="border-outline-variant bg-surface rounded-lg py-2 px-4 focus:ring-primary focus:border-primary font-body-md">
+<option>Сначала новые</option>
+<option>Сначала старые</option>
+<option>По рейтингу</option>
+</select>
+</div>
+</div>
+<button class="w-full md:w-auto bg-secondary text-on-secondary px-8 py-3 rounded-full font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                Оставить отзыв
+            </button>
+</section>
+<!-- Review Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-1 gap-gutter">
+<!-- Review Card 1 -->
+<article class="bg-white p-8 rounded-xl review-card-shadow flex flex-col md:flex-row gap-8">
+<div class="flex-shrink-0 flex flex-col items-center text-center md:w-48">
+<div class="w-20 h-20 rounded-full overflow-hidden mb-3 border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged elegant woman with a warm smile, outdoor natural lighting, soft forest background, Greenwood Estate branding style, high-end photography, cinematic feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnrazLWIAQm2KQB_AScUgtEpj4EJ0bofEa1GCPF5Md-ciSpVGeFty5ylln6nC9aqfmfUBIxnOK82PWpFwmLj-jpJ_325tdrSZtuechrm339apss5e1p_RQW6np-0zw85kioixUsqwnrHZhCGDAompv6Mg0dTvSimuqqZWKTL8ZY-JbwApkRmcKwi2dcLuzk7Wjvfc8JTATQiK9rubOrchQnh7adAQAqy_XzLaKHIY4hfCxvvtlNo1z"/>
+</div>
+<h3 class="font-title-lg text-title-lg text-primary">Елена В.</h3>
+<p class="font-label-md text-label-md text-outline">Июнь 2024</p>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface mb-6 leading-relaxed">
+                        Незабываемый уикенд! Мы остановились в "Лесном домике", и это было именно то, что нам нужно для перезагрузки. Продуманный до мелочей интерьер, запах сосны и потрясающий вид на озеро на рассвете. Ресторан Heritage превзошел все ожидания — фермерские продукты действительно имеют другой вкус. Обязательно вернемся осенью!
+                    </p>
+<div class="flex gap-4 mb-8">
+<div class="w-32 h-24 rounded-lg overflow-hidden cursor-zoom-in hover:opacity-90 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Breathtaking morning view of a misty lake from a modern wood cabin terrace, soft dawn light, lush green pine trees, Greenwood Estate eco-luxury style, serene atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3hrxENybAKzb9nKuugKGwS4Qvj6ZmWckVq_9CpXmij0fHCs1pOVgtm2_0GBURDzVhFthDfvQDAe_crD2IHLi2DTZXZFQ1-LwWCdQN7EfSQpPspK-cCazGI-XrirmFyG6GYjH0Idn4kmIeSI5PRFgak6esYOw8JDXKLflRn00wnU84ylC5SUlG3hO-IgbzMj6K56WsdyoPQzhg5OgIwHaEOPK8elki3DCaM5OYXPGYk8QzDvIvFwvu"/>
+</div>
+<div class="w-32 h-24 rounded-lg overflow-hidden cursor-zoom-in hover:opacity-90 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Interior of a luxury eco-cabin featuring high-end minimalist design, warm wood textures, a soft linen-covered bed, and a large window overlooking a forest, golden hour lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgXe_c-J5KWZKdb5eg7xQFeEstApQY2eViADobo58pLkDzRgRqVBnNnkdOc_7UN75NRqMUBPcT9k07AOuXudQ_6HJaj5psA9lboqRn_yp9tXK2_O0Jrb3kTFIW_Wp_lz4RFPnrSiWxZm0_v_GZGzJHJ0Ph-ehgMkIyYy5D109b4_A1QdCWUN5q4khcNJYHig9goN-EH6nMY3IF_thnY3AP2bbGia4qL_ysvpYZXIyc2Y4ZghP4ol0q"/>
+</div>
+</div>
+<!-- Admin Response -->
+<div class="bg-surface-container-low p-6 rounded-lg border-l-4 border-primary">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[18px]">eco</span>
+<span class="font-bold text-primary font-label-md text-label-md uppercase tracking-wider">Ответ Greenwood Estate</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic">
+                            Елена, благодарим вас за столь теплые слова! Мы счастливы, что смогли создать для вас атмосферу умиротворения. Ждем вас снова, чтобы вы смогли насладиться красотой нашей усадьбы в багряных красках осени.
+                        </p>
+</div>
+</div>
+</article>
+<!-- Review Card 2 -->
+<article class="bg-white p-8 rounded-xl review-card-shadow flex flex-col md:flex-row gap-8">
+<div class="flex-shrink-0 flex flex-col items-center text-center md:w-48">
+<div class="w-20 h-20 rounded-full overflow-hidden mb-3 border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young adventurous man with a beard wearing a premium outdoor jacket, standing in front of a rustic stone wall, natural high-key lighting, eco-premium hospitality aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2LBnzLT-NAqA7vBhG4jiN69N1loRxeXuMjKRp0RF4CR5Z72k1jvmpAArfnYKHgSpUkFxTr4-kqQFO84DA6T35PvJVyg98whdciBkX0tnJ56ZhbPwcrNBbjNAGF712OrVgVgS14spwjmpG6QZfwdwXxqdMfCA52eEOVSAyZ5ebEVK_wGn9A_9v5utntrrnaYIfrL6cqF0mWXNOyMS_bQv96jclndBb56WDR2eCYWRPZwUAYYAR1oBG"/>
+</div>
+<h3 class="font-title-lg text-title-lg text-primary">Александр К.</h3>
+<p class="font-label-md text-label-md text-outline">Май 2024</p>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined">star</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface mb-6 leading-relaxed">
+                        Отличное место для тех, кто ищет тишины. Сервис на высоте, консьерж помог организовать индивидуальную экскурсию по окрестностям. Единственный момент — Wi-Fi в дальних зонах парка работал нестабильно, но, возможно, это к лучшему для полного цифрового детокса. Спа-зона — это просто 10 из 10.
+                    </p>
+<div class="flex gap-4">
+<div class="w-32 h-24 rounded-lg overflow-hidden cursor-zoom-in hover:opacity-90 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="A serene spa interior with slate stone walls, a steaming pool, and dim atmospheric lighting with warm candle-like glows, professional interior photography, eco-luxury wellness style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvUjwQcJ_IHuvhf2ADptpCu7Woch_09ynSy-p6lwM0CwDLA4Bz7gZaKCpkLIBCGEnO9d9ORc45ZQW6ViHSMR5gpSZD-CsRvVFkZOQ8MIBvNemrARd7WVoKTNhMbJ6L3VOxDA4wvQG3WpfvZVmcDAwomrHw_VXojnrcooAG8-N4KMQb4R7uJ_4tQ4tC7n4hRgJgs-S1T8VK6Vl2h6HxlzvdtLvQ1M5mwXFnlFoZfib0vd8dzcZLpi9a"/>
+</div>
+</div>
+</div>
+</article>
+<!-- Review Card 3 -->
+<article class="bg-white p-8 rounded-xl review-card-shadow flex flex-col md:flex-row gap-8">
+<div class="flex-shrink-0 flex flex-col items-center text-center md:w-48">
+<div class="w-20 h-20 rounded-full overflow-hidden mb-3 border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="A cheerful couple in their late 20s smiling, lifestyle photography, soft natural focus, green outdoor backdrop, elegant casual attire, light mode aesthetic, Greenwood Estate guest vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9-On9fRny9zlg8B-lp-nX0btJcsbja01MbvcGuT-0gdUI1ukbYpP87qRT9Ew4lhfL8KhJNEt5J5EEYjliPMIs01FDEylS9vfqSfR5hO37PGA8rdBgQV2iRaQQ3D_PjXB_MYyjSTAeIEVAzPF6YcNkRVMNumMH2cknDEFdzyIaX0przA2sXhWyWvFHOrCb-xJ-2G9Vr5nkMJI6v9D6R49AbmGLsvHO91mkLHSuLjFGK1fmSsXw7zO8"/>
+</div>
+<h3 class="font-title-lg text-title-lg text-primary">Семья Новиковых</h3>
+<p class="font-label-md text-label-md text-outline">Апрель 2024</p>
+</div>
+<div class="flex-grow">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface mb-6 leading-relaxed">
+                        Приезжали с детьми на пасхальные праздники. Порадовало наличие детских программ и мастер-классов по гончарному делу. Мы могли спокойно насладиться ужином, пока дети были заняты полезным делом под присмотром аниматоров. Кухня великолепна, завтраки — отдельный вид искусства.
+                    </p>
+<!-- Admin Response -->
+<div class="bg-surface-container-low p-6 rounded-lg border-l-4 border-primary">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[18px]">eco</span>
+<span class="font-bold text-primary font-label-md text-label-md uppercase tracking-wider">Ответ Greenwood Estate</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic">
+                            Спасибо, что выбрали нас для вашего семейного отдыха! Мы рады, что нашим юным гостям понравились мастер-классы. Будем рады видеть всю вашу семью снова!
+                        </p>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination -->
+<nav class="mt-16 flex justify-center items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-outline hover:bg-primary-container hover:text-white transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">3</button>
+<span class="px-2 text-outline">...</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">12</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-outline hover:bg-primary-container hover:text-white transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</nav>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-dim border-t border-outline-variant">
+<div class="w-full py-section-margin px-container-padding flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
+<div class="mb-8 md:mb-0 text-center md:text-left">
+<div class="font-headline-md text-headline-md text-primary mb-2">Greenwood Estate</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+                    Окунитесь в атмосферу спокойствия и роскоши в самом сердце дикой природы.
+                </p>
+</div>
+<div class="flex flex-wrap justify-center gap-8 mb-8 md:mb-0">
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-label-md text-label-md" href="#">Sustainability Report</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-label-md text-label-md" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-label-md text-label-md" href="#">Contact Concierge</a>
+<a class="text-on-surface-variant hover:text-primary hover:underline transition-all font-label-md text-label-md" href="#">Terms of Service</a>
+</div>
+<div class="text-center md:text-right">
+<div class="flex gap-4 justify-center md:justify-end mb-4">
+<a class="text-primary hover:opacity-80" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-primary hover:opacity-80" href="#"><span class="material-symbols-outlined">camera_indoor</span></a>
+<a class="text-primary hover:opacity-80" href="#"><span class="material-symbols-outlined">mail</span></a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-70">
+                    © 2024 Greenwood Estate. Crafted for Eco-Premium Hospitality.
+                </p>
+</div>
+</div>
+</footer>
+<script>
+        // Scroll interaction for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'shadow-md');
+                header.classList.remove('h-20');
+                header.classList.add('h-16');
+            } else {
+                header.classList.remove('py-2', 'shadow-md');
+                header.classList.remove('h-16');
+                header.classList.add('h-20');
+            }
+        });
+
+        // Hover effect for images to simulate lightbox
+        document.querySelectorAll('article img').forEach(img => {
+            img.addEventListener('click', () => {
+                console.log('Open high-res lightbox');
+            });
+        });
+    </script>
+</body></html>

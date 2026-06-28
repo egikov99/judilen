@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Бронирование подтверждено | Greenwood Estate</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#edefe7",
+                    "on-primary-container": "#9dd090",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "on-surface": "#191c18",
+                    "surface": "#f9faf2",
+                    "primary-fixed-dim": "#a1d494",
+                    "primary-container": "#2d5a27",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#fe987c",
+                    "tertiary-fixed": "#d8e8c8",
+                    "background": "#f9faf2",
+                    "surface-tint": "#3b6934",
+                    "primary": "#154212",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e312c",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#b8c8aa",
+                    "on-error-container": "#93000a",
+                    "on-background": "#191c18",
+                    "on-surface-variant": "#42493e",
+                    "tertiary": "#303d27",
+                    "on-primary-fixed": "#002201",
+                    "secondary-fixed": "#ffdbd1",
+                    "outline-variant": "#c2c9bb",
+                    "outline": "#72796e",
+                    "surface-container-low": "#f3f4ed",
+                    "surface-container-highest": "#e2e3dc",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#bcf0ae",
+                    "surface-variant": "#e2e3dc",
+                    "on-tertiary-fixed": "#131f0c",
+                    "on-primary-fixed-variant": "#23501e",
+                    "surface-dim": "#d9dbd3",
+                    "on-secondary-container": "#772e1a",
+                    "on-secondary-fixed": "#3b0900",
+                    "inverse-on-surface": "#f0f1ea",
+                    "surface-bright": "#f9faf2",
+                    "secondary": "#974730",
+                    "inverse-primary": "#a1d494",
+                    "surface-container-high": "#e7e9e1",
+                    "tertiary-container": "#47543d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "section-margin": "40px",
+                    "card-gap": "24px",
+                    "container-padding": "32px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Playfair Display"],
+                    "display-lg": ["Playfair Display"],
+                    "title-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        display: inline-block;
+        line-height: 1;
+      }
+      .eco-gradient {
+        background: linear-gradient(180deg, rgba(25, 28, 24, 0.4) 0%, rgba(25, 28, 24, 0.8) 100%);
+      }
+      .bento-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-md shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<nav class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                Greenwood Estate
+            </div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary transition-colors" href="#">The Estate</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary transition-colors" href="#">Cabins</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary transition-colors" href="#">Services</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary transition-colors" href="#">Gallery</a>
+<a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary transition-colors" href="#">Reviews</a>
+</div>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded-full hover:opacity-90 transition-opacity">
+                Book Now
+            </button>
+</nav>
+</header>
+<main class="flex-grow flex items-center justify-center relative py-12 md:py-24">
+<!-- Hero Background -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A breathtaking, cinematic wide-angle view of a luxury modern A-frame cabin nestled in a lush, ancient pine forest at dusk. The cabin's large glass windows glow with warm amber light, contrasting with the deep forest greens and misty slate grays of the surrounding nature. The atmosphere is serene and premium, with soft atmospheric lighting and a high-end architectural photography aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB14nNtsk1etETWIVKrbUPAYI38-Qur7oE43Ij3wwuDzewQIZHxh4wDA_CAoZhv6lo5FT8F4JBA_sD7eQd_7N-68JfCr0t3TlYRgfzHUKmoU8wm-prb1IJa5DwKFnYLWOU03bQg8b4ydUz6DJsf9z3m7TkWq5QshEZuyiraxBNiX6R3I_XAtU021M875ABFzMKCWC--E2Z60VQ77qBoy5gTqVV6VHDOmmcEEkL4eJTGBQMtbkHAoU8S')"></div>
+<div class="absolute inset-0 eco-gradient"></div>
+</div>
+<!-- Success Content Canvas -->
+<div class="relative z-10 w-full max-w-2xl px-4">
+<div class="bento-card p-8 md:p-12 rounded-xl shadow-2xl border border-outline-variant/30 flex flex-col items-center text-center">
+<!-- Success Icon -->
+<div class="w-20 h-20 bg-primary-fixed/20 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'wght' 300;">check_circle</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Оплата прошла успешно</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10">Ваше бронирование подтверждено. Мы ждем вас в Greenwood Estate!</p>
+<!-- Booking Details Bento-ish Grid -->
+<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 text-left">
+<div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/20">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider block mb-1">Номер брони</span>
+<span class="font-title-lg text-title-lg text-on-surface">#GW-9821</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/20">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider block mb-1">Вариант размещения</span>
+<span class="font-title-lg text-title-lg text-on-surface">Люкс 'Кедр'</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-lg border border-outline-variant/20 md:col-span-2 flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'wght' 300;">calendar_today</span>
+<div>
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider block">Период проживания</span>
+<span class="font-title-lg text-title-lg text-on-surface">12 — 15 октября</span>
+</div>
+</div>
+</div>
+<!-- Next Steps -->
+<div class="flex items-start gap-3 text-left bg-primary-fixed/10 p-4 rounded-lg mb-10 w-full">
+<span class="material-symbols-outlined text-primary mt-0.5">mail</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Мы отправили подтверждение и чек на вашу почту. Пожалуйста, сохраните эти данные для регистрации при заезде.
+                    </p>
+</div>
+<!-- CTAs -->
+<div class="flex flex-col sm:flex-row gap-4 w-full">
+<a class="flex-1 bg-primary text-on-primary font-title-lg text-title-lg py-4 rounded-full hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20" href="#">
+                        Личный кабинет
+                    </a>
+<a class="flex-1 bg-surface text-on-surface-variant border border-outline font-title-lg text-title-lg py-4 rounded-full hover:bg-surface-container transition-all flex items-center justify-center" href="#">
+                        На главную
+                    </a>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface border-t border-outline-variant dark:border-outline">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-container-padding py-section-margin max-w-7xl mx-auto">
+<div class="md:col-span-1">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed mb-4">Greenwood Estate</div>
+<p class="font-body-md text-body-md text-on-surface dark:text-inverse-on-surface">© 2024 Greenwood Estate. All rights reserved. Designed for Eco-Premium luxury.</p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-title-lg text-title-lg text-on-surface dark:text-inverse-on-surface mb-2">Navigator</h4>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:underline" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:underline" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-title-lg text-title-lg text-on-surface dark:text-inverse-on-surface mb-2">Explore</h4>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:underline" href="#">Sustainability</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:underline" href="#">Careers</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-title-lg text-title-lg text-on-surface dark:text-inverse-on-surface mb-2">Connect</h4>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:underline" href="#">Contact Us</a>
+<div class="flex gap-4 mt-2">
+<span class="material-symbols-outlined text-primary cursor-pointer">face_nod</span>
+<span class="material-symbols-outlined text-primary cursor-pointer">public</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for the success icon scaling
+        window.addEventListener('DOMContentLoaded', () => {
+            const icon = document.querySelector('.material-symbols-outlined.text-5xl');
+            icon.style.transition = 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            icon.style.transform = 'scale(0)';
+            
+            setTimeout(() => {
+                icon.style.transform = 'scale(1)';
+            }, 300);
+        });
+    </script>
+</body></html>

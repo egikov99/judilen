@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Greenwood Estate Management - Admin Portal</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e2e3dc",
+                    "on-secondary-fixed": "#3b0900",
+                    "on-error-container": "#93000a",
+                    "surface-bright": "#f9faf2",
+                    "outline": "#72796e",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#2e312c",
+                    "outline-variant": "#c2c9bb",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffdbd1",
+                    "tertiary": "#303d27",
+                    "secondary-container": "#fe987c",
+                    "on-tertiary-container": "#b8c8aa",
+                    "surface-container-lowest": "#ffffff",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#d8e8c8",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "on-primary-fixed-variant": "#23501e",
+                    "surface-container-low": "#f3f4ed",
+                    "on-primary-fixed": "#002201",
+                    "on-tertiary-fixed": "#131f0c",
+                    "primary-fixed": "#bcf0ae",
+                    "inverse-on-surface": "#f0f1ea",
+                    "surface-container": "#edefe7",
+                    "on-background": "#191c18",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#772e1a",
+                    "surface": "#f9faf2",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "on-primary-container": "#9dd090",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#3b6934",
+                    "background": "#f9faf2",
+                    "surface-dim": "#d9dbd3",
+                    "on-secondary": "#ffffff",
+                    "on-surface-variant": "#42493e",
+                    "surface-container-high": "#e7e9e1",
+                    "primary": "#154212",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "primary-fixed-dim": "#a1d494",
+                    "tertiary-container": "#47543d",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "on-surface": "#191c18",
+                    "surface-variant": "#e2e3dc",
+                    "secondary": "#974730",
+                    "primary-container": "#2d5a27",
+                    "inverse-primary": "#a1d494"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "gutter": "24px",
+                    "section-margin": "40px",
+                    "container-padding": "32px",
+                    "card-gap": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Playfair Display"],
+                    "title-lg": ["Inter"],
+                    "display-lg": ["Playfair Display"],
+                    "headline-lg-mobile": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            border-bottom: 2px solid #154212;
+            color: #154212;
+        }
+        .custom-shadow {
+            box-shadow: 0 16px 24px -8px rgba(21, 66, 18, 0.08);
+        }
+        .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+        }
+        body {
+            background-color: #F5F2ED; /* Warm Beige from Style Guidance */
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-background overflow-x-hidden">
+<!-- Side Navigation Bar (COMPONENTS_21 Implementation) -->
+<aside class="flex flex-col h-screen w-[280px] py-gutter px-base bg-primary dark:bg-primary w-[280px] h-full fixed left-0 top-0 shadow-sm z-50">
+<div class="mb-10 px-4">
+<h1 class="font-headline-md text-headline-md font-bold text-on-primary">Greenwood Estate</h1>
+<p class="font-label-md text-label-md text-on-primary/70 uppercase tracking-widest">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Dashboard (Inactive) -->
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Rentals (Active - Context: Cabin/Services Management) -->
+<a class="flex items-center gap-base bg-tertiary-container text-on-tertiary-container rounded-full px-4 py-2 scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">cottage</span>
+<span class="font-label-md text-label-md">Rentals</span>
+</a>
+<!-- Services (Inactive) -->
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined">room_service</span>
+<span class="font-label-md text-label-md">Services</span>
+</a>
+<!-- Bookings (Inactive) -->
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-md text-label-md">Bookings</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="pt-base border-t border-white/10 space-y-2">
+<button class="w-full bg-secondary text-on-secondary py-3 px-4 rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:brightness-110 transition-all mb-4" onclick="toggleModal()">
+<span class="material-symbols-outlined">add</span>
+                New Entry
+            </button>
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Help</span>
+</a>
+<a class="flex items-center gap-base text-on-primary-container px-4 py-2 hover:bg-primary-container transition-colors duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[280px] min-h-screen">
+<!-- TopAppBar (COMPONENTS_21 Implementation) -->
+<header class="flex justify-between items-center h-16 px-gutter bg-surface dark:bg-surface-dim border-b border-outline-variant sticky top-0 z-40">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-body-md focus:ring-2 focus:ring-primary" placeholder="Search entries..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-gutter">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="text-right hidden md:block">
+<p class="font-label-md text-label-md text-on-surface">Admin User</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Senior Manager</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed overflow-hidden ring-2 ring-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged woman with a friendly expression, wearing a tailored blazer in a deep forest green color. She is posed against a softly blurred background of a modern architectural office with wood panels and natural light, reflecting the high-end eco-premium brand identity of Greenwood Estate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAxuQqLD2XlOUfg8o-fLrclMrltoEiGKFS_1uS3zVDRT1EUD3NiAC_2KZPJwCBOj38dOL8t4PjL1eztmZdUDZ4SMTZiTb6_f-DqpUr3tbD9BvVcbG29IHrGzFe1YeslbwSYPNSu6KHVKW7HnTj1n2R2yuN-Tcbp_RXguj6gYEeo0fBbdGWXOD76LZv_Q9LWEY9pwaVFm0k8skNs2dKPzXd9zbUwUcSIYeQXz3T3BtJ6jH7tepqtSbl"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-container-padding max-w-[1400px] mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-gutter mb-section-margin">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary mb-2">Управление каталогом</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                        Создавайте и редактируйте предложения для ваших гостей. Управляйте статусами бронирования и актуальными ценами на домики и услуги поместья.
+                    </p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-full font-title-lg hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95" onclick="toggleModal()">
+<span class="material-symbols-outlined">add_circle</span>
+                    Добавить позицию
+                </button>
+</div>
+<!-- Tab Navigation -->
+<div class="flex gap-8 border-b border-outline-variant mb-gutter overflow-x-auto">
+<button class="pb-4 font-title-lg text-title-lg active-tab flex items-center gap-2">
+<span class="material-symbols-outlined">cabin</span>
+                    Домики
+                </button>
+<button class="pb-4 font-title-lg text-title-lg text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">spa</span>
+                    Услуги
+                </button>
+</div>
+<!-- Items Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-card-gap">
+<!-- Card Item 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden custom-shadow group border border-outline-variant/30 flex flex-col">
+<div class="relative h-48 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A luxurious, modern A-frame wooden cabin named Cedar nestled deep within a misty pine forest. The cabin features massive floor-to-ceiling glass windows reflecting the surrounding greenery. The overall aesthetic is rustic yet minimalist, with warm interior lighting glowing against the cool, natural tones of the forest at dawn. High-end eco-premium photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD63Y8kxqh50xmKmW60PQGeGs5b4NFgTYuGo0wxI7N9SOSaSkwcAcALYCmTRPJHZ5MHzu7BVrkpa6H1laQ4Zbcq8QChmGeS9UrOn726XR8aae6IIL1KH1MXtFCynICglQ2vfnsMGV9PgPKDO_jDGZ_uFlpb_vMZBZ8Dm5oiqMro-a8JBGyQUbSlWHMH9ei4broxbCKkqfC-mWpxJxNxJViyHRXKcziqk86PqXO8b_8fBcjx7Syl9Ux"/>
+<div class="absolute top-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-label-md">
+                            Доступно
+                        </div>
+</div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">Кедр</h3>
+<span class="font-title-lg text-primary">15 000 ₽ / сут</span>
+</div>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">
+                            Уютный коттедж из натурального кедра с панорамным видом на озеро и камином для тихих вечеров.
+                        </p>
+<div class="mt-auto flex gap-3 pt-4 border-t border-outline-variant/30">
+<button class="flex-1 py-2 rounded-lg border border-outline text-on-surface-variant font-label-md hover:bg-surface-container transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span> Изменить
+                            </button>
+<button class="px-3 py-2 rounded-lg border border-error/30 text-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card Item 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden custom-shadow group border border-outline-variant/30 flex flex-col">
+<div class="relative h-48 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="An elegant, eco-friendly wooden lodge called Pine made from light-colored pine wood. It is situated on a small hill surrounded by rolling green hills and wildflowers. The design is contemporary with clean lines and a spacious wooden deck. The lighting is bright and airy, typical of a late summer afternoon in a premium country estate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN6Sy8R1ZbQBlfOs7inJ4yn27gR9VBzqwz8DNKpJOqq9S7NgdXiARji0I_aK5NII6BYUsFPlu0tEAtcbQpVEeWSDao_jkFF6hf-_cOPxx96l-koRLa54TN5rMwmw5EbmXL3Fv1FqFcM32dSqTMSgbV80xRg8kE9PTFtYTkV_pWHO295QxLrSdr8FzvmaZNaqofRQPTn_hnUY1Ss2jhyBHC4hJ0uscpLiVRRjdYrf1_s5-bNkuZ6gqY"/>
+<div class="absolute top-4 right-4 bg-secondary text-on-secondary px-3 py-1 rounded-full text-label-md">
+                            Забронировано
+                        </div>
+</div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">Сосна</h3>
+<span class="font-title-lg text-primary">12 500 ₽ / сут</span>
+</div>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">
+                            Современный дом с отделкой из светлой сосны. Идеально подходит для семейного отдыха до 4 человек.
+                        </p>
+<div class="mt-auto flex gap-3 pt-4 border-t border-outline-variant/30">
+<button class="flex-1 py-2 rounded-lg border border-outline text-on-surface-variant font-label-md hover:bg-surface-container transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span> Изменить
+                            </button>
+<button class="px-3 py-2 rounded-lg border border-error/30 text-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card Item 3 (Service) -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden custom-shadow group border border-outline-variant/30 flex flex-col">
+<div class="relative h-48 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A traditional Russian Banya made of dark aged logs, with steam rising gracefully from the chimney into a cold twilight air. The interior glow is warm orange against the deep blue of the evening. The setting is a secluded corner of a luxury estate garden, surrounded by snowy fir trees. Artistic, high-contrast photography with a focus on textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7pSONllRjsQsstd5OLB1tNY0szezphKoBNdSmqQnl-CIMWVtsgpwuGCE5zJGj9hu2DqH6Jg6wyQOFBsxzGz1BpZmDofbhCe8iDggGGi5pErRI-9y5vNeRhKBw6l6rB-GMTVid-5k77BAVF7PX3xIv3ps_uPzFPcghjV0qeFY7YavhDg6cMFhAkz4_cojupWkGXNNkllw4bEmBMZ_yvHkgfaCG2z72pc8NTbp2UObDd11O0U4PydkO"/>
+<div class="absolute top-4 right-4 bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full text-label-md">
+                            Сервис
+                        </div>
+</div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">Русская баня</h3>
+<span class="font-title-lg text-primary">5 000 ₽ / час</span>
+</div>
+<p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">
+                            Традиционная парная на дровах с березовыми вениками и сибирским чаем. Вместимость до 6 человек.
+                        </p>
+<div class="mt-auto flex gap-3 pt-4 border-t border-outline-variant/30">
+<button class="flex-1 py-2 rounded-lg border border-outline text-on-surface-variant font-label-md hover:bg-surface-container transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[18px]">edit</span> Изменить
+                            </button>
+<button class="px-3 py-2 rounded-lg border border-error/30 text-error hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Stats Overview (Bonus Bento Card) -->
+<div class="mt-section-margin grid grid-cols-1 md:grid-cols-3 gap-card-gap">
+<div class="bg-tertiary text-on-tertiary p-gutter rounded-2xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-4xl opacity-50">analytics</span>
+<div>
+<p class="font-label-md text-label-md uppercase opacity-70">Загрузка домиков</p>
+<h4 class="font-display-lg text-display-lg">84%</h4>
+</div>
+</div>
+<div class="bg-white p-gutter rounded-2xl flex flex-col justify-between border border-outline-variant shadow-sm">
+<span class="material-symbols-outlined text-4xl text-secondary opacity-50">payments</span>
+<div>
+<p class="font-label-md text-label-md uppercase text-on-surface-variant">Выручка за месяц</p>
+<h4 class="font-display-lg text-display-lg text-primary">1.2М ₽</h4>
+</div>
+</div>
+<div class="bg-primary-container text-on-primary-container p-gutter rounded-2xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-4xl opacity-50">star</span>
+<div>
+<p class="font-label-md text-label-md uppercase opacity-70">Рейтинг сервиса</p>
+<h4 class="font-display-lg text-display-lg">4.9</h4>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-on-background/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-base" id="modal-overlay">
+<!-- Add Item Form Modal -->
+<div class="bg-surface w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="add-modal">
+<div class="bg-primary p-6 flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-on-primary">Добавить новую позицию</h3>
+<button class="text-on-primary hover:rotate-90 transition-transform" onclick="toggleModal()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Title -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Название</label>
+<input class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-all" placeholder="Напр: Лесной коттедж" type="text"/>
+</div>
+<!-- Category -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Категория</label>
+<select class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:ring-2 focus:ring-primary transition-all">
+<option>Домики</option>
+<option>Услуги</option>
+<option>Питание</option>
+</select>
+</div>
+</div>
+<!-- Description -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Описание</label>
+<textarea class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:ring-2 focus:ring-primary transition-all" placeholder="Опишите особенности и преимущества..." rows="4"></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Price -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Стоимость (₽)</label>
+<div class="relative">
+<input class="w-full bg-white border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:ring-2 focus:ring-primary transition-all" placeholder="0.00" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">₽</span>
+</div>
+</div>
+<!-- Status -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Статус</label>
+<div class="flex items-center gap-4 py-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary" name="status" type="radio"/>
+<span class="text-body-md">Активно</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="text-primary focus:ring-primary" name="status" type="radio"/>
+<span class="text-body-md">Черновик</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Image Upload Placeholder -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Фотография</label>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center gap-3 bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">cloud_upload</span>
+</div>
+<div class="text-center">
+<p class="font-title-lg text-on-surface">Нажмите для загрузки или перетащите файл</p>
+<p class="text-label-md text-on-surface-variant">PNG, JPG до 10MB</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 pt-4">
+<button class="flex-1 py-3 border border-outline text-on-surface-variant rounded-xl font-title-lg hover:bg-surface-container transition-colors" onclick="toggleModal()" type="button">Отмена</button>
+<button class="flex-1 py-3 bg-primary text-on-primary rounded-xl font-title-lg shadow-md hover:brightness-110 transition-all" type="submit">Сохранить позицию</button>
+</div>
+</form>
+</div>
+</div>
+<script>
+        function toggleModal() {
+            const overlay = document.getElementById('modal-overlay');
+            const modal = document.getElementById('add-modal');
+            
+            if (overlay.classList.contains('opacity-0')) {
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.remove('scale-95');
+                modal.classList.add('scale-100');
+            } else {
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.add('scale-95');
+                modal.classList.remove('scale-100');
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modal-overlay');
+                if (!overlay.classList.contains('opacity-0')) toggleModal();
+            }
+        });
+
+        // Simple tab switching interaction (Visual only)
+        const tabs = document.querySelectorAll('.flex.gap-8.border-b button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('active-tab');
+                    t.classList.add('text-on-surface-variant');
+                });
+                tab.classList.add('active-tab');
+                tab.classList.remove('text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

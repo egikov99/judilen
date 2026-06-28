@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Greenwood Admin - Отчеты и Аналитика</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #F5F2ED; /* Level 0 Background per style guide */
+        }
+        .estate-card {
+            box-shadow: 0 4px 20px -2px rgba(21, 66, 18, 0.08);
+            border: 1px solid #E2E8F0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .estate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px -4px rgba(21, 66, 18, 0.12);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #72796e;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e2e3dc",
+                        "primary-fixed-dim": "#a1d494",
+                        "tertiary-fixed": "#d8e8c8",
+                        "outline": "#72796e",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9faf2",
+                        "primary-fixed": "#bcf0ae",
+                        "tertiary-container": "#47543d",
+                        "on-background": "#191c18",
+                        "primary-container": "#2d5a27",
+                        "secondary": "#974730",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#303d27",
+                        "on-surface-variant": "#42493e",
+                        "secondary-fixed-dim": "#ffb5a1",
+                        "on-surface": "#191c18",
+                        "secondary-fixed": "#ffdbd1",
+                        "on-tertiary-container": "#b8c8aa",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e2e3dc",
+                        "surface-container-high": "#e7e9e1",
+                        "surface-tint": "#3b6934",
+                        "tertiary-fixed-dim": "#bccbae",
+                        "on-secondary-fixed": "#3b0900",
+                        "surface-container": "#edefe7",
+                        "background": "#f9faf2",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c2c9bb",
+                        "inverse-surface": "#2e312c",
+                        "surface": "#f9faf2",
+                        "surface-container-low": "#f3f4ed",
+                        "on-secondary-container": "#772e1a",
+                        "on-primary-fixed-variant": "#23501e",
+                        "on-primary-container": "#9dd090",
+                        "primary": "#154212",
+                        "surface-dim": "#d9dbd3",
+                        "inverse-primary": "#a1d494",
+                        "inverse-on-surface": "#f0f1ea",
+                        "on-primary-fixed": "#002201",
+                        "on-tertiary-fixed": "#131f0c",
+                        "secondary-container": "#fe987c",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#3d4b34",
+                        "on-secondary-fixed-variant": "#79301b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-gap": "24px",
+                        "section-margin": "40px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Playfair Display"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "title-lg": ["Inter"],
+                        "headline-md": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-screen w-[280px] bg-primary dark:bg-primary shadow-md flex flex-col py-6 z-50">
+<div class="px-6 mb-10">
+<h1 class="font-display-lg text-headline-md text-on-primary">Greenwood Estate</h1>
+<p class="font-body-md text-body-md text-primary-fixed-dim">Admin Portal</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 text-on-primary-container hover:bg-primary-container/50 rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-primary-container hover:bg-primary-container/50 rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="font-body-md text-body-md">Bookings</span>
+</a>
+<a class="flex items-center gap-3 text-on-primary-container hover:bg-primary-container/50 rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-body-md text-body-md">Orders</span>
+</a>
+<a class="flex items-center gap-3 text-on-primary-container hover:bg-primary-container/50 rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="concierge">concierge</span>
+<span class="font-body-md text-body-md">Services</span>
+</a>
+<a class="flex items-center gap-3 text-on-primary-container hover:bg-primary-container/50 rounded-full px-4 py-3 mx-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body-md text-body-md">Customers</span>
+</a>
+<a class="flex items-center gap-3 bg-tertiary-container text-on-tertiary-container rounded-full px-4 py-3 mx-2 Active: scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<button class="w-full bg-secondary text-on-secondary rounded-xl py-3 px-4 flex items-center justify-center gap-2 font-title-lg hover:opacity-90 transition-all shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Booking
+            </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[280px] flex-1 flex flex-col min-h-screen">
+<!-- TopAppBar Shell -->
+<header class="sticky z-40 top-0 w-full px-container-padding h-20 bg-surface-bright dark:bg-surface-dim border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-6">
+<span class="font-display-lg text-headline-md text-primary">Greenwood Admin</span>
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-body-lg" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary w-64 text-body-md" placeholder="Поиск по системе..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full text-on-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="h-full w-full object-cover" data-alt="A professional headshot of a mature estate administrator with a warm smile, wearing a subtle linen shirt, standing against a blurred background of a modern rustic architectural structure with soft morning sunlight filtering through the trees. The photography is high-end, clean, and minimalist, echoing a luxury eco-resort aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7qz1FNNPVGfaANYLNWrpPllugGbOJDBCuafgj6ih_TniaozIzXjY9cggwxxRLaDhZjE2rfT3rBQwCKToWLIKRtJ7O1kICn2fd5UAlBjzDjS6aHtREqb6rYhEYN_VdbtZUaUkTggCWsA9Bvk9gQ_fksBgGoU-4ESWr7ShixZHEUkVW9y0VTU81rkmN6Ey9UD-x4VJs681S_-j2jTIvSut33xGBf2GTDxocmRrE5XhRdmMRJ7pkmLex"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-container-padding space-y-8 max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display-lg text-headline-lg text-primary">Отчеты и Аналитика</h2>
+<p class="font-body-lg text-on-surface-variant">Сводные данные по доходности и бронированиям поместья</p>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant p-2 rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+<span class="font-title-lg text-on-surface">01 Окт — 31 Окт 2023</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-card-gap">
+<!-- Revenue Card -->
+<div class="estate-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+</div>
+<span class="text-primary font-bold text-label-md bg-primary-fixed-dim/30 px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                            +12%
+                        </span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Выручка за период</p>
+<h3 class="font-display-lg text-headline-md text-on-surface">1,240,000 ₽</h3>
+</div>
+</div>
+<!-- Occupancy Card -->
+<div class="estate-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-secondary" data-icon="home_work">home_work</span>
+</div>
+<span class="text-secondary font-bold text-label-md bg-secondary-fixed/50 px-2 py-1 rounded-full">
+                            82% Занято
+                        </span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Забронировано домиков</p>
+<h3 class="font-display-lg text-headline-md text-on-surface">45</h3>
+</div>
+</div>
+<!-- New Customers Card -->
+<div class="estate-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-tertiary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-tertiary" data-icon="group">group</span>
+</div>
+<div class="w-16 h-8 opacity-50 overflow-hidden">
+<svg class="w-full h-full text-tertiary stroke-current fill-none stroke-[3]" viewbox="0 0 100 50">
+<path d="M0,45 Q15,40 25,25 T50,20 T75,10 T100,5"></path>
+</svg>
+</div>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Новые клиенты</p>
+<h3 class="font-display-lg text-headline-md text-on-surface">18</h3>
+</div>
+</div>
+<!-- Average Check Card -->
+<div class="estate-card bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-outline/10 rounded-lg">
+<span class="material-symbols-outlined text-outline" data-icon="receipt_long">receipt_long</span>
+</div>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wider mb-1">Средний чек</p>
+<h3 class="font-display-lg text-headline-md text-on-surface">27,500 ₽</h3>
+</div>
+</div>
+</div>
+<!-- Charts Section (Bento Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-card-gap">
+<!-- Large Revenue Chart -->
+<div class="lg:col-span-2 estate-card bg-surface-container-lowest rounded-xl p-8">
+<div class="flex justify-between items-center mb-10">
+<h4 class="font-headline-md text-primary">Динамика выручки</h4>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary rounded-full"></div>
+<span class="font-label-md text-on-surface-variant">Текущий месяц</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-outline-variant rounded-full"></div>
+<span class="font-label-md text-on-surface-variant">Прошлый месяц</span>
+</div>
+</div>
+</div>
+<div class="relative h-[300px] w-full mt-4">
+<!-- Simulated Chart Grid -->
+<div class="absolute inset-0 flex flex-col justify-between opacity-10">
+<div class="w-full h-[1px] bg-outline"></div>
+<div class="w-full h-[1px] bg-outline"></div>
+<div class="w-full h-[1px] bg-outline"></div>
+<div class="w-full h-[1px] bg-outline"></div>
+</div>
+<!-- Animated Chart Line via SVG -->
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#154212" stop-opacity="0.1"></stop>
+<stop offset="100%" stop-color="#154212" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,250 L100,220 L200,240 L300,180 L400,160 L500,140 L600,170 L700,120 L800,90 L900,110 L1000,50" fill="none" stroke="#154212" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<path d="M0,250 L100,220 L200,240 L300,180 L400,160 L500,140 L600,170 L700,120 L800,90 L900,110 L1000,50 V300 H0 Z" fill="url(#chartGradient)"></path>
+</svg>
+<div class="absolute bottom-[-20px] left-0 w-full flex justify-between font-label-md text-outline px-2">
+<span>01 Окт</span>
+<span>07 Окт</span>
+<span>14 Окт</span>
+<span>21 Окт</span>
+<span>31 Окт</span>
+</div>
+</div>
+</div>
+<!-- Bar Chart: Popular Services -->
+<div class="estate-card bg-surface-container-lowest rounded-xl p-8 flex flex-col">
+<h4 class="font-headline-md text-primary mb-8">Популярные услуги</h4>
+<div class="flex-1 flex flex-col justify-around">
+<div class="space-y-2">
+<div class="flex justify-between items-end font-body-md text-on-surface">
+<span>Баня и СПА</span>
+<span class="font-bold">42 заказа</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-3">
+<div class="bg-primary h-full rounded-full w-[90%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end font-body-md text-on-surface">
+<span>Завтраки</span>
+<span class="font-bold">38 заказов</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-3">
+<div class="bg-primary h-full rounded-full w-[75%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end font-body-md text-on-surface">
+<span>Конные прогулки</span>
+<span class="font-bold">24 заказа</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-3">
+<div class="bg-primary h-full rounded-full w-[55%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end font-body-md text-on-surface">
+<span>Дрова для костра</span>
+<span class="font-bold">19 заказов</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-3">
+<div class="bg-primary h-full rounded-full w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Table Section -->
+<div class="estate-card bg-surface-container-lowest rounded-xl overflow-hidden">
+<div class="p-8 border-b border-outline-variant flex justify-between items-center">
+<h4 class="font-headline-md text-primary">Последние крупные бронирования</h4>
+<button class="text-primary font-title-lg flex items-center gap-2 hover:underline">
+                        Смотреть все
+                        <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="px-8 py-4 font-label-md text-on-surface-variant">Клиент</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant">Домик</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant">Период</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant">Статус</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant text-right">Сумма</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-tertiary-fixed text-primary flex items-center justify-center font-bold">АС</div>
+<div>
+<p class="font-title-lg text-on-surface">Александр Соколов</p>
+<p class="font-label-md text-on-surface-variant">ID: 4529</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-body-lg text-on-surface">Люкс "Кедр"</td>
+<td class="px-8 py-6 font-body-md text-on-surface-variant">12.10 — 18.10 (6 ночей)</td>
+<td class="px-8 py-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container/20 text-primary font-bold text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary mr-2"></span>
+                                        Оплачено
+                                    </span>
+</td>
+<td class="px-8 py-6 font-title-lg text-primary text-right">184,000 ₽</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center font-bold">ЕМ</div>
+<div>
+<p class="font-title-lg text-on-surface">Елена Маркова</p>
+<p class="font-label-md text-on-surface-variant">ID: 4531</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-body-lg text-on-surface">Коттедж "Ольха"</td>
+<td class="px-8 py-6 font-body-md text-on-surface-variant">15.10 — 17.10 (2 ночи)</td>
+<td class="px-8 py-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container/20 text-secondary font-bold text-label-md">
+<span class="w-2 h-2 rounded-full bg-secondary mr-2"></span>
+                                        Ожидание
+                                    </span>
+</td>
+<td class="px-8 py-6 font-title-lg text-primary text-right">56,200 ₽</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-tertiary-fixed text-primary flex items-center justify-center font-bold">ИВ</div>
+<div>
+<p class="font-title-lg text-on-surface">Игорь Васильев</p>
+<p class="font-label-md text-on-surface-variant">ID: 4532</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-body-lg text-on-surface">Студия "Липа"</td>
+<td class="px-8 py-6 font-body-md text-on-surface-variant">20.10 — 25.10 (5 ночей)</td>
+<td class="px-8 py-6">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container/20 text-primary font-bold text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary mr-2"></span>
+                                        Оплачено
+                                    </span>
+</td>
+<td class="px-8 py-6 font-title-lg text-primary text-right">112,500 ₽</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-auto py-8 px-container-padding border-t border-outline-variant bg-surface-container-low text-on-surface-variant flex justify-between items-center">
+<span class="font-label-md">© 2023 Greenwood Estate Portal. Все права защищены.</span>
+<div class="flex gap-6 font-label-md">
+<a class="hover:text-primary transition-colors" href="#">Поддержка</a>
+<a class="hover:text-primary transition-colors" href="#">Документация</a>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions for stats
+        document.querySelectorAll('.estate-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transform = 'scale(1.2) rotate(5deg)';
+                    icon.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }
+            });
+            card.addEventListener('mouseleave', () => {
+                const icon = card.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transform = 'scale(1) rotate(0deg)';
+                }
+            });
+        });
+    </script>
+</body></html>

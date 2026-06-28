@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact &amp; Directions | Greenwood Estate</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#f9faf2",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#2d5a27",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "on-background": "#191c18",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#a1d494",
+                    "on-error": "#ffffff",
+                    "tertiary": "#303d27",
+                    "outline": "#72796e",
+                    "surface-bright": "#f9faf2",
+                    "primary-fixed": "#bcf0ae",
+                    "on-primary-container": "#9dd090",
+                    "on-surface": "#191c18",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "on-primary-fixed": "#002201",
+                    "on-secondary-fixed": "#3b0900",
+                    "primary-fixed-dim": "#a1d494",
+                    "primary": "#154212",
+                    "surface-dim": "#d9dbd3",
+                    "secondary-fixed": "#ffdbd1",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#131f0c",
+                    "on-tertiary-container": "#b8c8aa",
+                    "on-primary-fixed-variant": "#23501e",
+                    "inverse-on-surface": "#f0f1ea",
+                    "surface-variant": "#e2e3dc",
+                    "secondary": "#974730",
+                    "surface-tint": "#3b6934",
+                    "secondary-container": "#fe987c",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#e2e3dc",
+                    "outline-variant": "#c2c9bb",
+                    "surface-container-high": "#e7e9e1",
+                    "background": "#f9faf2",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "tertiary-container": "#47543d",
+                    "on-secondary-container": "#772e1a",
+                    "inverse-surface": "#2e312c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#edefe7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f3f4ed",
+                    "on-surface-variant": "#42493e",
+                    "tertiary-fixed": "#d8e8c8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "container-padding": "32px",
+                    "section-margin": "40px",
+                    "base": "8px",
+                    "card-gap": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "display-lg": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Playfair Display"],
+                    "title-lg": ["Inter"],
+                    "headline-md": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .eco-shadow {
+            box-shadow: 0 16px 24px -12px rgba(21, 66, 18, 0.08);
+        }
+        .form-input-focus:focus {
+            border-color: #154212;
+            box-shadow: 0 0 0 2px rgba(21, 66, 18, 0.1);
+            outline: none;
+        }
+        .hero-overlay {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1));
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant shadow-sm transition-all">
+<nav class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md text-primary">Greenwood Estate</div>
+<!-- Desktop Navigation -->
+<ul class="hidden md:flex items-center space-x-8">
+<li><a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">The Estate</a></li>
+<li><a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Cabins</a></li>
+<li><a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Services</a></li>
+<li><a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Gallery</a></li>
+<li><a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 font-body-lg text-body-lg" href="#">Reviews</a></li>
+<li><a class="text-primary font-bold border-b-2 border-primary font-body-lg text-body-lg" href="#">Contact</a></li>
+</ul>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-medium hover:opacity-90 active:scale-95 transition-all">
+                Book Now
+            </button>
+</nav>
+</header>
+<!-- Hero Section -->
+<section class="relative h-[614px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105" data-alt="A serene, high-resolution photograph of a winding paved road leading into a lush, dense forest of ancient pine and oak trees. Soft morning sunlight filters through the canopy, creating a dappled light effect on the road's surface. The aesthetic is premium eco-luxury, with deep greens, earthy browns, and a calm, inviting atmosphere. The composition is wide-angle, emphasizing the grandeur and tranquility of the estate's natural entrance." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMc4PYM3THIyT9Aen9Cny8cX_7jzBm7lfUnYNpJWNFPunM8dgWtd5KnCwOnPKHMPsuf9OK06Q8-xDqVjm7hJzEamTDh5_dffxdsxGB3IiL7yLsg1eBQN50OfvVdSDRYjPDSRBF8dRSySd3RDRYoiPnIdII6dDNSDxArAuOmLD7Wk4InkFGv07RhtWXCgfaL0zP0sfAqxY_jPtD2WGf5bU0GUzrvr0HX3qMtt7asVH5sxmUZE2mf38W')">
+</div>
+<div class="absolute inset-0 hero-overlay"></div>
+<div class="relative z-10 text-center text-white px-container-padding">
+<h1 class="font-display-lg text-display-lg mb-4 drop-shadow-lg md:text-display-lg sm:text-headline-lg-mobile">Contact &amp; Directions</h1>
+<p class="font-body-lg text-body-lg max-w-2xl mx-auto opacity-90">Find your way to serenity. Our estate is located in the heart of the forest, designed to offer a peaceful escape from the everyday.</p>
+</div>
+</section>
+<!-- Main Content Grid -->
+<main class="max-w-7xl mx-auto px-container-padding py-section-margin grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
+<!-- Left Column: Contact Info & Directions -->
+<div class="lg:col-span-7 space-y-12">
+<!-- Contact Info Section -->
+<section id="contact-info">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-8">Get in Touch</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="flex items-start space-x-4 p-6 bg-surface-container-low rounded-xl border border-outline-variant hover:border-primary transition-colors group">
+<div class="bg-primary-fixed p-3 rounded-lg text-on-primary-fixed-variant group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase mb-1">Our Address</p>
+<p class="font-title-lg text-title-lg text-on-surface">Forest Array, 42</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Greenwood District, GD 8802</p>
+</div>
+</div>
+<div class="flex items-start space-x-4 p-6 bg-surface-container-low rounded-xl border border-outline-variant hover:border-primary transition-colors group">
+<div class="bg-primary-fixed p-3 rounded-lg text-on-primary-fixed-variant group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">call</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase mb-1">Phone Number</p>
+<p class="font-title-lg text-title-lg text-on-surface">+7 (999) 000-00-00</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Available 24/7 for guests</p>
+</div>
+</div>
+<div class="flex items-start space-x-4 p-6 bg-surface-container-low rounded-xl border border-outline-variant hover:border-primary transition-colors group md:col-span-2">
+<div class="bg-primary-fixed p-3 rounded-lg text-on-primary-fixed-variant group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase mb-1">Email Address</p>
+<p class="font-title-lg text-title-lg text-on-surface">info@greenwood-estate.com</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Response within 2 hours</p>
+</div>
+</div>
+</div>
+</section>
+<!-- How to Get There Section -->
+<section class="pt-8 border-t border-outline-variant" id="directions">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-6">How to get there</h2>
+<div class="space-y-8">
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions_car</span>
+</div>
+<h3 class="font-title-lg text-title-lg mb-2">By Private Car</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                            Take the M4 Highway toward the Northern Valley. Take exit 88 labeled "Forest Array Preserve." Follow the winding scenic route for 12km. You will see a large stone entrance gate with the Greenwood Estate logo. Free valet parking is available for all guests.
+                        </p>
+</div>
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">train</span>
+</div>
+<h3 class="font-title-lg text-title-lg mb-2">Public Transport</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                            Board the North-Western Line from Central Station to "Pine Crest Junction." From there, we offer a complimentary eco-shuttle service that runs every hour from 8:00 AM to 8:00 PM. Please book your shuttle slot at least 24 hours in advance via our concierge.
+                        </p>
+</div>
+</div>
+</section>
+<!-- Map Section -->
+<section class="pt-8" id="map">
+<div class="w-full h-96 rounded-2xl overflow-hidden eco-shadow border border-outline-variant bg-surface-container">
+<div class="w-full h-full relative" data-location="Forest Array, 42" style="">
+<div class="absolute inset-0 bg-cover bg-center grayscale opacity-60 hover:grayscale-0 transition-all duration-700" data-alt="A clean, minimalist map rendering of a forested region with a prominent, elegant marker labeled 'Greenwood Estate'. The map uses a soft color palette of sage greens, stone grays, and cream backgrounds to match the rustic modern UI. Major roads are clearly defined, and topographic textures like trees and hills are subtly illustrated in a sophisticated, premium style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCHTxlJJocIBHxbmBxLJMhpoQVOYeT60X30GqgQiu17wgdPEosLE3-pAsh2n1zMtGAs-bi9f37kE9c3-g66gcekFYrK5ClJ4lSPVd_bPdgp3P5aAwhkzQfNH5NNYzTWsAjgls7mW3NY7RdKaXoovI67RaXiC73SOs4qeGS6Fs_CWNjoLFSxg43UTYRst6gIYYyZpeytnmwmAP3RynLgI7hDjC3M67R0NwuuaaerqdFYbBTUQ8zDJmpb')">
+</div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-white/90 backdrop-blur-sm p-4 rounded-full shadow-xl flex items-center space-x-3 border border-primary/20 animate-bounce">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-title-lg text-primary pr-2">Greenwood Estate</span>
+</div>
+</div>
+<!-- UI Overlays for "Interactive" feel -->
+<div class="absolute top-4 right-4 flex flex-col space-y-2">
+<button class="bg-white p-2 rounded-lg shadow-md hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined">add</span></button>
+<button class="bg-white p-2 rounded-lg shadow-md hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined">remove</span></button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Inquiry Form -->
+<aside class="lg:col-span-5">
+<div class="sticky top-28 bg-white p-8 rounded-2xl eco-shadow border border-outline-variant">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Send an Inquiry</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">Planning a special event or have specific questions? Our team is here to assist.</p>
+<form class="space-y-6" id="inquiryForm">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider" for="name">Full Name</label>
+<input class="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-on-surface form-input-focus transition-all" id="name" name="name" placeholder="John Doe" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider" for="email">Email Address</label>
+<input class="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-on-surface form-input-focus transition-all" id="email" name="email" placeholder="john@example.com" required="" type="email"/>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider" for="message">Your Message</label>
+<textarea class="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-on-surface form-input-focus transition-all resize-none" id="message" name="message" placeholder="Tell us how we can help..." required="" rows="5"></textarea>
+</div>
+<button class="w-full bg-primary text-on-primary py-4 rounded-lg font-title-lg text-title-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center space-x-2" type="submit">
+<span>Send Message</span>
+<span class="material-symbols-outlined">send</span>
+</button>
+</form>
+<div class="hidden mt-6 p-4 bg-primary-fixed text-on-primary-fixed-variant rounded-lg text-center font-body-md" id="successMessage">
+                    Thank you! Your message has been sent successfully. We will get back to you soon.
+                </div>
+</div>
+</aside>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-margin bg-surface-container-highest border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-container-padding py-12 max-w-7xl mx-auto gap-8">
+<div class="flex flex-col items-center md:items-start">
+<div class="font-headline-md text-headline-md text-primary mb-2">Greenwood Estate</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs text-center md:text-left">
+                    An eco-premium experience designed for tranquility and luxury in the heart of nature.
+                </p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline hover:text-primary transition-all" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline hover:text-primary transition-all" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline hover:text-primary transition-all" href="#">Sustainability Report</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:underline hover:text-primary transition-all" href="#">Press Kit</a>
+</div>
+<div class="flex space-x-4">
+<a class="text-primary hover:scale-110 transition-transform" href="#"><span class="material-symbols-outlined">face_nod</span></a>
+<a class="text-primary hover:scale-110 transition-transform" href="#"><span class="material-symbols-outlined">photo_camera</span></a>
+<a class="text-primary hover:scale-110 transition-transform" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+</div>
+</div>
+<div class="w-full border-t border-outline-variant py-6 text-center">
+<p class="font-body-md text-body-md text-on-surface-variant opacity-70">
+                © 2024 Greenwood Estate. All rights reserved.
+            </p>
+</div>
+</footer>
+<script>
+        // Form handling micro-interaction
+        const inquiryForm = document.getElementById('inquiryForm');
+        const successMessage = document.getElementById('successMessage');
+
+        inquiryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const submitBtn = inquiryForm.querySelector('button[type="submit"]');
+            
+            // Visual feedback
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span><span>Sending...</span>';
+            submitBtn.classList.add('opacity-70', 'pointer-events-none');
+
+            // Simulate API call
+            setTimeout(() => {
+                inquiryForm.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+            }, 1500);
+        });
+
+        // Simple scroll parallax effect for hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroBg = document.querySelector('.bg-cover');
+            if (heroBg) {
+                heroBg.style.transform = `translateY(${scrolled * 0.4}px) scale(${1 + scrolled * 0.0002})`;
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,43 @@
+FROM node:20-alpine AS base
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml .npmrc ./
+COPY apps/web/package.json apps/web/package.json
+COPY packages/auth/package.json packages/auth/package.json
+COPY packages/db/package.json packages/db/package.json
+COPY packages/integrations/package.json packages/integrations/package.json
+RUN pnpm install --frozen-lockfile
+
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages ./packages
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN pnpm build
+
+FROM base AS migrator
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
+COPY packages/db ./packages/db
+CMD ["pnpm", "--filter", "@judilen/db", "migrate"]
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+RUN mkdir -p /app/apps/web/public/uploads && chown -R nextjs:nodejs /app/apps/web/public/uploads
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+CMD ["node", "apps/web/server.js"]

@@ -1,0 +1,28 @@
+{
+  "name": "@judilen/db",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "2.0.2",
+    "drizzle-orm": "0.45.2",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.20.0",
+    "typescript": "6.0.3"
+  }
+}
+

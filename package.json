@@ -1,0 +1,21 @@
+{
+  "name": "judilen",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @judilen/web dev",
+    "build": "pnpm --filter @judilen/web build",
+    "start": "pnpm --filter @judilen/web start",
+    "lint": "pnpm --filter @judilen/web lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @judilen/web test",
+    "test:e2e": "pnpm --filter @judilen/web test:e2e",
+    "db:generate": "pnpm --filter @judilen/db generate",
+    "db:migrate": "pnpm --filter @judilen/db migrate",
+    "db:seed": "pnpm --filter @judilen/db seed"
+  }
+}

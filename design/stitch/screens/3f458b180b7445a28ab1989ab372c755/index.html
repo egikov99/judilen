@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Оплата бронирования | Verdant Estate</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#d8e8c8",
+                    "primary-fixed-dim": "#a1d494",
+                    "surface-container-highest": "#e2e3dc",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f9faf2",
+                    "on-secondary": "#ffffff",
+                    "outline": "#72796e",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "on-surface": "#191c18",
+                    "tertiary": "#303d27",
+                    "on-surface-variant": "#42493e",
+                    "on-error-container": "#93000a",
+                    "secondary": "#974730",
+                    "primary-container": "#2d5a27",
+                    "tertiary-container": "#47543d",
+                    "on-background": "#191c18",
+                    "primary-fixed": "#bcf0ae",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "surface-tint": "#3b6934",
+                    "on-secondary-fixed": "#3b0900",
+                    "surface-container-high": "#e7e9e1",
+                    "surface-variant": "#e2e3dc",
+                    "error": "#ba1a1a",
+                    "secondary-fixed": "#ffdbd1",
+                    "on-tertiary-container": "#b8c8aa",
+                    "inverse-surface": "#2e312c",
+                    "outline-variant": "#c2c9bb",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#f9faf2",
+                    "surface-container": "#edefe7",
+                    "on-secondary-container": "#772e1a",
+                    "on-primary-fixed-variant": "#23501e",
+                    "surface-container-low": "#f3f4ed",
+                    "surface": "#f9faf2",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#fe987c",
+                    "on-tertiary-fixed": "#131f0c",
+                    "on-primary-fixed": "#002201",
+                    "inverse-primary": "#a1d494",
+                    "inverse-on-surface": "#f0f1ea",
+                    "surface-dim": "#d9dbd3",
+                    "primary": "#154212",
+                    "on-primary-container": "#9dd090",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding": "32px",
+                    "base": "8px",
+                    "section-margin": "40px",
+                    "gutter": "24px",
+                    "card-gap": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "body-md": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "display-lg": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .luxury-shadow {
+            box-shadow: 0 16px 24px -4px rgba(21, 66, 18, 0.08);
+        }
+        body {
+            background-color: #F5F2ED; /* Warm Beige Level 0 */
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline fixed full-width top-0 z-50 w-full">
+<div class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">
+                Verdant Estate
+            </div>
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">Reserves</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">Estates</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">Experiences</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200 font-body-md text-body-md" href="#">About</a>
+</nav>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="shopping_bag">shopping_bag</span>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-20 px-4 md:px-container-padding max-w-7xl mx-auto min-h-screen">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Order Summary (Asymmetric Focus) -->
+<div class="lg:col-span-5 order-2 lg:order-1">
+<div class="bg-surface-container-lowest rounded-xl p-8 luxury-shadow border border-outline-variant/30">
+<h2 class="font-headline-md text-headline-md text-primary mb-6">Детали бронирования</h2>
+<div class="relative w-full h-48 rounded-lg overflow-hidden mb-6">
+<div class="w-full h-full bg-cover bg-center" data-alt="An ultra-luxurious, minimalist cedar-lined hotel suite with large floor-to-ceiling windows overlooking a foggy pine forest. The interior features rich wooden textures, high-end white linens, and soft golden ambient lighting. The atmosphere is peaceful, exclusive, and reflects a premium eco-resort aesthetic with a palette of forest greens, warm clays, and cream tones." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC7CfjdORfbKE88kKogW0GbdewpZMsDtM75WFVESiU540zdxiwP8AEmu-R4CfczR48cYzT3GyzC5rcVkz6jc39H01FloFTAnduNmwl9gwPAOa06a4WwMOJjF-6oTh9JTQ9rIA_x8sTH7BKu4j69lbUlgcVXFyHHNqGkY_zCT68DE_b1F4ov3iavSkir-XEQD9EmOAEowVaBk7oxdN_Ot_okbqcIx2gSI5LzIhXH0UtPcqIgOvAMGHOS')"></div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Категория</p>
+<p class="font-title-lg text-title-lg">Люкс "Кедр"</p>
+</div>
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Даты</p>
+<p class="font-body-md text-body-md">12 окт — 15 окт</p>
+</div>
+</div>
+<div class="py-4 space-y-3">
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>3 ночи × 22 000 RUB</span>
+<span>66 000 RUB</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>Сервисный сбор</span>
+<span class="text-primary-container font-semibold">0 RUB</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md text-body-md">
+<span>Гости</span>
+<span>2 взрослых</span>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant">
+<div class="flex justify-between items-center">
+<span class="font-headline-md text-headline-md">Итого</span>
+<span class="font-display-lg text-headline-lg text-primary">66 000 RUB</span>
+</div>
+</div>
+</div>
+<!-- Trust Indicators -->
+<div class="mt-12 grid grid-cols-3 gap-4 pt-8 border-t border-outline-variant/50">
+<div class="flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="lock" style="font-size: 32px;">lock</span>
+<span class="font-label-md text-[10px] leading-tight text-on-surface-variant">Безопасная оплата</span>
+</div>
+<div class="flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="shield" style="font-size: 32px;">shield</span>
+<span class="font-label-md text-[10px] leading-tight text-on-surface-variant">Защита данных</span>
+</div>
+<div class="flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="verified" style="font-size: 32px;">verified</span>
+<span class="font-label-md text-[10px] leading-tight text-on-surface-variant">Официально</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Payment Form -->
+<div class="lg:col-span-7 order-1 lg:order-2">
+<div class="bg-surface-container-lowest rounded-xl p-8 luxury-shadow border border-outline-variant/30">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-8">Оплата</h1>
+<!-- Payment Tabs -->
+<div class="flex gap-4 mb-10 overflow-x-auto pb-2">
+<button class="flex items-center gap-3 px-6 py-3 rounded-full bg-primary text-on-primary font-label-md text-label-md whitespace-nowrap transition-all hover:opacity-90">
+<span class="material-symbols-outlined" data-icon="credit_card">credit_card</span>
+                            Банковская карта
+                        </button>
+<button class="flex items-center gap-3 px-6 py-3 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="account_balance">account_balance</span>
+                            SberPay
+                        </button>
+<button class="flex items-center gap-3 px-6 py-3 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                            Перевод
+                        </button>
+</div>
+<!-- Card Fields -->
+<form class="space-y-6">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1">Номер карты</label>
+<div class="relative">
+<input class="w-full px-4 py-4 rounded-lg bg-surface-bright border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-lg text-body-lg" placeholder="0000 0000 0000 0000" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+<span class="material-symbols-outlined text-on-surface-variant opacity-40" data-icon="credit_card">credit_card</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1">Срок действия</label>
+<input class="w-full px-4 py-4 rounded-lg bg-surface-bright border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-lg text-body-lg" placeholder="ММ / ГГ" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1">CVV / CVC</label>
+<input class="w-full px-4 py-4 rounded-lg bg-surface-bright border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-lg text-body-lg" placeholder="•••" type="password"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1">Имя владельца</label>
+<input class="w-full px-4 py-4 rounded-lg bg-surface-bright border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-lg text-body-lg uppercase" placeholder="IVAN IVANOV" type="text"/>
+</div>
+<div class="pt-8">
+<button class="w-full bg-primary text-on-primary py-5 rounded-lg font-title-lg text-title-lg luxury-shadow hover:bg-primary-container transition-all active:scale-[0.98] flex justify-center items-center gap-4" type="submit">
+                                Оплатить 66 000 RUB
+                                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<p class="text-center text-on-surface-variant font-label-md text-[11px] mt-4 leading-relaxed">
+                                Нажимая кнопку «Оплатить», вы соглашаетесь с условиями <a class="underline hover:text-primary" href="#">Публичной оферты</a> и <a class="underline hover:text-primary" href="#">Политикой конфиденциальности</a>.
+                            </p>
+</div>
+</form>
+</div>
+<!-- Supplementary Help -->
+<div class="mt-8 flex items-center justify-between p-6 bg-tertiary-fixed/30 rounded-xl border border-tertiary-fixed">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="help_outline">help_outline</span>
+<div class="text-on-tertiary-fixed">
+<p class="font-label-md font-bold">Нужна помощь?</p>
+<p class="font-body-md text-[13px]">Наши менеджеры на связи 24/7</p>
+</div>
+</div>
+<a class="text-primary font-bold font-label-md hover:underline" href="tel:88005553535">+7 800 555-35-35</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline w-full">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-container-padding py-12 max-w-7xl mx-auto">
+<div class="mb-8 md:mb-0">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim mb-2">Verdant Estate</div>
+<p class="font-label-md text-label-md text-on-surface-variant">© 2024 Verdant Estate Luxury Group. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Sustainability Report</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for input fields
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.01]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+
+        // Simple tab switcher logic
+        const tabButtons = document.querySelectorAll('button.rounded-full');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                tabButtons.forEach(b => {
+                    b.classList.remove('bg-primary', 'text-on-primary');
+                    b.classList.add('border', 'border-outline-variant', 'text-on-surface-variant');
+                });
+                btn.classList.add('bg-primary', 'text-on-primary');
+                btn.classList.remove('border', 'border-outline-variant', 'text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

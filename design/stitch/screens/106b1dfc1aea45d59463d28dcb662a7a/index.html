@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Greenwood Estate — Премиальный отдых в сердце природы</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#ffdbd1",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f9faf2",
+                    "outline": "#72796e",
+                    "on-surface": "#191c18",
+                    "on-background": "#191c18",
+                    "primary-container": "#2d5a27",
+                    "tertiary-container": "#47543d",
+                    "on-tertiary-fixed-variant": "#3d4b34",
+                    "secondary": "#974730",
+                    "on-tertiary-container": "#b8c8aa",
+                    "tertiary-fixed": "#d8e8c8",
+                    "inverse-on-surface": "#f0f1ea",
+                    "inverse-surface": "#2e312c",
+                    "surface-container": "#edefe7",
+                    "on-tertiary": "#ffffff",
+                    "primary": "#154212",
+                    "tertiary-fixed-dim": "#bccbae",
+                    "surface-tint": "#3b6934",
+                    "on-surface-variant": "#42493e",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d9dbd3",
+                    "on-primary-fixed-variant": "#23501e",
+                    "error": "#ba1a1a",
+                    "background": "#f9faf2",
+                    "surface-variant": "#e2e3dc",
+                    "primary-fixed-dim": "#a1d494",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#a1d494",
+                    "on-tertiary-fixed": "#131f0c",
+                    "surface": "#f9faf2",
+                    "surface-container-highest": "#e2e3dc",
+                    "on-secondary-fixed": "#3b0900",
+                    "on-primary-fixed": "#002201",
+                    "primary-fixed": "#bcf0ae",
+                    "on-primary-container": "#9dd090",
+                    "surface-container-low": "#f3f4ed",
+                    "surface-container-high": "#e7e9e1",
+                    "on-secondary-fixed-variant": "#79301b",
+                    "secondary-container": "#fe987c",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#772e1a",
+                    "tertiary": "#303d27",
+                    "secondary-fixed-dim": "#ffb5a1",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#c2c9bb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "card-gap": "24px",
+                    "base": "8px",
+                    "section-margin": "40px",
+                    "container-padding": "32px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "title-lg": ["Inter"],
+                    "headline-md": ["Playfair Display"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Playfair Display"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "title-lg": ["18px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hero-gradient {
+            background: linear-gradient(to bottom, rgba(25, 28, 24, 0.4), rgba(25, 28, 24, 0.6));
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .text-balance { text-wrap: balance; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar Navigation -->
+<header class="bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-md shadow-sm dark:shadow-none docked full-width top-0 sticky z-50 transition-all duration-300 ease-in-out">
+<nav class="flex justify-between items-center w-full px-container-padding py-4 max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Greenwood Estate</div>
+<ul class="hidden md:flex gap-8 items-center">
+<li><a class="font-title-lg text-title-lg text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1" href="#">The Estate</a></li>
+<li><a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#cabins">Cabins</a></li>
+<li><a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#services">Services</a></li>
+<li><a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Gallery</a></li>
+<li><a class="font-title-lg text-title-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">Reviews</a></li>
+</ul>
+<button class="font-label-md text-label-md px-6 py-2 bg-primary text-on-primary rounded-full hover:opacity-90 transition-opacity">Book Now</button>
+</nav>
+</header>
+<!-- Hero Section -->
+<section class="relative h-[921px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A cinematic, wide-angle shot of a luxurious, modern wooden cabin nestled deep within a lush, misty coniferous forest. The architecture features large glass windows reflecting the towering pines. Soft, warm morning light filters through the dense branches, creating a serene and exclusive atmosphere. The overall color palette is dominated by deep forest greens, earthy browns, and soft misty greys, emphasizing premium eco-luxury." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCCqCdFLhZF2OOJVjvgmp7RANkjDtY_9_e2aZ5EUG2-tqRTGKHQu_XfT3oZ71KTKqOHm1o4DLRsMpCAWskGVA0UR1s3r93rm9W7_SziddTzuaF-mh70Pl-NITZgi3yvok1OwKyaeJ6QROgl8Bf9NqZJf-2b73pD71C6XwDgu36O_bseTGtXTdF9yCoLhZ6gAEB2VzaT8HuvyFfA4J_d5xX91U7S1NtrVR8lAHHe3h7awURzF3Ygsg3V')"></div>
+<div class="absolute inset-0 hero-gradient"></div>
+</div>
+<div class="relative z-10 text-center px-4 max-w-4xl">
+<h1 class="font-display-lg text-display-lg md:text-[64px] text-white mb-6 animate-fade-in text-balance">Побег в сердце природы</h1>
+<p class="font-body-lg text-body-lg md:text-[20px] text-white/90 mb-10 max-w-2xl mx-auto text-balance">
+                Премиальный отдых в окружении хвойного леса и тишины. Почувствуйте гармонию, которую дарит уединение.
+            </p>
+<a class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-on-primary rounded-full font-title-lg text-title-lg hover:bg-primary-container transition-all transform hover:scale-105" href="#booking">
+                Выбрать даты
+                <span class="material-symbols-outlined">calendar_month</span>
+</a>
+</div>
+</section>
+<!-- Booking Form Section -->
+<section class="relative z-20 -mt-16 px-4" id="booking">
+<div class="max-w-6xl mx-auto glass-card rounded-2xl shadow-xl p-6 md:p-8 border border-outline-variant/30">
+<form class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider block">Заезд — Выезд</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="12 Июля - 19 Июля" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">date_range</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider block">Гости</label>
+<div class="relative">
+<select class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none transition-all">
+<option>2 взрослых, 0 детей</option>
+<option>1 взрослый</option>
+<option>2 взрослых, 1 ребенок</option>
+<option>4 взрослых</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">group</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider block">Тип размещения</label>
+<div class="relative">
+<select class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none transition-all">
+<option>Все варианты</option>
+<option>Коттедж "Ольха"</option>
+<option>Студия "Липа"</option>
+<option>Люкс "Кедр"</option>
+</select>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">home</span>
+</div>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-title-lg text-title-lg hover:shadow-lg transition-all" type="submit">
+                    Найти номер
+                </button>
+</form>
+</div>
+</section>
+<!-- Our Cabins Section -->
+<section class="py-section-margin px-container-padding max-w-7xl mx-auto" id="cabins">
+<div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+<div class="max-w-2xl">
+<span class="text-secondary font-label-md text-label-md tracking-[0.2em] uppercase">Ваш уютный дом</span>
+<h2 class="font-headline-lg text-headline-lg mt-2">Наши домики</h2>
+</div>
+<a class="text-primary font-title-lg text-title-lg flex items-center gap-2 hover:underline" href="#">
+                Все варианты 
+                <span class="material-symbols-outlined">arrow_right_alt</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Cabin 1 -->
+<div class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
+<div class="relative h-72 overflow-hidden">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A cozy, high-end wooden cottage interior with a large stone fireplace, floor-to-ceiling windows overlooking a forest, and plush linen furniture. The lighting is warm and inviting, using a palette of soft beiges, warm woods, and forest greens. The style is rustic modern with premium textures." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuApntseb53X8p_B9xK1t6R9qeZJbzZZzqtT4Jl0cM_r_p7pGpOD2GdwVXuePXtNjXft5WqXIBvcMYf6ZNy3F1vFhL37nUV3cmDHmtTD_b5pfPFOnmDWn8mHFfL-ulQJcXb6u7PTJacrG4B70L9yYhAdYIgmy1aBF_L9gJp027Hie7mZGkYzkZDVEPsGsrr1eh2TGW2PEXXitgoAA_72ZOTM5QgF5Y5q99Pfgbn3QjBtOJbRZmKapROx')"></div>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full font-label-md text-label-md text-primary">От 15 000 ₽ / ночь</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-headline-md mb-2">Коттедж "Ольха"</h3>
+<p class="text-on-surface-variant font-body-md mb-6">Просторный двухэтажный дом для семьи. Панорамная веранда и каминная зона.</p>
+<div class="flex items-center gap-4 text-outline text-label-md mb-6">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">group</span> 4 гостя</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">square_foot</span> 85 м²</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">wifi</span> Wi-Fi</div>
+</div>
+<button class="w-full py-3 border border-primary text-primary rounded-lg font-title-lg text-title-lg hover:bg-primary hover:text-on-primary transition-all">Подробнее</button>
+</div>
+</div>
+<!-- Cabin 2 -->
+<div class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
+<div class="relative h-72 overflow-hidden">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A minimalist forest studio apartment with scandinavian design influences. Bright interior with light wood walls, a comfortable queen bed with premium white linens, and a small kitchenette. A large window frames a view of birch trees. The aesthetic is clean, bright, and peaceful." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBQzgF4HQjZyOU3MqW62CDQt9JDyPhA-PPsJegqC9t0O_0wkumUBgURMMOQSkbQJtyZ638J1e4bqjD1xHZUqch0cEvBiRtPOQqBVOVZ4Tonv-a65nziXPuXiZh0hm_lbdm89p1NFmh81hSGgXYkX_ra9sEbp4RIEeQ4gahd2HzEqUasZVwAT9R17YEOZYT1o7y09dMy4gj7sICg74D8OCvX4b27tIxeksgRX3ysNNduNu5K2JCCxQo1')"></div>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full font-label-md text-label-md text-primary">От 8 500 ₽ / ночь</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-headline-md mb-2">Студия "Липа"</h3>
+<p class="text-on-surface-variant font-body-md mb-6">Идеально для пар. Уютная студия с видом на березовую рощу и завтраком в постель.</p>
+<div class="flex items-center gap-4 text-outline text-label-md mb-6">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">group</span> 2 гостя</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">square_foot</span> 35 м²</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">local_cafe</span> Кофе-машина</div>
+</div>
+<button class="w-full py-3 border border-primary text-primary rounded-lg font-title-lg text-title-lg hover:bg-primary hover:text-on-primary transition-all">Подробнее</button>
+</div>
+</div>
+<!-- Cabin 3 -->
+<div class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
+<div class="relative h-72 overflow-hidden">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="An ultra-luxury cedar log cabin suite at night. Warm glowing lights from within, a private outdoor cedar hot tub on the deck, surrounded by snow-dusted pines. The atmosphere is romantic, expensive, and deeply private. High-contrast lighting with golden glows and deep night greens." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEM7T-ZK7W3Gv8g3pVs4VVuDcEt7YyyyTla-m5ZuSpqttYQFh200LCn1owlb_1EoyZParsbHx9NHgEwpes4nnSg7W2afukLVLC62k-wXADILNGXYtCnU2UvAr59wv9Z8ucfR41XMHrlK5dD54A7jc8AHelWVjjT1_ZiyfKIcHol9_NLZrepTdzGJlnJrWllNABWUWQmkevcNgD0_0o0BAzTh_oDCyUNzltJcqcbtpoAMNmxtlcmrCq')"></div>
+<div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full font-label-md text-label-md text-primary">От 22 000 ₽ / ночь</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-headline-md mb-2">Люкс "Кедр"</h3>
+<p class="text-on-surface-variant font-body-md mb-6">Эксклюзивный отдых. Кедровая баня на дровах, терраса и премиальный сервис.</p>
+<div class="flex items-center gap-4 text-outline text-label-md mb-6">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">group</span> 2 гостя</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">hot_tub</span> Своя баня</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">wine_bar</span> Мини-бар</div>
+</div>
+<button class="w-full py-3 border border-primary text-primary rounded-lg font-title-lg text-title-lg hover:bg-primary hover:text-on-primary transition-all">Подробнее</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section class="bg-surface-container py-section-margin" id="services">
+<div class="px-container-padding max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<span class="text-secondary font-label-md text-label-md tracking-[0.2em] uppercase">Забота о вас</span>
+<h2 class="font-headline-lg text-headline-lg mt-2">Услуги для души</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<div class="text-center group">
+<div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-[40px] text-primary">spa</span>
+</div>
+<h4 class="font-title-lg text-title-lg mb-3">Баня и СПА</h4>
+<p class="text-on-surface-variant font-body-md">Традиционная русская баня с ароматными вениками и банным чаном под открытым небом.</p>
+</div>
+<div class="text-center group">
+<div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-[40px] text-primary">potted_plant</span>
+</div>
+<h4 class="font-title-lg text-title-lg mb-3">Конные прогулки</h4>
+<p class="text-on-surface-variant font-body-md">Маршруты по заповедным тропам в сопровождении опытного инструктора для любого уровня.</p>
+</div>
+<div class="text-center group">
+<div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-[40px] text-primary">restaurant</span>
+</div>
+<h4 class="font-title-lg text-title-lg mb-3">Местные завтраки</h4>
+<p class="text-on-surface-variant font-body-md">Фермерские продукты: домашний сыр, мед, свежая выпечка и лесные ягоды каждое утро.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials & Gallery -->
+<section class="py-section-margin">
+<div class="px-container-padding max-w-7xl mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<!-- Testimonials -->
+<div>
+<span class="text-secondary font-label-md text-label-md tracking-[0.2em] uppercase">Отзывы</span>
+<h2 class="font-headline-lg text-headline-lg mt-2 mb-8">Что говорят гости</h2>
+<div class="space-y-8">
+<div class="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-primary">
+<div class="flex gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-title-lg text-title-lg italic mb-6">"Невероятное место для цифрового детокса. Тишина такая, что слышно только шум сосен. Сервис на уровне лучших отелей Европы."</p>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest"></div>
+<div>
+<p class="font-bold">Анна Кузнецова</p>
+<p class="text-label-md text-outline">Отдыхала в Сентябре 2023</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Instagram Gallery -->
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-4">
+<div class="aspect-square rounded-xl overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="Close up photography of a rustic breakfast spread on a wooden table: fresh croissants, a small bowl of wild blueberries, and a steaming cup of coffee in a handmade ceramic mug. Soft morning sunlight. Professional food photography style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBIVq-mXnZCU2V31MX-a_Cf4a7ZmBo2XHJ9EmEzMmpJWbLHsA8dsRBZeiBM79HSrGqoaZbh5aH-Egh4gJrkImQGpnjGVjc-r136bjCcskdhR1dBvHjoaromgq8DwR4lfWGbtYw8vX_vSYSgZkjNH_mOtpfZp4RwRLMgeCYyuYoHMie2Lwdo1wp_MxKdw3Xs8W18sWBDtm5P1dh4lt0JvMS065TylCcUVkPHd3R5lrUEJ3d_zgUz1Bin')"></div>
+</div>
+<div class="aspect-[4/5] rounded-xl overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="A woman in a cozy knit sweater sitting on a porch chair, wrapped in a blanket, looking out at a forest clearing at dusk. The mood is tranquil and reflective. Cinematic lighting, deep greens and warm orange tones." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNFnfRAjWTkEYSh33mGH7vjvUeePoxCOyE2pmOyOKz99kH5pn_immJql41afmZDGY3eS_tCFevKmMJRkvIwlaf8xB3ul_1Sl7ly2_p7m2Hqf0dr6jGx3qVluvw9MfWN9aFQ3GGuG93hVBOUXYnCH_G9XolAcfaHR8WuJQqq2bNxRJasXYqfrbHsW7QsCqqLkTR-egx5hhlqzigLl6RdqXjOq466qhynp6uT673FLGhnT1l6D4GU4Hb')"></div>
+</div>
+</div>
+<div class="space-y-4 pt-8">
+<div class="aspect-[4/5] rounded-xl overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="A beautiful brown horse standing in a sunlit forest clearing. Dappled sunlight hitting its coat. The background is a blurry green forest. High-end lifestyle outdoor photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDj6nQO2UoHG5UUI6LuIvGIcsnUYmZUdR5HODX0LetbXUBqAZwufYR06ZPjY2QFyYbf5TvTMmAAs7vOFVV9fOldFCWCuVMudLBY-_6wEgM4a5HT5MLn3LOfw21p5_VIM_zk2YOAJ-S8378CWAfICsvvJ82SZWvcHiezxr0l8Kgk5QuarnjBNlzejHVodMAfsSKPMQ3v9zUciSXCXCJFFArGpv1DoADFrg0IDdpvhbl-aWy00FdxABIW')"></div>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="A top-down view of an outdoor forest spa area with a steaming cedar hot tub, wooden decks, and surrounding pine trees under a clear starry night sky. Magical and serene atmosphere." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmNmwcv7obk4Nuqcezn1iRIptM91INkyfeT6glMNkdrQWLdH8sJXYBDtK8LKq9PHQO-Ru3lt13VDFAVN4V8L7bnhP1R9eWSmqo-p01EdCDn-p_SVICvd9uxatH-k527OjALYVFlowXp6Q3v3whndyEMTQ-Cr7pc6OavJdSO7L3A8fw9--BXYIrPLIOFnUbXMHibn9-9uwmmDqj1DdHYS6WyyFe6ILtmBMIyTMi5f588_vhDf-50H4k')"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface border-t border-outline-variant dark:border-outline">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-container-padding py-section-margin max-w-7xl mx-auto">
+<div class="space-y-4">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed">Greenwood Estate</div>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-outline">Ваше идеальное убежище в самом сердце нетронутой природы. Наслаждайтесь комфортом и тишиной.</p>
+</div>
+<div class="space-y-4">
+<h5 class="font-title-lg text-title-lg">Навигация</h5>
+<ul class="flex flex-col gap-2">
+<li><a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:text-secondary dark:hover:text-secondary-fixed transition-colors hover:underline" href="#">Privacy Policy</a></li>
+<li><a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:text-secondary dark:hover:text-secondary-fixed transition-colors hover:underline" href="#">Terms of Service</a></li>
+<li><a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:text-secondary dark:hover:text-secondary-fixed transition-colors hover:underline" href="#">Sustainability</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h5 class="font-title-lg text-title-lg">Помощь</h5>
+<ul class="flex flex-col gap-2">
+<li><a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:text-secondary dark:hover:text-secondary-fixed transition-colors hover:underline" href="#">Careers</a></li>
+<li><a class="font-label-md text-label-md text-on-surface-variant dark:text-outline hover:text-secondary dark:hover:text-secondary-fixed transition-colors hover:underline" href="#">Contact Us</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<h5 class="font-title-lg text-title-lg">Контакты</h5>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-outline">
+                    Лесная ул., 42, Усадьба Greenwood<br/>
+                    +7 (900) 123-45-67<br/>
+                    hello@greenwood.estate
+                </p>
+<div class="flex gap-4">
+<a class="text-primary hover:opacity-80 transition-opacity" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-primary hover:opacity-80 transition-opacity" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+</div>
+</div>
+</div>
+<div class="px-container-padding py-6 border-t border-outline-variant/30 text-center text-label-md text-outline">
+            © 2024 Greenwood Estate. All rights reserved. Designed for Eco-Premium luxury.
+        </div>
+</footer>
+<script>
+        // Simple scroll behavior for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'shadow-md');
+                header.classList.remove('py-4', 'shadow-sm');
+            } else {
+                header.classList.add('py-4', 'shadow</script></body></html>

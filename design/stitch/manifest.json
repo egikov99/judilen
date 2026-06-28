@@ -1,0 +1,27 @@
+{
+  "project": {
+    "id": "9446995305808184062",
+    "title": "Панель отчетности администратора"
+  },
+  "designSystem": {
+    "requestedId": "asset-stub-assets_249987b5029240548b3037422ca78a72",
+    "resourceName": "assets/249987b5029240548b3037422ca78a72",
+    "file": "design-system/response.json"
+  },
+  "screens": [
+    { "id": "50dcaf3b04a949ca97b4188580bb1c44", "title": "Панель администратора: Отчеты" },
+    { "id": "106b1dfc1aea45d59463d28dcb662a7a", "title": "Главная страница: Greenwood Estate" },
+    { "id": "f3c85092ed5e438da4e45b5f489ece24", "title": "Детали домика: Люкс «Кедр»" },
+    { "id": "5104e8e7bee64889ab0d1df719cb552b", "title": "Личный кабинет: Мои поездки" },
+    { "id": "c79303adc9dc4f459686488ad0c83d95", "title": "Шахматка бронирований" },
+    { "id": "41aae9b4cd9f4a7fa1976effb285c588", "title": "Управление заказами: Панель администратора" },
+    { "id": "3f458b180b7445a28ab1989ab372c755", "title": "Оплата бронирования: Greenwood Estate" },
+    { "id": "33d045f6d16e413194a7fc94e3d01b56", "title": "Подтверждение оплаты: Greenwood Estate" },
+    { "id": "152ae307061a4766bdf93a56f17c77e7", "title": "Форма отзыва: Greenwood Estate" },
+    { "id": "8558f69b20a1436f854b988c92f84417", "title": "Все отзывы: Greenwood Estate" },
+    { "id": "6fe97beb1a13495195fe9fc4385097bd", "title": "Контакты и проезд: Greenwood Estate" },
+    { "id": "65cba4b52bfa4e5cb192102d590ddf39", "title": "Каталог услуг: Greenwood Estate" },
+    { "id": "9f132803d60e4e1a8ce4064665ce9678", "title": "Управление каталогом: Панель администратора" }
+  ]
+}
+
