@@ -50,13 +50,25 @@ const adminRole = allRoles.find((role) => role.name === "admin");
 if (!adminRole) throw new Error("Admin role was not created");
 const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@judilen.local").toLowerCase().trim();
 const existingAdmin = await db.select({ id: users.id }).from(users).where(eq(users.email, adminEmail)).limit(1);
+const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!";
 if (!existingAdmin.length) {
   await db.insert(users).values({
     email: adminEmail,
-    passwordHash: await hash(process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!"),
+    passwordHash: await hash(adminPassword),
     roleId: adminRole.id,
     firstName: "Администратор"
   });
+  console.log(`Created administrator ${adminEmail}`);
+} else if (process.env.SEED_ADMIN_RESET_PASSWORD === "true") {
+  await db.update(users).set({
+    passwordHash: await hash(adminPassword),
+    roleId: adminRole.id,
+    isActive: true,
+    updatedAt: new Date()
+  }).where(eq(users.id, existingAdmin[0].id));
+  console.log(`Reset password for administrator ${adminEmail}`);
+} else {
+  console.log(`Administrator ${adminEmail} already exists; password was not changed`);
 }
 
 await db.insert(houses).values([
