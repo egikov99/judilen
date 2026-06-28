@@ -18,6 +18,11 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages ./packages
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Next.js imports server modules while collecting page metadata. The postgres
+# client is lazy, so this non-secret build-only URL is never queried. The final
+# runtime image receives the real DATABASE_URL from Docker Compose/Portainer.
+ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
+ENV DATABASE_URL=$DATABASE_URL
 RUN pnpm build
 
 FROM base AS migrator
