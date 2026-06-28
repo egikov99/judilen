@@ -10,6 +10,8 @@ on:
     branches:
       - dev
 
+  workflow_dispatch:
+
 # Repository Actions settings should use "Read and write permissions".
 # No git push is performed here; write permission keeps required checks and
 # future PR annotations available through GITHUB_TOKEN.
