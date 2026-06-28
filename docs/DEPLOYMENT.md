@@ -46,6 +46,11 @@ Portainer не должен создавать или монтировать `.e
 - Reference/branch для Stack: `main`.
 - Compose path: `docker-compose.yml`.
 - Webhook должен принадлежать именно этому Stack и выполнять pull/redeploy.
+- На Docker endpoint должна существовать внешняя сеть `proxy`.
+- Reverse proxy должен быть подключен к сети `proxy` и направлять трафик на `app:3000`.
+
+Приложение не публикует порт на Docker host. Оно подключено к `proxy` для
+reverse proxy и к внутренней сети Stack для доступа к PostgreSQL.
 
 ## Production checklist
 

@@ -51,8 +51,11 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-booking@example.com}
-    ports:
-      - "${APP_PORT:-3000}:3000"
+    expose:
+      - "3000"
+    networks:
+      - default
+      - proxy
     volumes:
       - uploads:/app/apps/web/public/uploads
     depends_on:
@@ -67,3 +70,7 @@ services:
 volumes:
   postgres_data:
   uploads:
+
+networks:
+  proxy:
+    external: true
