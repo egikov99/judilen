@@ -18,6 +18,10 @@ Compose запускает `migrate` как one-shot service и поднимае
 4. В GitHub repository settings добавьте Actions secret `PORTAINER_WEBHOOK_URL`.
 5. Защитите ветки `dev` и `main`.
 
+Portainer не должен создавать или монтировать `.env`: Compose явно передает
+переменные Stack в контейнер `app`. Как минимум настройте `POSTGRES_PASSWORD`,
+`AUTH_SECRET`, `APP_URL` и `NEXT_PUBLIC_SITE_URL` в Environment variables Stack.
+
 `Dev CI` запускается для pull request в `dev` и push в `dev`; он выполняет проверки без деплоя. `Production` запускается только после push в `main`. Portainer webhook является последним шагом production job, поэтому он не вызывается при ошибке install, lint, typecheck, migration, seed, tests, Next.js build, Compose validation или Docker build.
 
 ## Ветки

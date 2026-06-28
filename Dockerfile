@@ -22,7 +22,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # client is lazy, so this non-secret build-only URL is never queried. The final
 # runtime image receives the real DATABASE_URL from Docker Compose/Portainer.
 ARG DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build
+ARG APP_URL=http://localhost:3000
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ENV DATABASE_URL=$DATABASE_URL
+ENV APP_URL=$APP_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN pnpm build
 
 FROM base AS migrator

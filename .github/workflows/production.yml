@@ -42,9 +42,6 @@ jobs:
       AUTH_SECRET: ci-only-secret-at-least-32-characters-long
       APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      # docker-compose.yml reads runtime variables from this safe example file
-      # during validation. Portainer provides the real production environment.
-      ENV_FILE: .env.example
 
     steps:
       - name: Checkout code
