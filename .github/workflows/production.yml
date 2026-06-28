@@ -93,7 +93,10 @@ jobs:
       - name: Trigger Portainer webhook
         if: success()
         run: |
-          test -n "$PORTAINER_WEBHOOK_URL"
-          curl -fsSL -X POST "$PORTAINER_WEBHOOK_URL"
+          if [ -z "$PORTAINER_WEBHOOK_URL" ]; then
+            echo "::error::PORTAINER_WEBHOOK_URL repository secret is not configured"
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error -X POST "$PORTAINER_WEBHOOK_URL"
         env:
           PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
