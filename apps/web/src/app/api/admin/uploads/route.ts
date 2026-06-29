@@ -1,55 +1,62 @@
 import { db, houseImages, houses } from "@judilen/db";
 import { eq } from "drizzle-orm";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
-import { requirePermission } from "@/lib/session";
+import { requireAllPermissions, requirePermission } from "@/lib/session";
+import { removeUploadedFile, saveImageFile } from "@/lib/uploads";
 import { problem } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
-function imageType(bytes: Uint8Array) {
-  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return { ext: "png", mime: "image/png" };
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return { ext: "jpg", mime: "image/jpeg" };
-  if (
-    String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
-    String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
-  ) return { ext: "webp", mime: "image/webp" };
-  return null;
-}
-
 export async function POST(request: Request) {
-  const auth = await requirePermission("house_images.create");
+  let auth = await requirePermission("uploads.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const form = await request.formData();
+  const scope = String(form.get("scope") ?? "houses");
   const file = form.get("file");
+  if (!(file instanceof File)) return problem(422, "Файл не передан");
+
+  if (scope !== "houses") {
+    if (scope !== "services" && scope !== "content") return problem(422, "Неизвестная область загрузки");
+    const result = await saveImageFile(file, scope);
+    if (!result.ok) return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+    return Response.json({ url: result.url }, { status: 201 });
+  }
+
   const houseId = String(form.get("houseId") ?? "");
+  const imageId = String(form.get("imageId") ?? "");
   const alt = String(form.get("alt") ?? "").trim();
   const caption = String(form.get("caption") ?? "").trim();
   const position = Number(form.get("position") ?? 0);
   const isMain = form.get("isMain") === "true" || form.get("isMain") === "on";
-  if (!(file instanceof File) || !houseId || alt.length < 3 || !Number.isInteger(position)) {
-    return problem(422, "Требуются file, houseId, alt и целочисленный position");
-  }
-  const maxBytes = Number(process.env.MAX_UPLOAD_BYTES ?? 10 * 1024 * 1024);
-  if (file.size <= 0 || file.size > maxBytes) return problem(413, "Файл превышает допустимый размер");
+  const isActive = form.get("isActive") !== "false";
+  auth = await requireAllPermissions(["uploads.create", imageId ? "house_images.update" : "house_images.create"]);
+  if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
+  if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  if (!houseId || alt.length < 3 || !Number.isInteger(position)) return problem(422, "Требуются houseId, alt и целочисленный position");
   const [house] = await db.select({ id: houses.id }).from(houses).where(eq(houses.id, houseId)).limit(1);
   if (!house) return problem(404, "Домик не найден");
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const detected = imageType(bytes);
-  if (!detected || (file.type && file.type !== detected.mime)) return problem(415, "Допустимы PNG, JPEG и WebP");
-  const uploadRoot = process.env.UPLOAD_DIR ?? join(process.cwd(), "public", "uploads");
-  const directory = join(uploadRoot, "houses", houseId);
-  await mkdir(directory, { recursive: true });
-  const filename = `${crypto.randomUUID()}.${detected.ext}`;
-  await writeFile(join(directory, filename), bytes, { flag: "wx", mode: 0o640 });
-  const url = `/uploads/houses/${houseId}/${filename}`;
-  const [image] = await db.transaction(async (tx) => {
-    if (isMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
-    const [created] = await tx.insert(houseImages).values({ houseId, url, alt, caption: caption || null, position, isMain }).returning();
-    return [created];
-  });
-  await writeAudit({ session: auth.session, request, action: "house.image.upload", entityType: "house_image", entityId: image.id, after: image });
-  return Response.json({ item: image }, { status: 201 });
+  const [before] = imageId ? await db.select().from(houseImages).where(eq(houseImages.id, imageId)).limit(1) : [];
+  if (imageId && (!before || before.houseId !== houseId)) return problem(404, "Фото не найдено");
+
+  const result = await saveImageFile(file, "houses", houseId);
+  if (!result.ok) return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+  let image: typeof houseImages.$inferSelect;
+  try {
+    image = await db.transaction(async (tx) => {
+      if (isMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
+      if (before) {
+        return (await tx.update(houseImages).set({ url: result.url, alt, caption: caption || null, position, isMain, isActive, updatedAt: new Date() }).where(eq(houseImages.id, before.id)).returning())[0];
+      }
+      return (await tx.insert(houseImages).values({ houseId, url: result.url, alt, caption: caption || null, position, isMain, isActive }).returning())[0];
+    });
+  } catch (error) {
+    await removeUploadedFile(result.url);
+    throw error;
+  }
+  if (before) await removeUploadedFile(before.url);
+  await writeAudit({ session: auth.session, request, action: before ? "house.image.replace" : "house.image.upload", entityType: "house_image", entityId: image.id, before, after: image });
+  revalidateTag("houses", "max");
+  return Response.json({ item: image }, { status: before ? 200 : 201 });
 }

@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { requirePermission } from "@/lib/session";
+import { removeUploadedFile } from "@/lib/uploads";
 import { houseImageSchema, problem } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const [before] = await db.select().from(houseImages).where(eq(houseImages.id, id)).limit(1);
   if (!before) return problem(404, "Фото не найдено");
   await db.delete(houseImages).where(eq(houseImages.id, id));
+  await removeUploadedFile(before.url);
   await writeAudit({ session: auth.session, request, action: "house_image.delete", entityType: "house_image", entityId: id, before });
   revalidateTag("houses", "max");
   return Response.json({ ok: true });

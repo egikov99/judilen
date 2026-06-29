@@ -252,6 +252,31 @@ img { display: block; max-width: 100%; }
 .event-log { display: grid; }
 .event-log > div { display: grid; grid-template-columns: 80px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .event-log small { color: var(--muted); }
+.visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+.upload-dropzone { display: grid; place-items: center; min-height: 180px; overflow: hidden; border: 2px dashed var(--line); border-radius: 8px; background: #fafbf7; color: var(--muted); cursor: pointer; text-align: center; }
+.upload-dropzone:hover { border-color: var(--forest-700); }
+.upload-dropzone img { width: 100%; height: 180px; object-fit: cover; }
+.photo-upload-form { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 24px; margin-bottom: 28px; }
+.photo-admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.photo-admin-card { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fafbf7; }
+.photo-admin-card > img { width: 100%; aspect-ratio: 3/2; object-fit: cover; }
+.photo-admin-card > .form-stack { padding: 18px; }
+.icon-button { width: 42px; height: 42px; border: 1px solid var(--line); background: white; color: var(--forest-900); cursor: pointer; }
+.period-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px; border: 1px solid var(--line); background: white; }
+.period-toolbar select, .period-toolbar input { min-height: 44px; border: 1px solid var(--line); padding: 8px 10px; background: white; }
+.period-label { color: var(--muted); font-size: 13px; }
+.dynamic-calendar { width: max-content; min-width: 100%; }
+.calendar-day { position: relative; min-height: 58px; padding: 10px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: white; cursor: pointer; text-align: left; }
+.calendar-day:hover { background: var(--sage-100); }
+.source-badge[data-source="manual"], .calendar-booking[data-source="manual"] { background: #e6ece2; color: #354a31; }
+.source-badge[data-source="blocked"], .calendar-booking[data-source="blocked"] { background: #ffe0d8; color: #7f2d1d; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(10,20,10,.55); }
+.modal-panel { position: relative; width: min(520px, 100%); max-height: 90vh; overflow-y: auto; padding: 28px; border-radius: 8px; background: white; box-shadow: 0 24px 70px rgba(0,0,0,.25); }
+.modal-panel h2 { margin-top: 0; font: 700 28px var(--serif); }
+.modal-close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: 0; background: transparent; font-size: 28px; cursor: pointer; }
+.dashboard-stat-grid { grid-template-columns: repeat(3, 1fr); }
+.dashboard-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.compact-table { min-width: 560px; }
 
 @media (max-width: 950px) {
   .nav-links { display: none; }
@@ -263,6 +288,8 @@ img { display: block; max-width: 100%; }
   .booking-card { position: static; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .integration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .photo-admin-grid { grid-template-columns: 1fr; }
+  .dashboard-stat-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-layout { grid-template-columns: 80px 1fr; }
   .admin-sidebar { padding: 24px 10px; }
   .admin-sidebar .brand { font-size: 0; padding-inline: 5px; }
@@ -310,6 +337,8 @@ img { display: block; max-width: 100%; }
   .conflict-row { align-items: stretch; flex-direction: column; }
   .event-log > div { grid-template-columns: 70px 1fr; }
   .event-log small { grid-column: 1 / -1; }
+  .photo-upload-form, .dashboard-columns { grid-template-columns: 1fr; }
+  .dashboard-stat-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

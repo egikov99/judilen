@@ -22,6 +22,7 @@ const permissionRows = [
   ["house_images.create", "Загрузка фотографий домиков"],
   ["house_images.update", "Изменение фотографий домиков"],
   ["house_images.delete", "Удаление фотографий домиков"],
+  ["uploads.create", "Загрузка изображений"],
   ["content.write", "Изменение контента и SEO"],
   ["reports.read", "Просмотр отчетов"],
   ["users.manage", "Управление пользователями"],
@@ -50,7 +51,7 @@ const roleLabels = {
 const grants: Record<keyof typeof roleLabels, string[]> = {
   client: [],
   admin: permissionRows.map(([key]) => key),
-  content_manager: ["dashboard.read", "houses.read", "houses.write", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "services.read", "services.create", "services.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
+  content_manager: ["dashboard.read", "houses.read", "houses.write", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "services.read", "services.create", "services.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
   manager: ["dashboard.read", "bookings.read", "bookings.write", "customers.read", "customers.write"]
 };
 

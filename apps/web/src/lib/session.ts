@@ -20,6 +20,13 @@ export async function requirePermission(permission: Permission) {
   return { error: null, session };
 }
 
+export async function requireAllPermissions(permissions: Permission[]) {
+  const session = await getSession();
+  if (!session) return { error: "unauthorized" as const, session: null };
+  if (!permissions.every((permission) => can(session.role, permission))) return { error: "forbidden" as const, session };
+  return { error: null, session };
+}
+
 export async function requirePagePermission(permission: Permission) {
   const session = await requireSession();
   if (!can(session.role, permission)) redirect("/admin?forbidden=1");

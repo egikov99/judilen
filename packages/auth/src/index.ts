@@ -21,6 +21,7 @@ export type Permission =
   | "house_images.create"
   | "house_images.update"
   | "house_images.delete"
+  | "uploads.create"
   | "content.write"
   | "reports.read"
   | "users.manage"
@@ -69,6 +70,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "house_images.create",
     "house_images.update",
     "house_images.delete",
+    "uploads.create",
     "content.write",
     "reports.read",
     "users.manage",
@@ -94,6 +96,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "house_images.create",
     "house_images.update",
     "house_images.delete",
+    "uploads.create",
     "services.read",
     "services.create",
     "services.update",

@@ -12,6 +12,7 @@ describe("RBAC", () => {
     expect(can("content_manager", "external_calendars.read")).toBe(false);
     expect(can("content_manager", "external_calendars.sync")).toBe(false);
     expect(can("content_manager", "calendar_conflicts.update")).toBe(false);
+    expect(can("content_manager", "uploads.create")).toBe(true);
     expect(can("admin", "external_calendars.create")).toBe(true);
     expect(can("admin", "calendar_conflicts.update")).toBe(true);
     expect(adminNavigation("content_manager").map((item) => item.href)).toEqual(["/admin", "/admin/houses", "/admin/services", "/admin/reviews", "/admin/content"]);

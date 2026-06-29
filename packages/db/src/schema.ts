@@ -160,7 +160,10 @@ export const houseImages = pgTable(
     isActive: boolean("is_active").notNull().default(true),
     ...timestamps
   },
-  (table) => [uniqueIndex("house_images_position_unique").on(table.houseId, table.position)]
+  (table) => [
+    uniqueIndex("house_images_position_unique").on(table.houseId, table.position),
+    uniqueIndex("house_images_one_main").on(table.houseId).where(sql`${table.isMain} = true`)
+  ]
 );
 
 export const services = pgTable(

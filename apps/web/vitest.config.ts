@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   test: {
     environment: "node",
-    exclude: ["tests/e2e/**", "node_modules/**"],
+    include: ["tests/**/*.test.ts"],
+    exclude: ["tests/e2e/**", "node_modules/**", ".next/**"],
     coverage: { reporter: ["text", "json", "html"] }
   },
   resolve: {
