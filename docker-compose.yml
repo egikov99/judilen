@@ -35,16 +35,17 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        APP_URL: ${APP_URL:-http://localhost:3000}
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        APP_URL: ${APP_URL:-https://judilen.digitaleasyup.com}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://judilen.digitaleasyup.com}
     restart: unless-stopped
     environment:
+    
       NODE_ENV: production
       DATABASE_URL: postgres://judilen:${POSTGRES_PASSWORD:-judilen}@db:5432/judilen
-      APP_URL: ${APP_URL:-http://localhost:3000}
+      APP_URL: ${APP_URL:-https://judilen.digitaleasyup.com}
       AUTH_SECRET: ${AUTH_SECRET:-}
       SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-604800}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://judilen.digitaleasyup.com}
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/apps/web/public/uploads}
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-10485760}
       ICAL_SYNC_CRON_SECRET: ${ICAL_SYNC_CRON_SECRET:-}
