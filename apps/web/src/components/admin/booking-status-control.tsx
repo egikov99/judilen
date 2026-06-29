@@ -4,11 +4,16 @@ import { useState } from "react";
 
 const labels = {
   new: "Новая заявка",
+  pending: "Ожидает обработки",
   awaiting_confirmation: "Ожидает подтверждения",
   confirmed: "Подтверждено",
   awaiting_payment: "Ожидает оплаты",
   paid: "Оплачено",
+  external: "Внешнее бронирование",
+  blocked: "Блокировка дат",
   cancelled: "Отменено",
+  declined: "Отклонено",
+  import_removed: "Удалено из импорта",
   completed: "Завершено"
 } as const;
 
@@ -27,4 +32,3 @@ export function BookingStatusControl({ id, status }: { id: string; status: keyof
   }
   return <select value={value} disabled={saving} onChange={(event) => change(event.target.value as keyof typeof labels)} aria-label="Статус бронирования">{Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select>;
 }
-

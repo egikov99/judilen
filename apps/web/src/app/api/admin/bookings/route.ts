@@ -16,6 +16,7 @@ const manualBookingSchema = z.object({
   checkOut: z.iso.date(),
   guests: z.coerce.number().int().min(1).max(30),
   totalAmount: z.coerce.number().nonnegative(),
+  status: z.enum(["confirmed", "blocked"]).default("confirmed"),
   managerComment: z.string().trim().max(5000).optional()
 }).refine((value) => value.checkOut > value.checkIn, { message: "Некорректный период" })
   .refine((value) => value.customerId || (value.firstName && value.email && value.phone), {
@@ -89,12 +90,13 @@ export async function POST(request: Request) {
         checkOut: parsed.data.checkOut,
         guests: parsed.data.guests,
         totalAmount: String(parsed.data.totalAmount),
-        status: "confirmed",
+        status: parsed.data.status,
+        source: "crm_manual",
         managerComment: parsed.data.managerComment
       }).returning();
       await tx.insert(bookingStatusHistory).values({
         bookingId: booking.id,
-        toStatus: "confirmed",
+        toStatus: parsed.data.status,
         changedBy: auth.session.userId,
         comment: "Создано вручную"
       });

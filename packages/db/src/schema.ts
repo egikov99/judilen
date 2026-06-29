@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   uuid
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -26,11 +27,16 @@ export const roleName = pgEnum("role_name", [
 ]);
 export const bookingStatus = pgEnum("booking_status", [
   "new",
+  "pending",
   "awaiting_confirmation",
   "confirmed",
   "awaiting_payment",
   "paid",
+  "external",
+  "blocked",
   "cancelled",
+  "declined",
+  "import_removed",
   "completed"
 ]);
 export const paymentStatus = pgEnum("payment_status", [
@@ -46,7 +52,9 @@ export const integrationKind = pgEnum("integration_kind", [
   "airbnb",
   "ostrovok",
   "expedia",
-  "google_travel"
+  "google_travel",
+  "tripadvisor",
+  "other"
 ]);
 export const servicePriceUnit = pgEnum("service_price_unit", [
   "hour",
@@ -214,6 +222,7 @@ export const bookings = pgTable(
     checkOut: date("check_out").notNull(),
     guests: integer("guests").notNull(),
     status: bookingStatus("status").notNull().default("new"),
+    source: text("source").notNull().default("site"),
     totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
     paidAmount: numeric("paid_amount", { precision: 12, scale: 2 }).notNull().default("0"),
     externalId: text("external_id"),
@@ -270,6 +279,8 @@ export const integrations = pgTable("integrations", {
   config: jsonb("config").$type<Record<string, unknown>>().notNull(),
   isEnabled: boolean("is_enabled").notNull().default(true),
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  importedCount: integer("imported_count").notNull().default(0),
+  errorCount: integer("error_count").notNull().default(0),
   ...timestamps
 });
 
@@ -281,6 +292,66 @@ export const integrationLogs = pgTable("integration_logs", {
   context: jsonb("context").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
+
+export const externalCalendars = pgTable(
+  "external_calendars",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    integrationId: uuid("integration_id").references(() => integrations.id, { onDelete: "set null" }),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }).notNull(),
+    provider: integrationKind("provider").notNull().default("ical"),
+    name: text("name").notNull(),
+    importUrl: text("import_url"),
+    exportToken: uuid("export_token").defaultRandom().notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    syncIntervalMinutes: integer("sync_interval_minutes").notNull().default(60),
+    lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+    lastSuccessAt: timestamp("last_success_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps
+  },
+  (table) => [uniqueIndex("external_calendars_export_token_unique").on(table.exportToken)]
+);
+
+export const bookingExternalRefs = pgTable(
+  "booking_external_refs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
+    provider: integrationKind("provider").notNull(),
+    externalId: text("external_id"),
+    externalUid: text("external_uid").notNull(),
+    externalCalendarId: uuid("external_calendar_id").references(() => externalCalendars.id, { onDelete: "cascade" }).notNull(),
+    rawPayload: jsonb("raw_payload_json").$type<Record<string, unknown>>(),
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }).defaultNow().notNull(),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("booking_external_refs_calendar_uid_unique").on(table.externalCalendarId, table.externalUid),
+    uniqueIndex("booking_external_refs_booking_unique").on(table.bookingId)
+  ]
+);
+
+export const calendarConflicts = pgTable(
+  "calendar_conflicts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }).notNull(),
+    externalCalendarId: uuid("external_calendar_id").references(() => externalCalendars.id, { onDelete: "cascade" }).notNull(),
+    source: text("source").notNull(),
+    externalUid: text("external_uid").notNull(),
+    startDate: date("start_date").notNull(),
+    endDate: date("end_date").notNull(),
+    summary: text("summary").notNull(),
+    rawPayload: jsonb("raw_payload_json").$type<Record<string, unknown>>(),
+    status: text("status").notNull().default("open"),
+    resolvedBy: uuid("resolved_by").references(() => users.id, { onDelete: "set null" }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    resolutionNote: text("resolution_note"),
+    ...timestamps
+  },
+  (table) => [uniqueIndex("calendar_conflicts_open_event_unique").on(table.externalCalendarId, table.externalUid).where(sql`${table.status} = 'open'`)]
+);
 
 export const settings = pgTable("settings", {
   key: text("key").primaryKey(),

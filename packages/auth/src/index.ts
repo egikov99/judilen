@@ -25,6 +25,17 @@ export type Permission =
   | "reports.read"
   | "users.manage"
   | "integrations.manage"
+  | "integrations.read"
+  | "integrations.create"
+  | "integrations.update"
+  | "integrations.delete"
+  | "external_calendars.read"
+  | "external_calendars.create"
+  | "external_calendars.update"
+  | "external_calendars.delete"
+  | "external_calendars.sync"
+  | "calendar_conflicts.read"
+  | "calendar_conflicts.update"
   | "settings.manage";
 
 export interface Session {
@@ -62,6 +73,17 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "reports.read",
     "users.manage",
     "integrations.manage",
+    "integrations.read",
+    "integrations.create",
+    "integrations.update",
+    "integrations.delete",
+    "external_calendars.read",
+    "external_calendars.create",
+    "external_calendars.update",
+    "external_calendars.delete",
+    "external_calendars.sync",
+    "calendar_conflicts.read",
+    "calendar_conflicts.update",
     "settings.manage"
   ],
   content_manager: [
@@ -133,7 +155,7 @@ export function adminNavigation(role: Role) {
     { href: "/admin/reviews", label: "Отзывы", permission: "reviews.read" },
     { href: "/admin/content", label: "Контент", permission: "content.write" },
     { href: "/admin/reports", label: "Отчеты", permission: "reports.read" },
-    { href: "/admin/integrations", label: "Интеграции", permission: "integrations.manage" },
+    { href: "/admin/integrations", label: "Интеграции", permission: "external_calendars.read" },
     { href: "/admin/users", label: "Пользователи", permission: "users.manage" }
   ] satisfies Array<{ href: string; label: string; permission: Permission }>;
   return items.filter((item) => can(role, item.permission));

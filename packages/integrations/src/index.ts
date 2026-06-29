@@ -4,6 +4,7 @@ export interface ExternalBooking {
   checkIn: string;
   checkOut: string;
   source: string;
+  rawPayload?: string;
 }
 
 export interface CalendarAdapter {
@@ -35,7 +36,7 @@ export class IcalAdapter implements CalendarAdapter {
 
   async importCalendar(payload: string): Promise<ExternalBooking[]> {
     const blocks = unfoldIcal(payload).match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g) ?? [];
-    return blocks.map((block) => {
+    const events = blocks.map((block) => {
       const fields = new Map<string, string>();
       for (const line of block.split(/\r?\n/).slice(1, -1)) {
         const separator = line.indexOf(":");
@@ -51,9 +52,11 @@ export class IcalAdapter implements CalendarAdapter {
         title: fields.get("SUMMARY") ?? "Внешнее бронирование",
         checkIn: parseIcalDate(start),
         checkOut: parseIcalDate(end),
-        source: "ical"
+        source: "ical",
+        rawPayload: block
       };
     });
+    return [...new Map(events.map((event) => [event.externalId, event])).values()];
   }
 
   async exportCalendar(bookings: ExternalBooking[]): Promise<string> {
@@ -82,6 +85,33 @@ export class IcalAdapter implements CalendarAdapter {
 
 export function rangesOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
   return aStart < bEnd && bStart < aEnd;
+}
+
+export interface ExistingExternalBooking {
+  externalId: string;
+  title: string;
+  checkIn: string;
+  checkOut: string;
+  status: string;
+}
+
+export function reconcileExternalEvents(existing: ExistingExternalBooking[], incoming: ExternalBooking[]) {
+  const existingById = new Map(existing.map((event) => [event.externalId, event]));
+  const incomingById = new Map(incoming.map((event) => [event.externalId, event]));
+  return {
+    create: incoming.filter((event) => !existingById.has(event.externalId)),
+    update: incoming.filter((event) => {
+      const current = existingById.get(event.externalId);
+      return current && (
+        current.title !== event.title ||
+        current.checkIn !== event.checkIn ||
+        current.checkOut !== event.checkOut ||
+        current.status === "import_removed" ||
+        current.status === "cancelled"
+      );
+    }),
+    remove: existing.filter((event) => !incomingById.has(event.externalId))
+  };
 }
 
 export interface CreatePaymentInput {

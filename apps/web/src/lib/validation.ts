@@ -82,11 +82,16 @@ export const houseImageSchema = z.object({
 
 export const bookingStatusSchema = z.enum([
   "new",
+  "pending",
   "awaiting_confirmation",
   "confirmed",
   "awaiting_payment",
   "paid",
+  "external",
+  "blocked",
   "cancelled",
+  "declined",
+  "import_removed",
   "completed"
 ]);
 

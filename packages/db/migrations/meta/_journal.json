@@ -15,6 +15,13 @@
       "when": 1782729600000,
       "tag": "0001_services_reviews_byn",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782777600000,
+      "tag": "0002_external_calendars",
+      "breakpoints": true
     }
   ]
 }

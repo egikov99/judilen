@@ -1,5 +1,5 @@
 import { writeAudit } from "@/lib/audit";
-import { syncIcalIntegration } from "@/lib/integration-sync";
+import { syncExternalCalendar } from "@/lib/integration-sync";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -9,11 +9,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const { id } = await params;
   try {
-    const result = await syncIcalIntegration(id);
-    await writeAudit({ session: auth.session, request, action: "integration.sync", entityType: "integration", entityId: id, after: result });
+    const result = await syncExternalCalendar(id);
+    await writeAudit({ session: auth.session, request, action: "external_calendar.sync", entityType: "external_calendar", entityId: id, after: result });
     return Response.json(result);
   } catch (error) {
-    console.error("integration_sync_failed", { id, error });
-    return problem(502, "Синхронизация не выполнена", error instanceof Error ? error.message : undefined);
+    return problem(502, "Не удалось синхронизировать календарь", error instanceof Error ? error.message : undefined);
   }
 }

@@ -217,6 +217,41 @@ img { display: block; max-width: 100%; }
 .calendar-head { background: #f3f4ed; text-align: center; color: var(--muted); }
 .calendar-house { background: white; font-weight: 700; }
 .calendar-booking { margin: 4px -7px; border-radius: 6px; background: var(--sage-200); color: var(--forest-900); font-weight: 700; }
+.calendar-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.source-badge[data-source="site"], .calendar-booking[data-source="site"] { background: #d7ead3; color: #174b1d; }
+.source-badge[data-source="crm_manual"], .calendar-booking[data-source="crm_manual"] { background: #d9e7f5; color: #19466d; }
+.source-badge[data-source="booking"], .calendar-booking[data-source="booking"] { background: #dce6ff; color: #173f8a; }
+.source-badge[data-source="airbnb"], .calendar-booking[data-source="airbnb"] { background: #ffe1e5; color: #8d2430; }
+.source-badge[data-source="ostrovok"], .calendar-booking[data-source="ostrovok"] { background: #e8ddff; color: #51318a; }
+.source-badge[data-source="expedia"], .calendar-booking[data-source="expedia"] { background: #fff0c7; color: #694d00; }
+.source-badge[data-source="google_travel"], .calendar-booking[data-source="google_travel"] { background: #d9f2ef; color: #175952; }
+.source-badge[data-source="tripadvisor"], .calendar-booking[data-source="tripadvisor"] { background: #d5eee1; color: #175938; }
+.source-badge[data-source="ical"], .calendar-booking[data-source="ical"] { background: #ececec; color: #3f3f3f; }
+.calendar-cell-conflict { position: relative; background: #fff1ee; }
+.calendar-conflict { position: absolute; top: 3px; right: 3px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #ba1a1a; color: white; font-weight: 800; }
+.conflict-badge { background: #ffd9d5; color: #93000a; }
+.integration-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.integration-card { display: grid; gap: 16px; padding: 22px; border: 1px solid #e1e6dc; border-radius: 8px; background: white; }
+.integration-card h2, .integration-card p { margin: 0; }
+.integration-card h2 { font: 700 21px var(--serif); }
+.integration-card p, .integration-card small { color: var(--muted); }
+.integration-card-head { display: flex; align-items: center; gap: 13px; }
+.provider-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: var(--forest-950); color: white; font-weight: 800; }
+.integration-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+.integration-stats div { padding: 9px; background: var(--sage-100); }
+.integration-stats dt { color: var(--muted); font-size: 10px; text-transform: uppercase; }
+.integration-stats dd { margin: 3px 0 0; font-weight: 750; }
+.calendar-connections { display: grid; gap: 14px; }
+.calendar-connection { display: grid; gap: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 8px; }
+.calendar-connection p { margin: 0; }
+.action-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.copy-field { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.error-text { color: #93000a; }
+.conflict-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px; border-left: 4px solid var(--terracotta); background: #fff7f3; }
+.conflict-row p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+.event-log { display: grid; }
+.event-log > div { display: grid; grid-template-columns: 80px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.event-log small { color: var(--muted); }
 
 @media (max-width: 950px) {
   .nav-links { display: none; }
@@ -227,6 +262,7 @@ img { display: block; max-width: 100%; }
   .split-image { min-height: 480px; }
   .booking-card { position: static; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
+  .integration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-layout { grid-template-columns: 80px 1fr; }
   .admin-sidebar { padding: 24px 10px; }
   .admin-sidebar .brand { font-size: 0; padding-inline: 5px; }
@@ -269,6 +305,11 @@ img { display: block; max-width: 100%; }
   .admin-topbar { padding: 0 16px; }
   .admin-content { padding: 22px 15px; }
   .stat-grid { grid-template-columns: 1fr; }
+  .integration-grid { grid-template-columns: 1fr; }
+  .copy-field { grid-template-columns: 1fr; }
+  .conflict-row { align-items: stretch; flex-direction: column; }
+  .event-log > div { grid-template-columns: 70px 1fr; }
+  .event-log small { grid-column: 1 / -1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

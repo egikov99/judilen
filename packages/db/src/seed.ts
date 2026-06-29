@@ -26,6 +26,17 @@ const permissionRows = [
   ["reports.read", "Просмотр отчетов"],
   ["users.manage", "Управление пользователями"],
   ["integrations.manage", "Управление интеграциями"],
+  ["integrations.read", "Просмотр интеграций"],
+  ["integrations.create", "Создание интеграций"],
+  ["integrations.update", "Изменение интеграций"],
+  ["integrations.delete", "Удаление интеграций"],
+  ["external_calendars.read", "Просмотр внешних календарей"],
+  ["external_calendars.create", "Создание внешних календарей"],
+  ["external_calendars.update", "Изменение внешних календарей"],
+  ["external_calendars.delete", "Удаление внешних календарей"],
+  ["external_calendars.sync", "Синхронизация внешних календарей"],
+  ["calendar_conflicts.read", "Просмотр конфликтов календаря"],
+  ["calendar_conflicts.update", "Разрешение конфликтов календаря"],
   ["settings.manage", "Системные настройки"]
 ] as const;
 
