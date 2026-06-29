@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
-import { db, houseImages, houses, permissions, rolePermissions, roles, users, sqlClient } from "./index";
+import { db, houseImages, houses, permissions, reviews, rolePermissions, roles, serviceHouses, serviceOptions, services, users, sqlClient } from "./index";
 
 const permissionRows = [
   ["dashboard.read", "Просмотр панели"],
@@ -10,6 +10,18 @@ const permissionRows = [
   ["customers.write", "Изменение клиентов"],
   ["houses.read", "Просмотр домиков"],
   ["houses.write", "Изменение домиков"],
+  ["services.read", "Просмотр услуг"],
+  ["services.create", "Создание услуг"],
+  ["services.update", "Изменение услуг"],
+  ["services.delete", "Удаление услуг"],
+  ["reviews.read", "Просмотр отзывов"],
+  ["reviews.create", "Создание отзывов"],
+  ["reviews.update", "Изменение отзывов"],
+  ["reviews.delete", "Удаление отзывов"],
+  ["house_images.read", "Просмотр фотографий домиков"],
+  ["house_images.create", "Загрузка фотографий домиков"],
+  ["house_images.update", "Изменение фотографий домиков"],
+  ["house_images.delete", "Удаление фотографий домиков"],
   ["content.write", "Изменение контента и SEO"],
   ["reports.read", "Просмотр отчетов"],
   ["users.manage", "Управление пользователями"],
@@ -27,7 +39,7 @@ const roleLabels = {
 const grants: Record<keyof typeof roleLabels, string[]> = {
   client: [],
   admin: permissionRows.map(([key]) => key),
-  content_manager: ["dashboard.read", "houses.read", "houses.write", "content.write"],
+  content_manager: ["dashboard.read", "houses.read", "houses.write", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "services.read", "services.create", "services.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
   manager: ["dashboard.read", "bookings.read", "bookings.write", "customers.read", "customers.write"]
 };
 
@@ -81,7 +93,7 @@ await db.insert(houses).values([
     guests: 4,
     rooms: 2,
     amenities: ["Сауна", "Камин", "Wi‑Fi", "Кухня", "Терраса"],
-    basePrice: "14500",
+    basePrice: "520",
     rules: "Заезд после 15:00, выезд до 12:00. Курение запрещено.",
     seoTitle: "Домик Люкс «Кедр» — аренда в усадьбе Юдилен",
     seoDescription: "Снять премиальный домик «Кедр» с сауной и панорамными окнами.",
@@ -96,7 +108,7 @@ await db.insert(houses).values([
     guests: 6,
     rooms: 3,
     amenities: ["Мангал", "Wi‑Fi", "Кухня", "Детская кроватка"],
-    basePrice: "12000",
+    basePrice: "430",
     rules: "Заезд после 15:00, выезд до 12:00.",
     seoTitle: "Дом «Сосна» — семейный отдых в усадьбе Юдилен",
     seoDescription: "Семейный дом на 6 гостей рядом с лесом и озером.",
@@ -111,7 +123,7 @@ await db.insert(houses).values([
     guests: 2,
     rooms: 1,
     amenities: ["Терраса", "Wi‑Fi", "Мини-кухня", "Вид на лес"],
-    basePrice: "8900",
+    basePrice: "320",
     rules: "Заезд после 15:00, выезд до 12:00.",
     seoTitle: "Студия «Берёза» — отдых для двоих",
     seoDescription: "Камерный дом для двоих с террасой и видом на лес.",
@@ -120,13 +132,38 @@ await db.insert(houses).values([
 ]).onConflictDoNothing();
 
 await db.insert(houseImages).values([
-  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", url: "/images/stitch/asset-021.png", alt: "Люкс «Кедр» в хвойном лесу", position: 0 },
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", url: "/images/stitch/asset-021.png", alt: "Люкс «Кедр» в хвойном лесу", position: 0, isMain: true },
   { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", url: "/images/stitch/asset-028.png", alt: "Интерьер дома «Кедр»", position: 1 },
   { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", url: "/images/stitch/asset-023.png", alt: "Гостиная дома «Кедр»", position: 2 },
-  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", url: "/images/stitch/asset-008.png", alt: "Дом «Сосна»", position: 0 },
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", url: "/images/stitch/asset-008.png", alt: "Дом «Сосна»", position: 0, isMain: true },
   { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", url: "/images/stitch/asset-017.png", alt: "Интерьер дома «Сосна»", position: 1 },
-  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12303", url: "/images/stitch/asset-014.png", alt: "Студия «Берёза»", position: 0 },
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12303", url: "/images/stitch/asset-014.png", alt: "Студия «Берёза»", position: 0, isMain: true },
   { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12303", url: "/images/stitch/asset-015.png", alt: "Интерьер студии «Берёза»", position: 1 }
+]).onConflictDoNothing();
+
+await db.insert(services).values([
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "Аренда лодки", slug: "arenda-lodki", description: "Лодки для прогулок и рыбалки на озере.", imageUrl: "/images/stitch/asset-044.png", basePrice: "50", priceUnit: "hour", isActive: true, sortOrder: 10 },
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "Баня", slug: "banya", description: "Подготовленная баня с травяным чаем и зоной отдыха.", imageUrl: "/images/stitch/asset-020.png", basePrice: "80", priceUnit: "hour", isActive: true, sortOrder: 20 },
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Дополнительное место", slug: "dopolnitelnoe-mesto", description: "Спальное место для гостя сверх базового размещения.", imageUrl: "/images/stitch/asset-038.png", basePrice: "45", priceUnit: "person", isActive: true, sortOrder: 30 }
+]).onConflictDoNothing();
+
+await db.insert(serviceHouses).values([
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301" },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302" }
+]).onConflictDoNothing();
+
+await db.insert(serviceOptions).values([
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "Без мотора", description: "Весельная лодка", price: "50", isDefault: true, sortOrder: 10 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "С маленьким мотором", description: "Для спокойной прогулки", price: "100", sortOrder: 20 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "С большим мотором", description: "Для дальних маршрутов", price: "150", sortOrder: 30 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "2 часа", price: "80", isDefault: true, sortOrder: 10 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "4 часа", price: "150", sortOrder: 20 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Стандарт", price: "45", isDefault: true, sortOrder: 10 }
+]).onConflictDoNothing();
+
+await db.insert(reviews).values([
+  { customerName: "Анна", customerEmail: "anna@example.test", rating: 5, text: "Редкий случай, когда место вживую еще красивее. В Кедре очень тихо, а сауна после прогулки - отдельное удовольствие.", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", isPublished: true, source: "manual" },
+  { customerName: "Михаил", customerEmail: "mikhail@example.test", rating: 5, text: "Все организовано точно и без лишней суеты. Дом теплый, чистый, кухня действительно удобная.", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", isPublished: true, source: "manual" }
 ]).onConflictDoNothing();
 
 await sqlClient.end();

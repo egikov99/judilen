@@ -24,7 +24,7 @@ describe("payment provider safety", () => {
     await expect(getPaymentProvider("mock").createPayment({
       idempotenceKey: "key",
       amount: "100.00",
-      currency: "RUB",
+      currency: "BYN",
       description: "test",
       returnUrl: "https://example.com/return"
     })).rejects.toThrow("disabled in production");

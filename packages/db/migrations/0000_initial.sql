@@ -154,7 +154,7 @@ CREATE TABLE "payments" (
   "provider_payment_id" text,
   "status" payment_status NOT NULL DEFAULT 'pending',
   "amount" numeric(12,2) NOT NULL,
-  "currency" text NOT NULL DEFAULT 'RUB',
+  "currency" text NOT NULL DEFAULT 'BYN',
   "payload" jsonb,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now()

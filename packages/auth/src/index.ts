@@ -9,6 +9,18 @@ export type Permission =
   | "customers.write"
   | "houses.read"
   | "houses.write"
+  | "services.read"
+  | "services.create"
+  | "services.update"
+  | "services.delete"
+  | "reviews.read"
+  | "reviews.create"
+  | "reviews.update"
+  | "reviews.delete"
+  | "house_images.read"
+  | "house_images.create"
+  | "house_images.update"
+  | "house_images.delete"
   | "content.write"
   | "reports.read"
   | "users.manage"
@@ -34,13 +46,40 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "customers.write",
     "houses.read",
     "houses.write",
+    "services.read",
+    "services.create",
+    "services.update",
+    "services.delete",
+    "reviews.read",
+    "reviews.create",
+    "reviews.update",
+    "reviews.delete",
+    "house_images.read",
+    "house_images.create",
+    "house_images.update",
+    "house_images.delete",
     "content.write",
     "reports.read",
     "users.manage",
     "integrations.manage",
     "settings.manage"
   ],
-  content_manager: ["dashboard.read", "houses.read", "houses.write", "content.write"],
+  content_manager: [
+    "dashboard.read",
+    "houses.read",
+    "houses.write",
+    "house_images.read",
+    "house_images.create",
+    "house_images.update",
+    "house_images.delete",
+    "services.read",
+    "services.create",
+    "services.update",
+    "reviews.read",
+    "reviews.create",
+    "reviews.update",
+    "content.write"
+  ],
   manager: ["dashboard.read", "bookings.read", "bookings.write", "customers.read", "customers.write"]
 };
 
@@ -90,6 +129,8 @@ export function adminNavigation(role: Role) {
     { href: "/admin/calendar", label: "Шахматка", permission: "bookings.read" },
     { href: "/admin/customers", label: "Клиенты", permission: "customers.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
+    { href: "/admin/services", label: "Услуги", permission: "services.read" },
+    { href: "/admin/reviews", label: "Отзывы", permission: "reviews.read" },
     { href: "/admin/content", label: "Контент", permission: "content.write" },
     { href: "/admin/reports", label: "Отчеты", permission: "reports.read" },
     { href: "/admin/integrations", label: "Интеграции", permission: "integrations.manage" },

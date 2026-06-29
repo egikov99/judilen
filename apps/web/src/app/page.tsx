@@ -3,22 +3,22 @@ import Link from "next/link";
 import { BookingSearch } from "@/components/booking-search";
 import { HouseCard } from "@/components/house-card";
 import { PublicShell } from "@/components/public-shell";
-import { reviews } from "@/lib/catalog";
 import { getPublishedHouses } from "@/lib/houses";
+import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const houses = await getPublishedHouses();
+  const [houses, reviews, reviewStats] = await Promise.all([getPublishedHouses(), getPublishedReviews(), getPublishedReviewStats()]);
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
     name: "Усадьба «Юдилен»",
     url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
     image: "/images/stitch/asset-025.png",
-    telephone: "+7 800 555-35-35",
-    priceRange: "₽₽₽",
-    aggregateRating: { "@type": "AggregateRating", ratingValue: "5", reviewCount: "128" }
+    telephone: "+375 29 555-35-35",
+    priceRange: "BYN",
+    ...(reviewStats.count ? { aggregateRating: { "@type": "AggregateRating", ratingValue: String(reviewStats.average), reviewCount: String(reviewStats.count) } } : {})
   };
   return (
     <PublicShell>
@@ -62,7 +62,7 @@ export default async function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-heading"><div><span className="eyebrow">Отзывы гостей</span><h2>Сюда хочется вернуться</h2></div><Link className="text-link" href="/otzyvy">Все отзывы →</Link></div>
-          <div className="review-grid">{reviews.map((review) => <article className="review-card" key={review.name}><div className="stars">★★★★★</div><blockquote>«{review.text}»</blockquote><div className="review-byline"><strong>{review.name}</strong><br />{review.date}</div></article>)}</div>
+          {reviews.length ? <div className="review-grid">{reviews.slice(0, 3).map((review) => <article className="review-card" key={review.id}><div className="stars">{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</div><blockquote>«{review.text}»</blockquote><div className="review-byline"><strong>{review.customerName}</strong><br />{review.houseName ?? review.source}</div></article>)}</div> : <p className="notice">Опубликованных отзывов пока нет.</p>}
         </div>
       </section>
 

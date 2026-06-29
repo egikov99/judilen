@@ -4,9 +4,12 @@ import { adminNavigation, can, createSessionToken, verifySessionToken } from "@j
 describe("RBAC", () => {
   it("does not expose finance and integration sections to a content manager", () => {
     expect(can("content_manager", "houses.write")).toBe(true);
+    expect(can("content_manager", "services.update")).toBe(true);
+    expect(can("content_manager", "reviews.update")).toBe(true);
+    expect(can("content_manager", "users.manage")).toBe(false);
     expect(can("content_manager", "reports.read")).toBe(false);
     expect(can("content_manager", "integrations.manage")).toBe(false);
-    expect(adminNavigation("content_manager").map((item) => item.href)).toEqual(["/admin", "/admin/houses", "/admin/content"]);
+    expect(adminNavigation("content_manager").map((item) => item.href)).toEqual(["/admin", "/admin/houses", "/admin/services", "/admin/reviews", "/admin/content"]);
   });
 
   it("round-trips a signed session", async () => {

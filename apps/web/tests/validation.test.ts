@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { formatCurrency } from "@/lib/catalog";
 import { bookingSchema } from "@/lib/validation";
 
 const validBooking = {
@@ -23,5 +24,18 @@ describe("booking validation", () => {
   it("requires consent", () => {
     expect(bookingSchema.safeParse({ ...validBooking, consent: false }).success).toBe(false);
   });
+  it("accepts selected services with options and quantity", () => {
+    const parsed = bookingSchema.safeParse({
+      ...validBooking,
+      services: [{
+        serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001",
+        serviceOptionId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f2001",
+        quantity: 2
+      }]
+    });
+    expect(parsed.success).toBe(true);
+  });
+  it("formats currency as BYN", () => {
+    expect(formatCurrency(100)).toBe("100 BYN");
+  });
 });
-

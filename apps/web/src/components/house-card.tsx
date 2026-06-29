@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { House } from "@/lib/catalog";
-import { formatPrice } from "@/lib/catalog";
+import { formatCurrency } from "@/lib/catalog";
 
 export function HouseCard({ house }: { house: House }) {
   return (
@@ -14,7 +14,7 @@ export function HouseCard({ house }: { house: House }) {
         <h3>{house.name}</h3>
         <p>{house.description}</p>
         <div className="house-meta"><span>До {house.guests} гостей</span><span>{house.rooms} комнаты</span></div>
-        <div className="house-footer"><span className="price"><strong>{formatPrice(house.price)} ₽</strong> / ночь</span><Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
+        <div className="house-footer"><span className="price"><strong>{formatCurrency(house.price)}</strong> / ночь</span><Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
       </div>
     </article>
   );

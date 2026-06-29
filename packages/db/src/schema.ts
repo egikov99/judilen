@@ -5,6 +5,7 @@ import {
   jsonb,
   numeric,
   pgEnum,
+  primaryKey,
   pgTable,
   text,
   timestamp,
@@ -46,6 +47,20 @@ export const integrationKind = pgEnum("integration_kind", [
   "ostrovok",
   "expedia",
   "google_travel"
+]);
+export const servicePriceUnit = pgEnum("service_price_unit", [
+  "hour",
+  "day",
+  "booking",
+  "person",
+  "item"
+]);
+export const reviewSource = pgEnum("review_source", [
+  "manual",
+  "site",
+  "google",
+  "booking",
+  "airbnb"
 ]);
 
 export const roles = pgTable("roles", {
@@ -131,11 +146,52 @@ export const houseImages = pgTable(
     houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }).notNull(),
     url: text("url").notNull(),
     alt: text("alt").notNull(),
+    caption: text("caption"),
     position: integer("position").notNull().default(0),
+    isMain: boolean("is_main").notNull().default(false),
+    isActive: boolean("is_active").notNull().default(true),
     ...timestamps
   },
   (table) => [uniqueIndex("house_images_position_unique").on(table.houseId, table.position)]
 );
+
+export const services = pgTable(
+  "services",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    description: text("description").notNull(),
+    imageUrl: text("image_url"),
+    basePrice: numeric("base_price", { precision: 12, scale: 2 }).notNull().default("0"),
+    priceUnit: servicePriceUnit("price_unit").notNull().default("booking"),
+    isActive: boolean("is_active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [uniqueIndex("services_slug_unique").on(table.slug)]
+);
+
+export const serviceHouses = pgTable(
+  "service_houses",
+  {
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }).notNull()
+  },
+  (table) => [primaryKey({ columns: [table.serviceId, table.houseId] })]
+);
+
+export const serviceOptions = pgTable("service_options", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+  isDefault: boolean("is_default").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  ...timestamps
+});
 
 export const housePrices = pgTable("house_prices", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -186,7 +242,7 @@ export const payments = pgTable("payments", {
   providerPaymentId: text("provider_payment_id"),
   status: paymentStatus("status").notNull().default("pending"),
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-  currency: text("currency").notNull().default("RUB"),
+  currency: text("currency").notNull().default("BYN"),
   payload: jsonb("payload").$type<Record<string, unknown>>(),
   ...timestamps
 });
@@ -248,12 +304,25 @@ export const auditLogs = pgTable("audit_logs", {
 
 export const reviews = pgTable("reviews", {
   id: uuid("id").defaultRandom().primaryKey(),
-  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull().unique(),
-  customerId: uuid("customer_id").references(() => customers.id, { onDelete: "cascade" }).notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email"),
   rating: integer("rating").notNull(),
   text: text("text").notNull(),
-  status: text("status").notNull().default("pending"),
-  publishedAt: timestamp("published_at", { withTimezone: true }),
+  houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
+  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+  isPublished: boolean("is_published").notNull().default(false),
+  source: reviewSource("source").notNull().default("site"),
+  ...timestamps
+});
+
+export const bookingServices = pgTable("booking_services", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
+  serviceId: uuid("service_id").references(() => services.id, { onDelete: "restrict" }).notNull(),
+  serviceOptionId: uuid("service_option_id").references(() => serviceOptions.id, { onDelete: "restrict" }),
+  quantity: integer("quantity").notNull().default(1),
+  unitPrice: numeric("unit_price", { precision: 12, scale: 2 }).notNull(),
+  totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
   ...timestamps
 });
 

@@ -19,14 +19,16 @@ function imageType(bytes: Uint8Array) {
 }
 
 export async function POST(request: Request) {
-  const auth = await requirePermission("houses.write");
+  const auth = await requirePermission("house_images.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const form = await request.formData();
   const file = form.get("file");
   const houseId = String(form.get("houseId") ?? "");
   const alt = String(form.get("alt") ?? "").trim();
+  const caption = String(form.get("caption") ?? "").trim();
   const position = Number(form.get("position") ?? 0);
+  const isMain = form.get("isMain") === "true" || form.get("isMain") === "on";
   if (!(file instanceof File) || !houseId || alt.length < 3 || !Number.isInteger(position)) {
     return problem(422, "Требуются file, houseId, alt и целочисленный position");
   }
@@ -43,7 +45,11 @@ export async function POST(request: Request) {
   const filename = `${crypto.randomUUID()}.${detected.ext}`;
   await writeFile(join(directory, filename), bytes, { flag: "wx", mode: 0o640 });
   const url = `/uploads/houses/${houseId}/${filename}`;
-  const [image] = await db.insert(houseImages).values({ houseId, url, alt, position }).returning();
+  const [image] = await db.transaction(async (tx) => {
+    if (isMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
+    const [created] = await tx.insert(houseImages).values({ houseId, url, alt, caption: caption || null, position, isMain }).returning();
+    return [created];
+  });
   await writeAudit({ session: auth.session, request, action: "house.image.upload", entityType: "house_image", entityId: image.id, after: image });
   return Response.json({ item: image }, { status: 201 });
 }

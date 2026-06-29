@@ -30,13 +30,13 @@ export async function POST(request: Request) {
     bookingId: booking.id,
     provider: provider.name,
     amount: String(amount),
-    currency: "RUB"
+    currency: "BYN"
   }).returning();
   try {
     const created = await provider.createPayment({
       idempotenceKey: payment.id,
       amount: amount.toFixed(2),
-      currency: "RUB",
+      currency: "BYN",
       description: `Бронирование ${booking.publicNumber}`,
       returnUrl: `${base}/oplata/${booking.id}/uspeh`
     });

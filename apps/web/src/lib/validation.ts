@@ -14,7 +14,12 @@ export const bookingSchema = z.object({
   lastName: z.string().trim().max(80).default(""),
   email: z.email().max(254).transform((value) => value.toLowerCase().trim()),
   phone: z.string().trim().min(7).max(30),
-  consent: z.literal(true)
+  consent: z.literal(true),
+  services: z.array(z.object({
+    serviceId: z.uuid(),
+    serviceOptionId: z.uuid().nullable().optional(),
+    quantity: z.coerce.number().int().min(1).max(100)
+  })).max(50).default([])
 }).refine((value) => value.checkOut > value.checkIn, {
   message: "Дата выезда должна быть позже даты заезда",
   path: ["checkOut"]
@@ -32,6 +37,47 @@ export const houseSchema = z.object({
   seoTitle: z.string().trim().min(10).max(70),
   seoDescription: z.string().trim().min(30).max(180),
   isPublished: z.boolean()
+});
+
+export const serviceSchema = z.object({
+  title: z.string().trim().min(2).max(140),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120),
+  description: z.string().trim().min(5).max(5000),
+  imageUrl: z.string().trim().max(1000).nullable().optional(),
+  basePrice: z.coerce.number().nonnegative().max(10_000_000),
+  priceUnit: z.enum(["hour", "day", "booking", "person", "item"]),
+  isActive: z.boolean(),
+  sortOrder: z.coerce.number().int().min(0).max(100_000),
+  houseIds: z.array(z.uuid()).max(100).default([])
+});
+
+export const serviceOptionSchema = z.object({
+  title: z.string().trim().min(1).max(140),
+  description: z.string().trim().max(2000).nullable().optional(),
+  price: z.coerce.number().nonnegative().max(10_000_000),
+  isDefault: z.boolean(),
+  isActive: z.boolean(),
+  sortOrder: z.coerce.number().int().min(0).max(100_000)
+});
+
+export const adminReviewSchema = z.object({
+  customerName: z.string().trim().min(2).max(120),
+  customerEmail: z.email().max(254).nullable().optional(),
+  rating: z.coerce.number().int().min(1).max(5),
+  text: z.string().trim().min(5).max(5000),
+  houseId: z.uuid().nullable().optional(),
+  bookingId: z.uuid().nullable().optional(),
+  isPublished: z.boolean(),
+  source: z.enum(["manual", "site", "google", "booking", "airbnb"])
+});
+
+export const houseImageSchema = z.object({
+  url: z.string().trim().min(1).max(1000).optional(),
+  alt: z.string().trim().min(2).max(250).optional(),
+  caption: z.string().trim().max(500).nullable().optional(),
+  position: z.coerce.number().int().min(0).max(100_000).optional(),
+  isMain: z.boolean().optional(),
+  isActive: z.boolean().optional()
 });
 
 export const bookingStatusSchema = z.enum([

@@ -1,6 +1,19 @@
+import { bookings, db } from "@judilen/db";
+import { count, eq, sql, sum } from "drizzle-orm";
+import { formatCurrency } from "@/lib/catalog";
 import { requirePagePermission } from "@/lib/session";
 
 export default async function ReportsPage() {
   await requirePagePermission("reports.read");
-  return <main className="admin-content"><h1 className="admin-title">Отчеты</h1><p className="admin-subtitle">Период: 1–30 июня 2026 · данные обновлены 5 минут назад.</p><div className="stat-grid"><div className="stat-card"><div className="stat-label">Выручка</div><div className="stat-value">1 284 500 ₽</div><span className="badge">+12,4%</span></div><div className="stat-card"><div className="stat-label">Занятость</div><div className="stat-value">76,8%</div><span className="badge">+5,1%</span></div><div className="stat-card"><div className="stat-label">Средний чек</div><div className="stat-value">31 320 ₽</div><span className="badge">+2,8%</span></div><div className="stat-card"><div className="stat-label">Отмены</div><div className="stat-value">3,2%</div><span className="badge">−1,4%</span></div></div><div style={{ display: "grid", gridTemplateColumns: "1.4fr .8fr", gap: 20 }}><section className="panel"><h2>Динамика выручки</h2><div style={{ height: 260, display: "flex", alignItems: "end", gap: 14, borderBottom: "1px solid var(--line)", padding: 20 }}>{[42,55,48,70,64,79,86,74,91,96,82,100].map((height,index) => <div key={index} title={`${height}%`} style={{ flex: 1, height: `${height}%`, background: index === 11 ? "var(--terracotta)" : "var(--forest-700)", borderRadius: "6px 6px 0 0" }} />)}</div></section><section className="panel"><h2>Каналы</h2>{[["Прямые", "61%"],["iCal", "22%"],["Booking", "11%"],["Прочие", "6%"]].map(([label,value]) => <div className="summary-row" key={label}><span>{label}</span><strong>{value}</strong></div>)}</section></div></main>;
+  const [revenueRows, bookingRows, cancellationRows, avgRows, channelRows] = await Promise.all([
+    db.select({ value: sum(bookings.paidAmount) }).from(bookings),
+    db.select({ value: count() }).from(bookings),
+    db.select({ value: count() }).from(bookings).where(eq(bookings.status, "cancelled")),
+    db.select({ value: sql<string>`coalesce(avg(${bookings.totalAmount}), 0)` }).from(bookings),
+    db.select({ source: bookings.externalSource, value: count() }).from(bookings).groupBy(bookings.externalSource)
+  ]);
+  const totalBookings = bookingRows[0]?.value ?? 0;
+  const cancellations = cancellationRows[0]?.value ?? 0;
+  const cancellationRate = totalBookings ? Math.round((cancellations / totalBookings) * 1000) / 10 : 0;
+  return <main className="admin-content"><h1 className="admin-title">Отчеты</h1><p className="admin-subtitle">Агрегаты по реальным бронированиям из базы данных.</p><div className="stat-grid"><div className="stat-card"><div className="stat-label">Оплачено</div><div className="stat-value">{formatCurrency(Number(revenueRows[0]?.value ?? 0))}</div><span className="badge">по платежам</span></div><div className="stat-card"><div className="stat-label">Бронирований</div><div className="stat-value">{totalBookings}</div><span className="badge">всего</span></div><div className="stat-card"><div className="stat-label">Средний чек</div><div className="stat-value">{formatCurrency(Number(avgRows[0]?.value ?? 0))}</div><span className="badge">по заявкам</span></div><div className="stat-card"><div className="stat-label">Отмены</div><div className="stat-value">{cancellationRate}%</div><span className="badge">{cancellations} отмен</span></div></div><section className="panel"><h2>Каналы</h2>{channelRows.length ? channelRows.map((row) => <div className="summary-row" key={row.source ?? "direct"}><span>{row.source ?? "Прямые"}</span><strong>{row.value}</strong></div>) : <p className="notice">Данных по каналам пока нет.</p>}</section></main>;
 }

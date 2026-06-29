@@ -1,6 +1,7 @@
-import { db, houses } from "@judilen/db";
-import { eq } from "drizzle-orm";
+import { db, houseImages, houses } from "@judilen/db";
+import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { HouseImagesManager } from "@/components/admin/house-images-manager";
 import { HouseEditor } from "@/components/admin/house-editor";
 import { requirePagePermission } from "@/lib/session";
 
@@ -9,5 +10,6 @@ export default async function EditHousePage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const [house] = await db.select().from(houses).where(eq(houses.id, id)).limit(1);
   if (!house) notFound();
-  return <main className="admin-content"><h1 className="admin-title">Редактирование</h1><p className="admin-subtitle">{house.name}</p><HouseEditor value={{ ...house, basePrice: String(house.basePrice) }} /></main>;
+  const images = await db.select().from(houseImages).where(eq(houseImages.houseId, id)).orderBy(asc(houseImages.position));
+  return <main className="admin-content"><h1 className="admin-title">Редактирование</h1><p className="admin-subtitle">{house.name}</p><HouseEditor value={{ ...house, basePrice: String(house.basePrice) }} /><HouseImagesManager houseId={id} images={images} /></main>;
 }

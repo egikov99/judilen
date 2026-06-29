@@ -1,6 +1,7 @@
-import { bookingStatusHistory, bookings, customers, db } from "@judilen/db";
+import { bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
 import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
+import { getActiveServicesByIds } from "@/lib/services";
 
 function bookingNumber() {
   const date = new Date().toISOString().slice(2, 10).replaceAll("-", "");
@@ -15,6 +16,28 @@ export async function POST(request: Request) {
   if (!house) return problem(404, "Домик не найден");
   if (parsed.data.guests > house.guests) return problem(422, "Количество гостей превышает вместимость домика");
   const nights = Math.ceil((Date.parse(parsed.data.checkOut) - Date.parse(parsed.data.checkIn)) / 86_400_000);
+  const activeServices = await getActiveServicesByIds([...new Set(parsed.data.services.map((item) => item.serviceId))], house.id);
+  let invalidService = false;
+  const serviceLines = parsed.data.services.map((line) => {
+    const service = activeServices.find((item) => item.id === line.serviceId);
+    if (!service) {
+      invalidService = true;
+      return null;
+    }
+    const option = line.serviceOptionId
+      ? service.options.find((item) => item.id === line.serviceOptionId)
+      : service.options.find((item) => item.isDefault) ?? service.options[0];
+    const unitPrice = option ? option.price : service.basePrice;
+    return {
+      serviceId: service.id,
+      serviceOptionId: option?.id ?? null,
+      quantity: line.quantity,
+      unitPrice,
+      totalPrice: unitPrice * line.quantity
+    };
+  }).filter((line) => line !== null);
+  if (invalidService) return problem(422, "Выбранная услуга недоступна для этого домика");
+  const servicesTotal = serviceLines.reduce((sum, line) => sum + line.totalPrice, 0);
   const publicNumber = bookingNumber();
   try {
     await db.transaction(async (tx) => {
@@ -40,8 +63,18 @@ export async function POST(request: Request) {
         checkOut: parsed.data.checkOut,
         guests: parsed.data.guests,
         status: "awaiting_confirmation",
-        totalAmount: String(nights * house.price)
+        totalAmount: String(nights * house.price + servicesTotal)
       }).returning({ id: bookings.id });
+      if (serviceLines.length) {
+        await tx.insert(bookingServices).values(serviceLines.map((line) => ({
+          bookingId: booking.id,
+          serviceId: line.serviceId,
+          serviceOptionId: line.serviceOptionId,
+          quantity: line.quantity,
+          unitPrice: String(line.unitPrice),
+          totalPrice: String(line.totalPrice)
+        })));
+      }
       await tx.insert(bookingStatusHistory).values({
         bookingId: booking.id,
         toStatus: "awaiting_confirmation",

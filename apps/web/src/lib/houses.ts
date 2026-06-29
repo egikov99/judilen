@@ -1,5 +1,5 @@
 import { db, houseImages, houses as houseTable } from "@judilen/db";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { houses as fallbackHouses, type House } from "./catalog";
 
@@ -18,9 +18,9 @@ async function loadPublishedHouses(): Promise<House[]> {
     const rows = await db
       .select({ house: houseTable, image: houseImages })
       .from(houseTable)
-      .leftJoin(houseImages, eq(houseTable.id, houseImages.houseId))
+      .leftJoin(houseImages, and(eq(houseTable.id, houseImages.houseId), eq(houseImages.isActive, true)))
       .where(eq(houseTable.isPublished, true))
-      .orderBy(asc(houseTable.name), asc(houseImages.position));
+      .orderBy(asc(houseTable.name), desc(houseImages.isMain), asc(houseImages.position));
     const mapped = new Map<string, House>();
     for (const { house, image } of rows) {
       const current = mapped.get(house.id) ?? {
@@ -60,4 +60,3 @@ export const getPublishedHouses = unstable_cache(loadPublishedHouses, ["publishe
 export async function getHouseBySlug(slug: string) {
   return (await getPublishedHouses()).find((house) => house.slug === slug);
 }
-
