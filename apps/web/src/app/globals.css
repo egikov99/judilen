@@ -161,6 +161,19 @@ img { display: block; max-width: 100%; }
 .service-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 .service-card > div { padding: 23px; }
 .service-card h2 { font: 700 26px var(--serif); }
+.services-heading { align-items: end; }
+.home-service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.home-service-card {
+  min-width: 0; overflow: hidden; border-radius: 8px;
+  background: #f9faf2; color: var(--ink);
+}
+.home-service-image { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.home-service-copy { padding: 24px; }
+.home-service-price { color: var(--terracotta); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.home-service-card h3 { margin: 8px 0 10px; font: 700 27px/1.2 var(--serif); }
+.home-service-card p { margin: 0; color: var(--muted); }
+.services-action { margin-top: 32px; text-align: center; }
+.dark-notice { color: rgba(255,255,255,.72); }
 
 .contact-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 40px; }
 .contact-card, .form-card { padding: 32px; background: white; border-radius: 18px; box-shadow: var(--shadow); }
@@ -209,7 +222,7 @@ img { display: block; max-width: 100%; }
   .nav-links { display: none; }
   .mobile-nav { display: inline-flex; }
   .booking-form { grid-template-columns: 1fr 1fr; }
-  .house-grid, .review-grid, .service-grid { grid-template-columns: repeat(2, 1fr); }
+  .house-grid, .review-grid, .service-grid, .home-service-grid { grid-template-columns: repeat(2, 1fr); }
   .split, .detail-layout, .contact-grid { grid-template-columns: 1fr; }
   .split-image { min-height: 480px; }
   .booking-card { position: static; }
@@ -236,7 +249,7 @@ img { display: block; max-width: 100%; }
   .section { padding: 74px 0; }
   .section-heading { display: block; }
   .section-heading p { margin-top: 18px; }
-  .house-grid, .review-grid, .service-grid { grid-template-columns: 1fr; }
+  .house-grid, .review-grid, .service-grid, .home-service-grid { grid-template-columns: 1fr; }
   .split-image { min-height: 390px; }
   .cta { padding: 46px 22px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }

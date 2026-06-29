@@ -3,13 +3,20 @@ import Link from "next/link";
 import { BookingSearch } from "@/components/booking-search";
 import { HouseCard } from "@/components/house-card";
 import { PublicShell } from "@/components/public-shell";
+import { formatCurrency } from "@/lib/catalog";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
+import { getPublicServices, priceUnitLabels } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [houses, reviews, reviewStats] = await Promise.all([getPublishedHouses(), getPublishedReviews(), getPublishedReviewStats()]);
+  const [houses, reviews, reviewStats, services] = await Promise.all([
+    getPublishedHouses(),
+    getPublishedReviews(),
+    getPublishedReviewStats(),
+    getPublicServices()
+  ]);
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
@@ -67,14 +74,35 @@ export default async function HomePage() {
       </section>
 
       <section className="section section-dark">
-        <div className="container split">
-          <div>
-            <span className="eyebrow">Вкус места</span>
-            <h2 className="page-title">Завтрак без спешки</h2>
-            <p style={{ color: "rgba(255,255,255,.72)", fontSize: 18 }}>Локальные продукты, сезонное меню и доставка прямо к вашей двери в выбранное время.</p>
-            <Link className="button button-light" href="/uslugi">Посмотреть услуги</Link>
+        <div className="container">
+          <div className="section-heading services-heading">
+            <div>
+              <span className="eyebrow">Больше впечатлений</span>
+              <h2>Услуги для вашего отдыха</h2>
+            </div>
+            <p>Дополните проживание баней, прогулкой на лодке или другими занятиями на природе.</p>
           </div>
-          <Image src="/images/stitch/asset-038.png" alt="Завтрак из локальных продуктов" width={512} height={512} style={{ borderRadius: 24, width: "100%" }} />
+          {services.length ? (
+            <div className="home-service-grid">
+              {services.slice(0, 3).map((service) => {
+                const defaultOption = service.options.find((option) => option.isDefault) ?? service.options[0];
+                const price = defaultOption?.price ?? service.basePrice;
+                return (
+                  <article className="home-service-card" key={service.id}>
+                    {service.imageUrl && <Image className="home-service-image" src={service.imageUrl} alt={service.title} width={512} height={384} loading="lazy" />}
+                    <div className="home-service-copy">
+                      <span className="home-service-price">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span>
+                      <h3>{service.title}</h3>
+                      <p>{service.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : <p className="dark-notice">Услуги пока не опубликованы.</p>}
+          <div className="services-action">
+            <Link className="button button-light" href="/uslugi">Все услуги</Link>
+          </div>
         </div>
       </section>
 
