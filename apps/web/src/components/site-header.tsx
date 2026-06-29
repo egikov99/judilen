@@ -4,7 +4,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <nav className="container nav" aria-label="Основная навигация">
-        <Link className="brand" href="/">Усадьба «Юдилен»</Link>
+        <Link className="brand" href="/">База отдыха «Юдилен»</Link>
         <div className="nav-links">
           <Link href="/domiki">Домики</Link>
           <Link href="/uslugi">Услуги</Link>
