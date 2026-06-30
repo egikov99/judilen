@@ -1,18 +1,23 @@
-import { db, roles, users } from "@judilen/db";
-import { desc, eq } from "drizzle-orm";
-import { UserCreateForm } from "@/components/admin/user-create-form";
-import { requirePagePermission } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { UserAccessManager } from "@/components/admin/user-access-manager";
+import { getAdminUsersData } from "@/lib/admin-users-data";
+import { getSessionAccess } from "@/lib/session";
 
 export default async function UsersPage() {
-  await requirePagePermission("users.manage");
-  const rows = await db.select({
-    id: users.id,
-    name: users.firstName,
-    lastName: users.lastName,
-    email: users.email,
-    role: roles.label,
-    isActive: users.isActive,
-    lastLoginAt: users.lastLoginAt
-  }).from(users).innerJoin(roles, eq(users.roleId, roles.id)).orderBy(desc(users.createdAt));
-  return <main className="admin-content"><h1 className="admin-title">Пользователи админки</h1><p className="admin-subtitle">Роли и доступ к разделам CRM.</p><section className="panel" style={{ marginBottom: 20 }}><h2>Новый пользователь</h2><UserCreateForm /></section><section className="panel"><table className="data-table"><thead><tr><th>Пользователь</th><th>Роль</th><th>Последний вход</th><th>Статус</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td><strong>{row.name} {row.lastName}</strong><br />{row.email}</td><td>{row.role}</td><td>{row.lastLoginAt?.toLocaleString("ru-RU") ?? "Не входил"}</td><td><span className={`badge ${row.isActive ? "" : "badge-warn"}`}>{row.isActive ? "Активен" : "Заблокирован"}</span></td></tr>)}</tbody></table></section></main>;
+  const access = await getSessionAccess();
+  if (!access) redirect("/login");
+  if (!access.permissions.includes("users.read")) redirect("/admin?forbidden=1");
+  const data = await getAdminUsersData();
+  return <main className="admin-content">
+    <h1 className="admin-title">Пользователи и доступы</h1>
+    <p className="admin-subtitle">Управление сотрудниками, ролями и индивидуальными правами CRM.</p>
+    <UserAccessManager
+      initialUsers={data.users.map((user) => ({ ...user, createdAt: user.createdAt.toISOString(), lastLoginAt: user.lastLoginAt?.toISOString() ?? null }))}
+      roles={data.roles}
+      permissions={data.permissions}
+      initialAuditLogs={data.auditLogs.map((log) => ({ ...log, createdAt: log.createdAt.toISOString() }))}
+      currentUserId={access.session.userId}
+      currentPermissions={access.permissions}
+    />
+  </main>;
 }

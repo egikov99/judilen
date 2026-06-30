@@ -52,7 +52,8 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       name: `${user.firstName} ${user.lastName}`.trim(),
-      role: "client"
+      role: "client",
+      sessionVersion: 0
     });
     (await cookies()).set(SESSION_COOKIE, token, {
       httpOnly: true,

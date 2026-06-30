@@ -6,7 +6,7 @@ import { HouseEditor } from "@/components/admin/house-editor";
 import { requirePagePermission } from "@/lib/session";
 
 export default async function EditHousePage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePagePermission("houses.write");
+  await requirePagePermission("houses.update");
   const { id } = await params;
   const [house] = await db.select().from(houses).where(eq(houses.id, id)).limit(1);
   if (!house) notFound();

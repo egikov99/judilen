@@ -21,9 +21,11 @@ const timestamps = {
 
 export const roleName = pgEnum("role_name", [
   "client",
+  "super_admin",
   "admin",
   "content_manager",
-  "manager"
+  "manager",
+  "viewer"
 ]);
 export const bookingStatus = pgEnum("booking_status", [
   "new",
@@ -104,11 +106,24 @@ export const users = pgTable(
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull().default(""),
     phone: text("phone"),
+    internalNote: text("internal_note"),
     isActive: boolean("is_active").notNull().default(true),
+    sessionVersion: integer("session_version").notNull().default(0),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     ...timestamps
   },
   (table) => [uniqueIndex("users_email_unique").on(table.email)]
+);
+
+export const userPermissionOverrides = pgTable(
+  "user_permission_overrides",
+  {
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    permissionId: uuid("permission_id").references(() => permissions.id, { onDelete: "cascade" }).notNull(),
+    isGranted: boolean("is_granted").notNull(),
+    ...timestamps
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.permissionId] })]
 );
 
 export const customers = pgTable(

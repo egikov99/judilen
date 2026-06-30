@@ -6,7 +6,7 @@ import { requirePermission } from "@/lib/session";
 import { problem, serviceOptionSchema } from "@/lib/validation";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requirePermission("services.read");
+  const auth = await requirePermission("service_options.read");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const { id } = await params;
@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requirePermission("services.update");
+  const auth = await requirePermission("service_options.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = serviceOptionSchema.safeParse(await request.json().catch(() => null));

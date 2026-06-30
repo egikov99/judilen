@@ -6,14 +6,25 @@ const permissionRows = [
   ["dashboard.read", "Просмотр панели"],
   ["bookings.read", "Просмотр бронирований"],
   ["bookings.write", "Изменение бронирований"],
+  ["bookings.create", "Создание бронирований"],
+  ["bookings.update", "Редактирование бронирований"],
+  ["bookings.delete", "Удаление бронирований"],
+  ["calendar.read", "Просмотр календаря"],
   ["customers.read", "Просмотр клиентов"],
   ["customers.write", "Изменение клиентов"],
   ["houses.read", "Просмотр домиков"],
   ["houses.write", "Изменение домиков"],
+  ["houses.create", "Создание домиков"],
+  ["houses.update", "Редактирование домиков"],
+  ["houses.delete", "Удаление домиков"],
   ["services.read", "Просмотр услуг"],
   ["services.create", "Создание услуг"],
   ["services.update", "Изменение услуг"],
   ["services.delete", "Удаление услуг"],
+  ["service_options.read", "Просмотр вариантов услуг"],
+  ["service_options.create", "Создание вариантов услуг"],
+  ["service_options.update", "Редактирование вариантов услуг"],
+  ["service_options.delete", "Удаление вариантов услуг"],
   ["reviews.read", "Просмотр отзывов"],
   ["reviews.create", "Создание отзывов"],
   ["reviews.update", "Изменение отзывов"],
@@ -26,6 +37,11 @@ const permissionRows = [
   ["content.write", "Изменение контента и SEO"],
   ["reports.read", "Просмотр отчетов"],
   ["users.manage", "Управление пользователями"],
+  ["users.read", "Просмотр пользователей"],
+  ["users.create", "Создание пользователей"],
+  ["users.update", "Изменение пользователей"],
+  ["users.delete", "Удаление пользователей"],
+  ["users.reset_password", "Сброс паролей пользователей"],
   ["integrations.manage", "Управление интеграциями"],
   ["integrations.read", "Просмотр интеграций"],
   ["integrations.create", "Создание интеграций"],
@@ -43,16 +59,20 @@ const permissionRows = [
 
 const roleLabels = {
   client: "Клиент",
+  super_admin: "Суперадминистратор",
   admin: "Администратор",
   content_manager: "Контент-менеджер",
-  manager: "Менеджер"
+  manager: "Менеджер",
+  viewer: "Наблюдатель"
 } as const;
 
 const grants: Record<keyof typeof roleLabels, string[]> = {
   client: [],
-  admin: permissionRows.map(([key]) => key),
-  content_manager: ["dashboard.read", "houses.read", "houses.write", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "services.read", "services.create", "services.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
-  manager: ["dashboard.read", "bookings.read", "bookings.write", "customers.read", "customers.write"]
+  super_admin: permissionRows.map(([key]) => key),
+  admin: permissionRows.map(([key]) => key).filter((key) => !key.startsWith("users.") && !["users.manage", "integrations.manage", "integrations.delete", "external_calendars.delete"].includes(key)),
+  content_manager: ["dashboard.read", "houses.read", "houses.write", "houses.create", "houses.update", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "services.read", "services.create", "services.update", "service_options.read", "service_options.create", "service_options.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
+  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write"],
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read"]
 };
 
 for (const [name, label] of Object.entries(roleLabels)) {
@@ -65,12 +85,13 @@ for (const [key, description] of permissionRows) {
 const allRoles = await db.select().from(roles);
 const allPermissions = await db.select().from(permissions);
 for (const role of allRoles) {
+  await db.delete(rolePermissions).where(eq(rolePermissions.roleId, role.id));
   for (const permission of allPermissions.filter((item) => grants[role.name].includes(item.key))) {
     await db.insert(rolePermissions).values({ roleId: role.id, permissionId: permission.id }).onConflictDoNothing();
   }
 }
 
-const adminRole = allRoles.find((role) => role.name === "admin");
+const adminRole = allRoles.find((role) => role.name === "super_admin");
 if (!adminRole) throw new Error("Admin role was not created");
 const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@judilen.local").toLowerCase().trim();
 const existingAdmin = await db.select({ id: users.id }).from(users).where(eq(users.email, adminEmail)).limit(1);
@@ -92,6 +113,11 @@ if (!existingAdmin.length) {
   }).where(eq(users.id, existingAdmin[0].id));
   console.log(`Reset password for administrator ${adminEmail}`);
 } else {
+  await db.update(users).set({
+    roleId: adminRole.id,
+    isActive: true,
+    updatedAt: new Date()
+  }).where(eq(users.id, existingAdmin[0].id));
   console.log(`Administrator ${adminEmail} already exists; password was not changed`);
 }
 

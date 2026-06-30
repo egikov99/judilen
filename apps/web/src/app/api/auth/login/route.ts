@@ -15,6 +15,7 @@ export async function POST(request: Request) {
       passwordHash: users.passwordHash,
       firstName: users.firstName,
       lastName: users.lastName,
+      sessionVersion: users.sessionVersion,
       role: roles.name
     })
     .from(users)
@@ -28,7 +29,8 @@ export async function POST(request: Request) {
     userId: row.id,
     email: row.email,
     name: `${row.firstName} ${row.lastName}`.trim(),
-    role: row.role
+    role: row.role,
+    sessionVersion: row.sessionVersion
   });
   const ttl = Number(process.env.SESSION_TTL_SECONDS ?? 604800);
   (await cookies()).set(SESSION_COOKIE, token, {
@@ -41,4 +43,3 @@ export async function POST(request: Request) {
   await db.update(users).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(users.id, row.id));
   return Response.json({ user: { id: row.id, email: row.email, name: row.firstName, role: row.role } });
 }
-

@@ -8,7 +8,7 @@ type Booking = { id: string; publicNumber: string; houseId: string; houseName: s
 type CalendarData = { houses: Array<{ id: string; name: string }>; bookings: Booking[]; conflicts: Array<{ id: string; houseId: string; startDate: string; endDate: string; summary: string }> };
 const labels: Record<string, string> = { site: "Сайт", crm_manual: "CRM", manual: "Вручную", blocked: "Блокировка", booking: "Booking", airbnb: "Airbnb", ostrovok: "Ostrovok", expedia: "Expedia", google_travel: "Google Travel", tripadvisor: "TripAdvisor", ical: "iCal" };
 
-export function BookingCalendar({ initial, initialStart, initialEnd }: { initial: CalendarData; initialStart: string; initialEnd: string }) {
+export function BookingCalendar({ initial, initialStart, initialEnd, canCreate }: { initial: CalendarData; initialStart: string; initialEnd: string; canCreate: boolean }) {
   const [data, setData] = useState(initial);
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
@@ -49,7 +49,7 @@ export function BookingCalendar({ initial, initialStart, initialEnd }: { initial
           const booking = data.bookings.find((row) => row.houseId === house.id && row.checkIn <= day && row.checkOut > day);
           const conflict = data.conflicts.find((row) => row.houseId === house.id && row.startDate <= day && row.endDate > day);
           const displaySource = booking?.status === "blocked" ? "blocked" : booking?.source;
-          return <button className={`calendar-day ${conflict ? "calendar-cell-conflict" : ""}`} key={`${house.id}-${day}`} onClick={() => booking ? setSelected(booking) : setFree({ houseId: house.id, houseName: house.name, date: day })}>
+          return <button className={`calendar-day ${conflict ? "calendar-cell-conflict" : ""}`} key={`${house.id}-${day}`} onClick={() => booking ? setSelected(booking) : canCreate ? setFree({ houseId: house.id, houseName: house.name, date: day }) : undefined}>
             {booking && <span className="calendar-booking" data-source={displaySource}>{booking.checkIn === day ? `${labels[displaySource ?? ""] ?? displaySource}: ${booking.firstName}` : "·"}</span>}
             {conflict && <span className="calendar-conflict">!</span>}
           </button>;

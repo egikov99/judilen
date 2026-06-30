@@ -56,7 +56,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requirePermission("bookings.write");
+  const auth = await requirePermission("bookings.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = manualBookingSchema.safeParse(await request.json().catch(() => null));

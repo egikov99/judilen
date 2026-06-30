@@ -6,7 +6,7 @@ import { requirePermission } from "@/lib/session";
 import { houseSchema, problem } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requirePermission("houses.write");
+  const auth = await requirePermission("houses.update");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = houseSchema.partial().safeParse(await request.json().catch(() => null));
@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requirePermission("houses.write");
+  const auth = await requirePermission("houses.delete");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const { id } = await params;

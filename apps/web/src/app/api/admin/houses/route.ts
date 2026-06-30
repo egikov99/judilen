@@ -12,7 +12,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requirePermission("houses.write");
+  const auth = await requirePermission("houses.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = houseSchema.safeParse(await request.json().catch(() => null));
@@ -26,4 +26,3 @@ export async function POST(request: Request) {
   revalidateTag("houses", "max");
   return Response.json({ item: house }, { status: 201 });
 }
-

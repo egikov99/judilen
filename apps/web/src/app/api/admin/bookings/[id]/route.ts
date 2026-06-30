@@ -5,7 +5,7 @@ import { requirePermission } from "@/lib/session";
 import { bookingUpdateSchema, problem } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requirePermission("bookings.write");
+  const auth = await requirePermission("bookings.update");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = bookingUpdateSchema.safeParse(await request.json().catch(() => null));

@@ -4,7 +4,7 @@ import { problem } from "@/lib/validation";
 import { validateDateRange } from "@/lib/date-ranges";
 
 export async function GET(request: Request) {
-  const auth = await requirePermission("bookings.read");
+  const auth = await requirePermission("calendar.read");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const url = new URL(request.url);

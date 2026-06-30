@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 
-export function HouseActions({ id }: { id: string }) {
+export function HouseActions({ id, canUpdate, canDelete }: { id: string; canUpdate: boolean; canDelete: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   async function unpublish() {
@@ -14,6 +14,5 @@ export function HouseActions({ id }: { id: string }) {
     setBusy(false);
     if (response.ok) router.refresh();
   }
-  return <div style={{ display: "flex", gap: 8 }}><Link className="button button-ghost" href={`/admin/houses/${id}`}>Редактировать</Link><button className="button button-ghost" disabled={busy} onClick={unpublish}>Скрыть</button></div>;
+  return <div style={{ display: "flex", gap: 8 }}>{canUpdate && <Link className="button button-ghost" href={`/admin/houses/${id}`}>Редактировать</Link>}{canDelete && <button className="button button-ghost" disabled={busy} onClick={unpublish}>Скрыть</button>}</div>;
 }
-

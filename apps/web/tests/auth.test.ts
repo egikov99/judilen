@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { adminNavigation, can, createSessionToken, verifySessionToken } from "@judilen/auth";
+import { removesLastSuperAdmin } from "@/lib/user-access-rules";
 
 describe("RBAC", () => {
   it("does not expose finance and integration sections to a content manager", () => {
@@ -20,9 +21,25 @@ describe("RBAC", () => {
 
   it("round-trips a signed session", async () => {
     const secret = "test-secret-that-is-at-least-32-characters";
-    const session = { userId: "user-1", email: "a@example.com", name: "Анна", role: "manager" as const };
+    const session = { userId: "user-1", email: "a@example.com", name: "Анна", role: "manager" as const, sessionVersion: 0 };
     const token = await createSessionToken(session, secret);
     await expect(verifySessionToken(token, secret)).resolves.toMatchObject(session);
     await expect(verifySessionToken(`${token}x`, secret)).resolves.toBeNull();
+  });
+
+  it("enforces staff role boundaries", () => {
+    expect(can("super_admin", "users.delete")).toBe(true);
+    expect(can("admin", "users.read")).toBe(false);
+    expect(can("manager", "bookings.update")).toBe(true);
+    expect(can("manager", "houses.update")).toBe(false);
+    expect(can("viewer", "bookings.read")).toBe(true);
+    expect(can("viewer", "bookings.update")).toBe(false);
+    expect(can("viewer", "services.update")).toBe(false);
+  });
+
+  it("does not allow removing the last active Super Admin", () => {
+    expect(removesLastSuperAdmin({ currentRole: "super_admin", currentActive: true, nextRole: "admin", activeSuperAdmins: 1 })).toBe(true);
+    expect(removesLastSuperAdmin({ currentRole: "super_admin", currentActive: true, nextActive: false, activeSuperAdmins: 2 })).toBe(false);
+    expect(removesLastSuperAdmin({ currentRole: "admin", currentActive: true, nextActive: false, activeSuperAdmins: 1 })).toBe(false);
   });
 });

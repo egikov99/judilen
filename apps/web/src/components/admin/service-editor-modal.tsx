@@ -24,13 +24,14 @@ const emptyOption = {
   title: "", description: "", price: "0", isDefault: false, isActive: true, sortOrder: 0
 };
 
-export function ServiceEditorModal({ service, initialOptions, houses, houseIds, onClose, onChanged }: {
+export function ServiceEditorModal({ service, initialOptions, houses, houseIds, onClose, onChanged, optionPermissions }: {
   service: ServiceRow | null;
   initialOptions: OptionRow[];
   houses: HouseRow[];
   houseIds: string[];
   onClose: () => void;
   onChanged: (message: string) => void;
+  optionPermissions: { create: boolean; update: boolean; delete: boolean };
 }) {
   const [draft, setDraft] = useState({ ...(service ?? emptyService), imageUrl: service?.imageUrl ?? "", houseIds });
   const [serviceId, setServiceId] = useState(service?.id ?? "");
@@ -112,10 +113,10 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
     </form>
 
     <section className="service-options-section">
-      <div className="section-heading compact-heading"><div><span className="eyebrow">Настройки</span><h3>Варианты услуги</h3></div>{serviceId && <button className="button button-ghost" type="button" onClick={() => setOptionDraft({ ...emptyOption, sortOrder: optionRows.length })}>Добавить вариант</button>}</div>
+      <div className="section-heading compact-heading"><div><span className="eyebrow">Настройки</span><h3>Варианты услуги</h3></div>{serviceId && optionPermissions.create && <button className="button button-ghost" type="button" onClick={() => setOptionDraft({ ...emptyOption, sortOrder: optionRows.length })}>Добавить вариант</button>}</div>
       {!serviceId && <p className="notice">Сначала сохраните услугу, после этого можно добавить варианты.</p>}
       {serviceId && !optionRows.length && !optionDraft && <p className="notice">Вариантов пока нет.</p>}
-      <div className="service-option-list">{[...optionRows].sort((a, b) => a.sortOrder - b.sortOrder).map((option) => <article className="service-option-card" key={option.id}><div><strong>{option.title}</strong><p>{option.description || "Без описания"}</p></div><div className="service-option-meta"><strong>{formatCurrency(Number(option.price))}</strong><span className="badge">Порядок: {option.sortOrder}</span>{option.isDefault && <span className="badge">По умолчанию</span>}{!option.isActive && <span className="badge badge-warn">Скрыт</span>}</div><div className="action-row"><button className="button button-ghost" type="button" onClick={() => setOptionDraft({ ...option, description: option.description ?? "", price: String(option.price) })}>Редактировать</button><button className="button button-ghost" type="button" disabled={saving === "option"} onClick={() => deleteOption(option.id)}>Удалить</button></div></article>)}</div>
+      <div className="service-option-list">{[...optionRows].sort((a, b) => a.sortOrder - b.sortOrder).map((option) => <article className="service-option-card" key={option.id}><div><strong>{option.title}</strong><p>{option.description || "Без описания"}</p></div><div className="service-option-meta"><strong>{formatCurrency(Number(option.price))}</strong><span className="badge">Порядок: {option.sortOrder}</span>{option.isDefault && <span className="badge">По умолчанию</span>}{!option.isActive && <span className="badge badge-warn">Скрыт</span>}</div><div className="action-row">{optionPermissions.update && <button className="button button-ghost" type="button" onClick={() => setOptionDraft({ ...option, description: option.description ?? "", price: String(option.price) })}>Редактировать</button>}{optionPermissions.delete && <button className="button button-ghost" type="button" disabled={saving === "option"} onClick={() => deleteOption(option.id)}>Удалить</button>}</div></article>)}</div>
       {optionDraft && <form className="option-editor" onSubmit={saveOption}><h4>{optionDraft.id ? "Редактирование варианта" : "Новый вариант"}</h4><div className="form-grid"><div className="field"><label>Название</label><input value={optionDraft.title} onChange={(event) => setOptionDraft({ ...optionDraft, title: event.target.value })} required /></div><div className="field"><label>Цена</label><input type="number" min="0" step="0.01" value={optionDraft.price} onChange={(event) => setOptionDraft({ ...optionDraft, price: event.target.value })} required /></div></div><div className="field"><label>Описание</label><textarea value={optionDraft.description} onChange={(event) => setOptionDraft({ ...optionDraft, description: event.target.value })} /></div><div className="form-grid"><div className="field"><label>Порядок</label><input type="number" min="0" value={optionDraft.sortOrder} onChange={(event) => setOptionDraft({ ...optionDraft, sortOrder: Number(event.target.value) })} /></div><div className="form-stack compact-checks"><label><input type="checkbox" checked={optionDraft.isActive} onChange={(event) => setOptionDraft({ ...optionDraft, isActive: event.target.checked })} /> Активен</label><label><input type="checkbox" checked={optionDraft.isDefault} onChange={(event) => setOptionDraft({ ...optionDraft, isDefault: event.target.checked })} /> По умолчанию</label></div></div><div className="action-row"><button className="button button-primary" disabled={!!saving}>{saving === "option" ? "Сохранение…" : "Сохранить вариант"}</button><button className="button button-ghost" type="button" disabled={!!saving} onClick={() => setOptionDraft(null)}>Отмена</button></div></form>}
     </section>
   </AdminModal>;
