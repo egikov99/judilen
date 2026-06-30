@@ -9,7 +9,7 @@ export default async function AdminDashboardPage() {
   const data = await getAdminDashboardData(range.startDate, range.endDate);
   return <main className="admin-content">
     <h1 className="admin-title">Обзор</h1>
-    <p className="admin-subtitle">Показатели по реальным бронированиям за выбранный период.</p>
+    <p className="admin-subtitle">Показатели по бронированиям за выбранный период.</p>
     <DashboardView initial={data} />
   </main>;
 }

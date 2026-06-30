@@ -193,7 +193,7 @@ export function adminNavigation(role: Role) {
   const items = [
     { href: "/admin", label: "Обзор", permission: "dashboard.read" },
     { href: "/admin/bookings", label: "Бронирования", permission: "bookings.read" },
-    { href: "/admin/calendar", label: "Шахматка", permission: "calendar.read" },
+    { href: "/admin/calendar", label: "Календарь", permission: "calendar.read" },
     { href: "/admin/customers", label: "Клиенты", permission: "customers.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
     { href: "/admin/services", label: "Услуги", permission: "services.read" },
