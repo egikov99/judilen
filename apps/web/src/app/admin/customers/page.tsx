@@ -1,6 +1,6 @@
 import { bookings, customers, db } from "@judilen/db";
 import { count, desc, eq, sql } from "drizzle-orm";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { requirePagePermission } from "@/lib/session";
 
 export default async function CustomersPage() {

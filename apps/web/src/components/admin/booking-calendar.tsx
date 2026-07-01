@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { addDays, periodRange, shiftRange, type PeriodPreset } from "@/lib/date-ranges";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 
 type Booking = { id: string; publicNumber: string; houseId: string; houseName: string; checkIn: string; checkOut: string; status: string; source: string; totalAmount: string; firstName: string; lastName: string; email: string; phone: string; externalUid: string | null; lastSyncedAt: string | null };
 type CalendarData = { houses: Array<{ id: string; name: string }>; bookings: Booking[]; conflicts: Array<{ id: string; houseId: string; startDate: string; endDate: string; summary: string }> };

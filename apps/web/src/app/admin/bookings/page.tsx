@@ -2,7 +2,7 @@ import { bookings, customers, db, houses } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { BookingStatusControl } from "@/components/admin/booking-status-control";
 import { QuickBookingForm } from "@/components/admin/quick-booking-form";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { requirePageAccess } from "@/lib/session";
 
 export default async function AdminBookingsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

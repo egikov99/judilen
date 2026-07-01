@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { SiteHeader } from "@/components/site-header";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { requireSession } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Мои поездки", robots: { index: false, follow: false } };

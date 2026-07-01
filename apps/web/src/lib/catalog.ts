@@ -13,7 +13,7 @@ export interface House {
 }
 
 export function formatCurrency(amount: number, currency = "BYN") {
-  return `${new Intl.NumberFormat("ru-RU").format(amount)} ${currency}`;
+  return `${formatPrice(amount)} ${currency}`;
 }
 
 export const houses: House[] = [

@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 
 export type PriceUnit = "hour" | "day" | "booking" | "person" | "item";
 export interface ServiceRow {

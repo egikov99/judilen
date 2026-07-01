@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -27,5 +27,15 @@ describe("currency copy", () => {
       .map((file) => readFileSync(file, "utf8"))
       .join("\n");
     expect(contents).not.toContain("₽");
+  });
+
+  it("ships and connects the NBRB icon font", () => {
+    for (const filename of ["nbrb.woff2", "nbrb.woff", "nbrb.ttf"]) {
+      expect(existsSync(join(root, "public", "fonts", filename))).toBe(true);
+    }
+    const css = readFileSync(join(root, "src", "app", "globals.css"), "utf8");
+    expect(css).toContain('font-family: "nbrb"');
+    expect(css).toContain('url("/fonts/nbrb.woff2")');
+    expect(css).toContain(".nbrb-icon");
   });
 });

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { dashboardRange, type DashboardPreset } from "@/lib/date-ranges";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 
 type EventRow = { id: string; date: string; houseName: string; firstName: string; lastName: string; source: string; status: string };
 type Data = {

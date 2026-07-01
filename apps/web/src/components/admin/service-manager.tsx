@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ServiceEditorModal, type HouseRow, type OptionRow, type ServiceRow } from "@/components/admin/service-editor-modal";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import type { Permission } from "@judilen/auth";
 
 export function ServiceManager({ services, options, houses, serviceHouseIds, permissions }: {

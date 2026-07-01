@@ -2,7 +2,7 @@ import { db, houses } from "@judilen/db";
 import { asc } from "drizzle-orm";
 import Link from "next/link";
 import { HouseActions } from "@/components/admin/house-actions";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { requirePageAccess } from "@/lib/session";
 
 export default async function AdminHousesPage() {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { PublicShell } from "@/components/public-shell";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { getPublicServices, priceUnitLabels } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Услуги", description: "Баня, лодки, рыбалка, трансфер и дополнительные услуги усадьбы «Юдилен».", alternates: { canonical: "/uslugi" } };

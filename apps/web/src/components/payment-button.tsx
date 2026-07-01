@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { formatCurrency } from "@/components/currency";
 
-export function PaymentButton({ bookingId, amount }: { bookingId: string; amount: string }) {
+export function PaymentButton({ bookingId, amount }: { bookingId: string; amount: number }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   async function pay() {
@@ -20,6 +21,5 @@ export function PaymentButton({ bookingId, amount }: { bookingId: string; amount
     }
     window.location.assign(payload.confirmationUrl);
   }
-  return <>{error && <div className="notice error">{error}</div>}<button className="button button-primary" onClick={pay} disabled={loading}>{loading ? "Переходим к оплате…" : `Оплатить ${amount}`}</button></>;
+  return <>{error && <div className="notice error">{error}</div>}<button className="button button-primary" onClick={pay} disabled={loading}>{loading ? "Переходим к оплате…" : <>Оплатить {formatCurrency(amount)}</>}</button></>;
 }
-

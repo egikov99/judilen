@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { formatCurrency, type House } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
+import { formatPrice, type House } from "@/lib/catalog";
 import { priceUnitLabels, type PublicService } from "@/lib/service-types";
 
 export function HouseBookingCard({ house, services }: { house: House; services: PublicService[] }) {
@@ -73,7 +74,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
             return <div className="notice" key={service.id} style={{ display: "grid", gap: 10 }}>
               <label style={{ display: "flex", gap: 9 }}><input type="checkbox" checked={item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label>
               <div className="form-grid">
-                <div className="field"><label htmlFor={`option-${service.id}`}>Вариант</label><select id={`option-${service.id}`} value={item.optionId} disabled={!item.enabled || !service.options.length} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title} - {formatCurrency(current.price)}</option>)}</select></div>
+                <div className="field"><label htmlFor={`option-${service.id}`}>Вариант</label><select id={`option-${service.id}`} value={item.optionId} disabled={!item.enabled || !service.options.length} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title} - {formatPrice(current.price)}</option>)}</select></div>
                 <div className="field"><label htmlFor={`quantity-${service.id}`}>Количество</label><input id={`quantity-${service.id}`} type="number" min="1" max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div>
               </div>
               <small>{formatCurrency(option?.price ?? service.basePrice)} {priceUnitLabels[service.priceUnit]}</small>

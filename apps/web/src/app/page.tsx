@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BookingSearch } from "@/components/booking-search";
 import { HouseCard } from "@/components/house-card";
 import { PublicShell } from "@/components/public-shell";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
 import { getPublicServices, priceUnitLabels } from "@/lib/services";

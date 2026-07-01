@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicShell } from "@/components/public-shell";
 import { getSession } from "@/lib/session";
-import { formatCurrency } from "@/lib/catalog";
+import { formatCurrency } from "@/components/currency";
 
 export const metadata: Metadata = { title: "Статус оплаты", robots: { index: false, follow: false } };
 export default async function PaymentSuccessPage({ params }: { params: Promise<{ bookingId: string }> }) {
