@@ -4,7 +4,7 @@
        url("/fonts/nbrb.ttf") format("truetype"),
        url("/fonts/nbrb.woff") format("woff");
   font-display: swap;
-  unicode-range: U+E901, U+42, U+59, U+4E;
+  unicode-range: U+0183;
 }
 
 .nbrb-icon {
@@ -27,7 +27,6 @@
   font-variant-ligatures: discretionary-ligatures;
 }
 
-.nbrb-icon-byn::before { content: "\e901"; }
 .currency-value { display: inline-flex; align-items: baseline; gap: .28em; white-space: nowrap; }
 .currency-value .nbrb-icon { font-size: .9em; }
 

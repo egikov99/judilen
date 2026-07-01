@@ -10,7 +10,7 @@ export function formatCurrency(amount: number, currency = "BYN") {
   return (
     <span className="currency-value">
       {formatted}
-      <i className="nbrb-icon nbrb-icon-byn" aria-hidden="true" />
+      <i className="nbrb-icon" aria-hidden="true">&#x183;</i>
       <span className="visually-hidden">BYN</span>
     </span>
   );

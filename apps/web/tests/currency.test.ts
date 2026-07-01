@@ -37,5 +37,8 @@ describe("currency copy", () => {
     expect(css).toContain('font-family: "nbrb"');
     expect(css).toContain('url("/fonts/nbrb.woff2")');
     expect(css).toContain(".nbrb-icon");
+    expect(css).toContain("unicode-range: U+0183");
+    const component = readFileSync(join(root, "src", "components", "currency.tsx"), "utf8");
+    expect(component).toContain("&#x183;");
   });
 });
