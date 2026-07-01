@@ -5,6 +5,12 @@ import { formatCurrency } from "@/components/currency";
 import { formatPrice, type House } from "@/lib/catalog";
 import { priceUnitLabels, type PublicService } from "@/lib/service-types";
 
+function guestLabel(count: number) {
+  if (count === 1) return "1 гость";
+  if (count >= 2 && count <= 4) return `${count} гостя`;
+  return `${count} гостей`;
+}
+
 export function HouseBookingCard({ house, services }: { house: House; services: PublicService[] }) {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -59,7 +65,14 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
           <div className="field"><label htmlFor="checkIn">Заезд</label><input id="checkIn" name="checkIn" type="date" required onChange={(event) => setDates((value) => ({ ...value, checkIn: event.target.value }))} /></div>
           <div className="field"><label htmlFor="checkOut">Выезд</label><input id="checkOut" name="checkOut" type="date" required onChange={(event) => setDates((value) => ({ ...value, checkOut: event.target.value }))} /></div>
         </div>
-        <div className="field"><label htmlFor="guests">Гости</label><select id="guests" name="guests" defaultValue="2"><option value="1">1 гость</option><option value="2">2 гостя</option><option value="3">3 гостя</option><option value="4">4 гостя</option></select></div>
+        <div className="field">
+          <label htmlFor="guests">Гости (максимум {house.guests})</label>
+          <select id="guests" name="guests" defaultValue={String(Math.min(2, house.guests))}>
+            {Array.from({ length: house.guests }, (_, index) => index + 1).map((count) => (
+              <option value={count} key={count}>{guestLabel(count)}</option>
+            ))}
+          </select>
+        </div>
         <div className="form-grid">
           <div className="field"><label htmlFor="firstName">Имя</label><input id="firstName" name="firstName" autoComplete="given-name" required /></div>
           <div className="field"><label htmlFor="lastName">Фамилия</label><input id="lastName" name="lastName" autoComplete="family-name" /></div>

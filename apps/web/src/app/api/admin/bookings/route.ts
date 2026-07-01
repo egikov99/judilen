@@ -61,6 +61,11 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = manualBookingSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
+  const [house] = await db.select({ guests: houses.guests }).from(houses).where(eq(houses.id, parsed.data.houseId)).limit(1);
+  if (!house) return problem(404, "Домик не найден");
+  if (parsed.data.guests > house.guests) {
+    return problem(422, "Количество гостей превышает вместимость домика");
+  }
   const publicNumber = bookingNumber();
   try {
     const created = await db.transaction(async (tx) => {

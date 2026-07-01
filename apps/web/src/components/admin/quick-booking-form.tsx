@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export function QuickBookingForm({ houses, defaults, initiallyOpen = false }: {
-  houses: Array<{ id: string; name: string }>;
+  houses: Array<{ id: string; name: string; guests: number }>;
   defaults: { houseId: string; checkIn: string; checkOut: string };
   initiallyOpen?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(initiallyOpen);
   const [message, setMessage] = useState("");
+  const [houseId, setHouseId] = useState(defaults.houseId);
+  const capacity = houses.find((house) => house.id === houseId)?.guests ?? 1;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -31,11 +33,11 @@ export function QuickBookingForm({ houses, defaults, initiallyOpen = false }: {
   return <section className="manual-booking">
     <button className="button button-primary" type="button" onClick={() => setOpen((value) => !value)}>{open ? "Закрыть форму" : "Добавить бронирование"}</button>
     {open && <div className="panel" style={{ marginTop: 16 }}><h2>Новое бронирование</h2>{message && <p className="notice">{message}</p>}<form className="form-stack" onSubmit={submit}>
-    <div className="form-grid"><div className="field"><label>Домик</label><select name="houseId" defaultValue={defaults.houseId}>{houses.map((house) => <option value={house.id} key={house.id}>{house.name}</option>)}</select></div><div className="field"><label>Статус</label><select name="status"><option value="confirmed">Подтверждено</option><option value="blocked">Блокировка дат</option></select></div></div>
+    <div className="form-grid"><div className="field"><label>Домик</label><select name="houseId" value={houseId} onChange={(event) => setHouseId(event.target.value)}>{houses.map((house) => <option value={house.id} key={house.id}>{house.name} (до {house.guests} чел.)</option>)}</select></div><div className="field"><label>Статус</label><select name="status"><option value="confirmed">Подтверждено</option><option value="blocked">Блокировка дат</option></select></div></div>
     <div className="form-grid"><div className="field"><label>Заезд</label><input name="checkIn" type="date" defaultValue={defaults.checkIn} required /></div><div className="field"><label>Выезд</label><input name="checkOut" type="date" defaultValue={defaults.checkOut} required /></div></div>
     <div className="form-grid"><div className="field"><label>Имя</label><input name="firstName" required /></div><div className="field"><label>Фамилия</label><input name="lastName" /></div></div>
     <div className="form-grid"><div className="field"><label>Email</label><input name="email" type="email" required /></div><div className="field"><label>Телефон</label><input name="phone" required /></div></div>
-    <div className="form-grid"><div className="field"><label>Гостей</label><input name="guests" type="number" min="1" defaultValue="1" required /></div><div className="field"><label>Сумма</label><input name="totalAmount" type="number" min="0" defaultValue="0" required /></div></div>
+    <div className="form-grid"><div className="field"><label>Гостей (максимум {capacity})</label><select name="guests" defaultValue="1">{Array.from({ length: capacity }, (_, index) => index + 1).map((count) => <option value={count} key={count}>{count}</option>)}</select></div><div className="field"><label>Сумма</label><input name="totalAmount" type="number" min="0" defaultValue="0" required /></div></div>
     <div className="field"><label>Комментарий</label><textarea name="managerComment" /></div>
     <button className="button button-primary">Создать бронирование</button>
   </form></div>}

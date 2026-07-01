@@ -22,7 +22,7 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
     .innerJoin(customers, eq(bookings.customerId, customers.id))
     .innerJoin(houses, eq(bookings.houseId, houses.id))
     .orderBy(desc(bookings.createdAt))
-    .limit(200), db.select({ id: houses.id, name: houses.name }).from(houses).orderBy(houses.name)]);
+    .limit(200), db.select({ id: houses.id, name: houses.name, guests: houses.guests }).from(houses).orderBy(houses.name)]);
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.parse(`${today}T00:00:00.000Z`) + 86_400_000).toISOString().slice(0, 10);
   const defaults = {
