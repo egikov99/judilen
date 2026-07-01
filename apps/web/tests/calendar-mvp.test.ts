@@ -16,5 +16,6 @@ describe("calendar integration MVP", () => {
     expect(migration).toContain("'external'");
     expect(migration).toContain("'blocked'");
     expect(migration).toContain("EXCLUDE USING gist");
+    expect(migration).toContain('daterange("check_in", "check_out", \'[)\') WITH &&');
   });
 });

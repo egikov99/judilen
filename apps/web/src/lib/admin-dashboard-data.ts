@@ -1,8 +1,8 @@
 import { bookingServices, bookings, customers, db, houses, services } from "@judilen/db";
 import { and, asc, eq, gt, gte, inArray, lt, notInArray } from "drizzle-orm";
+import { blockingBookingStatuses } from "./booking-availability";
 import { addDays } from "./date-ranges";
 
-const activeStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external", "blocked"] as const;
 const arrivalStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external"] as const;
 
 export async function getAdminDashboardData(startDate: string, endDate: string) {
@@ -15,7 +15,7 @@ export async function getAdminDashboardData(startDate: string, endDate: string) 
       notInArray(bookings.status, ["blocked", "import_removed"])
     )),
     db.select({ checkIn: bookings.checkIn, checkOut: bookings.checkOut }).from(bookings).where(and(
-      inArray(bookings.status, activeStatuses), lt(bookings.checkIn, exclusiveEnd), gt(bookings.checkOut, startDate)
+      inArray(bookings.status, blockingBookingStatuses), lt(bookings.checkIn, exclusiveEnd), gt(bookings.checkOut, startDate)
     )),
     db.select({ id: bookings.id, date: bookings.checkIn, houseName: houses.name, firstName: customers.firstName, lastName: customers.lastName, source: bookings.source, status: bookings.status })
       .from(bookings).innerJoin(houses, eq(bookings.houseId, houses.id)).innerJoin(customers, eq(bookings.customerId, customers.id))

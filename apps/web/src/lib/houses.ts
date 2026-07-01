@@ -1,7 +1,14 @@
-import { db, houseImages, houses as houseTable } from "@judilen/db";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { bookings, db, houseImages, houses as houseTable } from "@judilen/db";
+import { and, asc, desc, eq, gt, gte, inArray, lt, notExists } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+import { blockingBookingStatuses } from "./booking-availability";
 import { houses as fallbackHouses, type House } from "./catalog";
+
+type AvailabilityCriteria = {
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+};
 
 function fallbackAllowed() {
   return process.env.ALLOW_STATIC_FALLBACK === "true" || process.env.NODE_ENV === "development";
@@ -13,13 +20,25 @@ function eyebrow(guests: number) {
   return "Флагманский дом";
 }
 
-async function loadPublishedHouses(): Promise<House[]> {
+async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise<House[]> {
   try {
+    const hasOverlappingBooking = availability
+      ? db.select({ id: bookings.id }).from(bookings).where(and(
+          eq(bookings.houseId, houseTable.id),
+          inArray(bookings.status, blockingBookingStatuses),
+          lt(bookings.checkIn, availability.checkOut),
+          gt(bookings.checkOut, availability.checkIn)
+        ))
+      : null;
     const rows = await db
       .select({ house: houseTable, image: houseImages })
       .from(houseTable)
       .leftJoin(houseImages, and(eq(houseTable.id, houseImages.houseId), eq(houseImages.isActive, true)))
-      .where(eq(houseTable.isPublished, true))
+      .where(and(
+        eq(houseTable.isPublished, true),
+        availability ? gte(houseTable.guests, availability.guests) : undefined,
+        hasOverlappingBooking ? notExists(hasOverlappingBooking) : undefined
+      ))
       .orderBy(asc(houseTable.name), desc(houseImages.isMain), asc(houseImages.position));
     const mapped = new Map<string, House>();
     for (const { house, image } of rows) {
@@ -44,7 +63,7 @@ async function loadPublishedHouses(): Promise<House[]> {
       images: house.images.length ? house.images : ["/images/stitch/asset-025.png"]
     }));
   } catch (error) {
-    if (fallbackAllowed()) {
+    if (fallbackAllowed() && !availability) {
       console.warn("Using local catalog fallback because the database is unavailable");
       return fallbackHouses;
     }
@@ -52,10 +71,14 @@ async function loadPublishedHouses(): Promise<House[]> {
   }
 }
 
-export const getPublishedHouses = unstable_cache(loadPublishedHouses, ["published-houses"], {
+export const getPublishedHouses = unstable_cache(() => loadPublishedHouses(), ["published-houses"], {
   revalidate: 300,
   tags: ["houses"]
 });
+
+export function getAvailablePublishedHouses(criteria: AvailabilityCriteria) {
+  return loadPublishedHouses(criteria);
+}
 
 export async function getHouseBySlug(slug: string) {
   return (await getPublishedHouses()).find((house) => house.slug === slug);

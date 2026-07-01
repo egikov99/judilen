@@ -25,6 +25,15 @@ export const bookingSchema = z.object({
   path: ["checkOut"]
 });
 
+export const availabilitySearchSchema = z.object({
+  checkIn: z.iso.date(),
+  checkOut: z.iso.date(),
+  guests: z.coerce.number().int().min(1).max(30)
+}).refine((value) => value.checkOut > value.checkIn, {
+  message: "Дата выезда должна быть позже даты заезда",
+  path: ["checkOut"]
+});
+
 export const houseSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100),
   name: z.string().trim().min(2).max(120),

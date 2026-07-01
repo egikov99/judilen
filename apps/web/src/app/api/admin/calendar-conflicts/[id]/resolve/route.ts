@@ -2,6 +2,7 @@ import { bookings, calendarConflicts, db } from "@judilen/db";
 import { and, eq, gt, inArray, lt } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
+import { blockingBookingStatuses } from "@/lib/booking-availability";
 import { syncExternalCalendar } from "@/lib/integration-sync";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
@@ -10,8 +11,6 @@ const resolveSchema = z.object({
   action: z.enum(["keep_crm", "accept_external"]),
   note: z.string().trim().max(2000).default("")
 });
-const activeStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external", "blocked"] as const;
-
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requirePermission("calendar_conflicts.update");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
@@ -31,7 +30,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         updatedAt: new Date()
       }).where(and(
         eq(bookings.houseId, before.houseId),
-        inArray(bookings.status, activeStatuses),
+        inArray(bookings.status, blockingBookingStatuses),
         lt(bookings.checkIn, before.endDate),
         gt(bookings.checkOut, before.startDate)
       ));

@@ -2,9 +2,8 @@ import { bookings, db, externalCalendars, houses } from "@judilen/db";
 import { IcalAdapter } from "@judilen/integrations";
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { blockingBookingStatuses } from "@/lib/booking-availability";
 import { problem } from "@/lib/validation";
-
-const exportedStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external", "blocked"] as const;
 
 export async function exportHouseCalendar(request: Request, houseId: string) {
   const token = new URL(request.url).searchParams.get("token");
@@ -22,7 +21,7 @@ export async function exportHouseCalendar(request: Request, houseId: string) {
   if (!calendar) return problem(404, "Календарь не найден");
   const rows = await db.select().from(bookings).where(and(
     eq(bookings.houseId, houseId),
-    inArray(bookings.status, exportedStatuses)
+    inArray(bookings.status, blockingBookingStatuses)
   ));
   const payload = await new IcalAdapter().exportCalendar(rows.map((row) => ({
     externalId: `${row.id}@judilen`,

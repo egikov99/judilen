@@ -2,6 +2,8 @@ import { bookingStatusHistory, bookings, customers, db, houses } from "@judilen/
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
+import { hasDatabaseErrorCode } from "@/lib/booking-availability";
+import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -66,6 +68,9 @@ export async function POST(request: Request) {
   if (parsed.data.guests > house.guests) {
     return problem(422, "Количество гостей превышает вместимость домика");
   }
+  if (await findOverlappingBooking(parsed.data.houseId, parsed.data.checkIn, parsed.data.checkOut)) {
+    return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
+  }
   const publicNumber = bookingNumber();
   try {
     const created = await db.transaction(async (tx) => {
@@ -110,8 +115,9 @@ export async function POST(request: Request) {
     await writeAudit({ session: auth.session, request, action: "booking.create", entityType: "booking", entityId: created.id, after: created });
     return Response.json({ item: created }, { status: 201 });
   } catch (error) {
-    const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
-    if (code === "23P01") return problem(409, "Даты уже заняты");
+    if (hasDatabaseErrorCode(error, "23P01")) {
+      return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
+    }
     throw error;
   }
 }

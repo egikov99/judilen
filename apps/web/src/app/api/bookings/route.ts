@@ -1,4 +1,6 @@
 import { bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
+import { findOverlappingBooking } from "@/lib/booking-availability-db";
+import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
 import { getActiveServicesByIds } from "@/lib/services";
@@ -15,6 +17,9 @@ export async function POST(request: Request) {
   const house = (await getPublishedHouses()).find((item) => item.id === parsed.data.houseId);
   if (!house) return problem(404, "Домик не найден");
   if (parsed.data.guests > house.guests) return problem(422, "Количество гостей превышает вместимость домика");
+  if (await findOverlappingBooking(house.id, parsed.data.checkIn, parsed.data.checkOut)) {
+    return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
+  }
   const nights = Math.ceil((Date.parse(parsed.data.checkOut) - Date.parse(parsed.data.checkIn)) / 86_400_000);
   const activeServices = await getActiveServicesByIds([...new Set(parsed.data.services.map((item) => item.serviceId))], house.id);
   let invalidService = false;
@@ -83,8 +88,9 @@ export async function POST(request: Request) {
     });
     return Response.json({ publicNumber, status: "awaiting_confirmation" }, { status: 201 });
   } catch (error) {
-    const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
-    if (code === "23P01") return problem(409, "Даты уже заняты", "Выберите другой период");
+    if (hasDatabaseErrorCode(error, "23P01")) {
+      return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
+    }
     console.error("booking_create_failed", { publicNumber, error });
     return problem(500, "Не удалось создать бронирование");
   }

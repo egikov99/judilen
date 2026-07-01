@@ -12,8 +12,7 @@ import {
 } from "@judilen/db";
 import { IcalAdapter, reconcileExternalEvents, type ExternalBooking } from "@judilen/integrations";
 import { and, desc, eq, gt, inArray, lt, ne, sql } from "drizzle-orm";
-
-const activeStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external", "blocked"] as const;
+import { blockingBookingStatuses } from "./booking-availability";
 
 function isPrivateAddress(address: string) {
   const normalized = address.replace(/^::ffff:/, "");
@@ -53,7 +52,7 @@ async function findOverlap(houseId: string, event: ExternalBooking, excludedBook
     .from(bookings)
     .where(and(
       eq(bookings.houseId, houseId),
-      inArray(bookings.status, activeStatuses),
+      inArray(bookings.status, blockingBookingStatuses),
       lt(bookings.checkIn, event.checkOut),
       gt(bookings.checkOut, event.checkIn),
       excludedBookingId ? ne(bookings.id, excludedBookingId) : undefined
