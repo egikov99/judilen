@@ -24,7 +24,7 @@ services:
       DATABASE_URL: postgres://judilen:${POSTGRES_PASSWORD:-judilen}@db:5432/judilen
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@judilen.local}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-ChangeMe123!}
-      SEED_ADMIN_RESET_PASSWORD: ${SEED_ADMIN_RESET_PASSWORD:-true}
+      SEED_ADMIN_RESET_PASSWORD: ${SEED_ADMIN_RESET_PASSWORD:-false}
     depends_on:
       db:
         condition: service_healthy

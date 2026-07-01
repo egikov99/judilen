@@ -2,6 +2,7 @@ import { db, serviceOptions, services } from "@judilen/db";
 import { asc, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
+import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { requirePermission } from "@/lib/session";
 import { problem, serviceOptionSchema } from "@/lib/validation";
 
@@ -22,16 +23,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const [service] = await db.select({ id: services.id }).from(services).where(eq(services.id, id)).limit(1);
   if (!service) return problem(404, "Услуга не найдена");
-  const [option] = await db.transaction(async (tx) => {
-    if (parsed.data.isDefault) await tx.update(serviceOptions).set({ isDefault: false }).where(eq(serviceOptions.serviceId, id));
-    const [created] = await tx.insert(serviceOptions).values({
-      ...parsed.data,
-      description: parsed.data.description || null,
-      price: String(parsed.data.price),
-      serviceId: id
-    }).returning();
-    return [created];
-  });
+  let option: typeof serviceOptions.$inferSelect;
+  try {
+    [option] = await db.transaction(async (tx) => {
+      if (parsed.data.isDefault) await tx.update(serviceOptions).set({ isDefault: false }).where(eq(serviceOptions.serviceId, id));
+      const [created] = await tx.insert(serviceOptions).values({
+        ...parsed.data,
+        description: parsed.data.description || null,
+        price: String(parsed.data.price),
+        serviceId: id
+      }).returning();
+      return [created];
+    });
+  } catch (error) {
+    if (hasDatabaseErrorCode(error, "23505")) return problem(409, "Такой вариант услуги уже существует");
+    throw error;
+  }
   await writeAudit({ session: auth.session, request, action: "service_option.create", entityType: "service_option", entityId: option.id, after: option });
   revalidateTag("services", "max");
   return Response.json({ item: option }, { status: 201 });

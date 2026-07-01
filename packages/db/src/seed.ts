@@ -1,5 +1,5 @@
 import { hash } from "@node-rs/argon2";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db, houseImages, houses, permissions, reviews, rolePermissions, roles, serviceHouses, serviceOptions, services, users, sqlClient } from "./index";
 
 const permissionRows = [
@@ -121,6 +121,9 @@ if (!existingAdmin.length) {
   console.log(`Administrator ${adminEmail} already exists; password was not changed`);
 }
 
+const includeDemoData = process.env.SEED_DEMO_DATA !== "false";
+
+async function seedDemoData() {
 await db.insert(houses).values([
   {
     id: "8fc5f68a-330f-4f50-b6e4-dcb260b12301",
@@ -185,23 +188,42 @@ await db.insert(services).values([
   { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Дополнительное место", slug: "dopolnitelnoe-mesto", description: "Спальное место для гостя сверх базового размещения.", imageUrl: "/images/stitch/asset-038.png", basePrice: "45", priceUnit: "person", isActive: true, sortOrder: 30 }
 ]).onConflictDoNothing();
 
+const demoServiceTitles = ["Аренда лодки", "Баня", "Дополнительное место"];
+const demoServiceRows = await db
+  .select({ id: services.id, title: services.title })
+  .from(services)
+  .where(inArray(services.title, demoServiceTitles));
+const demoServiceIds = new Map(demoServiceRows.map((service) => [service.title, service.id]));
+function serviceId(title: string) {
+  const id = demoServiceIds.get(title);
+  if (!id) throw new Error(`Demo service was not created: ${title}`);
+  return id;
+}
+
 await db.insert(serviceHouses).values([
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301" },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302" }
+  { serviceId: serviceId("Дополнительное место"), houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301" },
+  { serviceId: serviceId("Дополнительное место"), houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302" }
 ]).onConflictDoNothing();
 
 await db.insert(serviceOptions).values([
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "Без мотора", description: "Весельная лодка", price: "50", isDefault: true, sortOrder: 10 },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "С маленьким мотором", description: "Для спокойной прогулки", price: "100", sortOrder: 20 },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "С большим мотором", description: "Для дальних маршрутов", price: "150", sortOrder: 30 },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "2 часа", price: "80", isDefault: true, sortOrder: 10 },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "4 часа", price: "150", sortOrder: 20 },
-  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Стандарт", price: "45", isDefault: true, sortOrder: 10 }
+  { serviceId: serviceId("Аренда лодки"), title: "Без мотора", description: "Весельная лодка", price: "50", isDefault: true, sortOrder: 10 },
+  { serviceId: serviceId("Аренда лодки"), title: "С маленьким мотором", description: "Для спокойной прогулки", price: "100", sortOrder: 20 },
+  { serviceId: serviceId("Аренда лодки"), title: "С большим мотором", description: "Для дальних маршрутов", price: "150", sortOrder: 30 },
+  { serviceId: serviceId("Баня"), title: "2 часа", price: "80", isDefault: true, sortOrder: 10 },
+  { serviceId: serviceId("Баня"), title: "4 часа", price: "150", sortOrder: 20 },
+  { serviceId: serviceId("Дополнительное место"), title: "Стандарт", price: "45", isDefault: true, sortOrder: 10 }
 ]).onConflictDoNothing();
 
 await db.insert(reviews).values([
   { customerName: "Анна", customerEmail: "anna@example.test", rating: 5, text: "Редкий случай, когда место вживую еще красивее. В Кедре очень тихо, а сауна после прогулки - отдельное удовольствие.", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", isPublished: true, source: "manual" },
   { customerName: "Михаил", customerEmail: "mikhail@example.test", rating: 5, text: "Все организовано точно и без лишней суеты. Дом теплый, чистый, кухня действительно удобная.", houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", isPublished: true, source: "manual" }
 ]).onConflictDoNothing();
+}
+
+if (includeDemoData) {
+  await seedDemoData();
+} else {
+  console.log("Skipped demo houses, services, options and reviews during bootstrap");
+}
 
 await sqlClient.end();

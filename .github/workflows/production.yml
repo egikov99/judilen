@@ -43,6 +43,7 @@ jobs:
       SEED_ADMIN_EMAIL: admin@judilen.local
       SEED_ADMIN_PASSWORD: ci-only-admin-password
       SEED_ADMIN_RESET_PASSWORD: "false"
+      RUN_DB_INTEGRATION_TESTS: "true"
       APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
 

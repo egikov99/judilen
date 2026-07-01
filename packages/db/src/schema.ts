@@ -195,7 +195,10 @@ export const services = pgTable(
     sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps
   },
-  (table) => [uniqueIndex("services_slug_unique").on(table.slug)]
+  (table) => [
+    uniqueIndex("services_slug_unique").on(table.slug),
+    uniqueIndex("services_title_unique").on(table.title)
+  ]
 );
 
 export const serviceHouses = pgTable(
@@ -207,17 +210,23 @@ export const serviceHouses = pgTable(
   (table) => [primaryKey({ columns: [table.serviceId, table.houseId] })]
 );
 
-export const serviceOptions = pgTable("service_options", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
-  isDefault: boolean("is_default").notNull().default(false),
-  isActive: boolean("is_active").notNull().default(true),
-  sortOrder: integer("sort_order").notNull().default(0),
-  ...timestamps
-});
+export const serviceOptions = pgTable(
+  "service_options",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    isDefault: boolean("is_default").notNull().default(false),
+    isActive: boolean("is_active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("service_options_identity_unique").on(table.serviceId, table.title, table.price)
+  ]
+);
 
 export const housePrices = pgTable("house_prices", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -391,18 +400,29 @@ export const auditLogs = pgTable("audit_logs", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
 
-export const reviews = pgTable("reviews", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  customerName: text("customer_name").notNull(),
-  customerEmail: text("customer_email"),
-  rating: integer("rating").notNull(),
-  text: text("text").notNull(),
-  houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
-  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
-  isPublished: boolean("is_published").notNull().default(false),
-  source: reviewSource("source").notNull().default("site"),
-  ...timestamps
-});
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    customerName: text("customer_name").notNull(),
+    customerEmail: text("customer_email"),
+    rating: integer("rating").notNull(),
+    text: text("text").notNull(),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    isPublished: boolean("is_published").notNull().default(false),
+    source: reviewSource("source").notNull().default("site"),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("reviews_identity_with_house_unique")
+      .on(table.customerName, sql`md5(${table.text})`, table.houseId)
+      .where(sql`${table.houseId} is not null`),
+    uniqueIndex("reviews_identity_without_house_unique")
+      .on(table.customerName, sql`md5(${table.text})`)
+      .where(sql`${table.houseId} is null`)
+  ]
+);
 
 export const bookingServices = pgTable("booking_services", {
   id: uuid("id").defaultRandom().primaryKey(),

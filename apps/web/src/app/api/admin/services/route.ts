@@ -2,6 +2,7 @@ import { db, serviceHouses, serviceOptions, services } from "@judilen/db";
 import { asc, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
+import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { requirePermission } from "@/lib/session";
 import { problem, serviceSchema } from "@/lib/validation";
 
@@ -24,15 +25,21 @@ export async function POST(request: Request) {
   const parsed = serviceSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
   const { houseIds, basePrice, imageUrl, ...data } = parsed.data;
-  const [service] = await db.transaction(async (tx) => {
-    const [created] = await tx.insert(services).values({
-      ...data,
-      imageUrl: imageUrl || null,
-      basePrice: String(basePrice)
-    }).returning();
-    if (houseIds.length) await tx.insert(serviceHouses).values(houseIds.map((houseId) => ({ serviceId: created.id, houseId })));
-    return [created];
-  });
+  let service: typeof services.$inferSelect;
+  try {
+    [service] = await db.transaction(async (tx) => {
+      const [created] = await tx.insert(services).values({
+        ...data,
+        imageUrl: imageUrl || null,
+        basePrice: String(basePrice)
+      }).returning();
+      if (houseIds.length) await tx.insert(serviceHouses).values(houseIds.map((houseId) => ({ serviceId: created.id, houseId })));
+      return [created];
+    });
+  } catch (error) {
+    if (hasDatabaseErrorCode(error, "23505")) return problem(409, "Услуга с таким названием или slug уже существует");
+    throw error;
+  }
   await writeAudit({ session: auth.session, request, action: "service.create", entityType: "service", entityId: service.id, after: service });
   revalidateTag("services", "max");
   return Response.json({ item: service }, { status: 201 });

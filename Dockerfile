@@ -34,7 +34,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
 COPY packages/db ./packages/db
-CMD ["sh", "-c", "pnpm --filter @judilen/db migrate && pnpm --filter @judilen/db seed"]
+CMD ["sh", "-c", "pnpm --filter @judilen/db migrate && pnpm --filter @judilen/db bootstrap"]
 
 FROM node:24-alpine AS runner
 WORKDIR /app

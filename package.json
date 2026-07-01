@@ -16,6 +16,7 @@
     "test:e2e": "pnpm --filter @judilen/web test:e2e",
     "db:generate": "pnpm --filter @judilen/db generate",
     "db:migrate": "pnpm --filter @judilen/db migrate",
+    "db:bootstrap": "pnpm --filter @judilen/db bootstrap",
     "db:seed": "pnpm --filter @judilen/db seed"
   }
 }

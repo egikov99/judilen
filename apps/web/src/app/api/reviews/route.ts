@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     text: parsed.data.text,
     isPublished: false,
     source: "site"
-  });
+  }).onConflictDoNothing();
   return Response.redirect(new URL("/otzyvy?sent=1", request.url), 303);
 }
 

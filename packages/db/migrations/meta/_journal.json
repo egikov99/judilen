@@ -36,6 +36,13 @@
       "when": 1782950400000,
       "tag": "0004_users_access",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783036800000,
+      "tag": "0005_deduplicate_seed_data",
+      "breakpoints": true
     }
   ]
 }
