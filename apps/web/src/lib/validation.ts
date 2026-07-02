@@ -77,6 +77,7 @@ export const adminReviewSchema = z.object({
   houseId: z.uuid().nullable().optional(),
   bookingId: z.uuid().nullable().optional(),
   isPublished: z.boolean(),
+  status: z.enum(["pending", "published", "rejected"]).optional(),
   source: z.enum(["manual", "site", "google", "booking", "airbnb"])
 });
 

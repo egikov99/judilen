@@ -78,6 +78,13 @@
       "when": 1783468800000,
       "tag": "0010_site_theme_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1783555200000,
+      "tag": "0011_payments_email_reviews",
+      "breakpoints": true
     }
   ]
 }

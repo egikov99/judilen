@@ -73,6 +73,11 @@ export const reviewSource = pgEnum("review_source", [
   "booking",
   "airbnb"
 ]);
+export const reviewModerationStatus = pgEnum("review_moderation_status", [
+  "pending",
+  "published",
+  "rejected"
+]);
 
 export const roles = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -253,6 +258,8 @@ export const bookings = pgTable(
     source: text("source").notNull().default("site"),
     totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).notNull(),
     paidAmount: numeric("paid_amount", { precision: 12, scale: 2 }).notNull().default("0"),
+    paymentMethod: text("payment_method").notNull().default("on_arrival"),
+    paymentStatus: text("payment_status").notNull().default("unpaid"),
     externalId: text("external_id"),
     externalSource: text("external_source"),
     managerComment: text("manager_comment"),
@@ -411,7 +418,9 @@ export const reviews = pgTable(
     text: text("text").notNull(),
     houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
     bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
     isPublished: boolean("is_published").notNull().default(false),
+    status: reviewModerationStatus("status").notNull().default("pending"),
     source: reviewSource("source").notNull().default("site"),
     ...timestamps
   },
@@ -421,7 +430,10 @@ export const reviews = pgTable(
       .where(sql`${table.houseId} is not null`),
     uniqueIndex("reviews_identity_without_house_unique")
       .on(table.customerName, sql`md5(${table.text})`)
-      .where(sql`${table.houseId} is null`)
+      .where(sql`${table.houseId} is null`),
+    uniqueIndex("reviews_booking_unique")
+      .on(table.bookingId)
+      .where(sql`${table.bookingId} is not null`)
   ]
 );
 
@@ -665,3 +677,48 @@ export const siteThemeSettings = pgTable("site_theme_settings", {
   footerColor: text("footer_color").notNull(),
   ...timestamps
 });
+
+export const smtpSettings = pgTable("smtp_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  host: text("host").notNull(),
+  port: integer("port").notNull(),
+  username: text("username"),
+  passwordEncrypted: text("password_encrypted"),
+  encryption: text("encryption").notNull().default("starttls"),
+  fromEmail: text("from_email").notNull(),
+  fromName: text("from_name").notNull(),
+  replyToEmail: text("reply_to_email"),
+  status: text("status").notNull().default("not_configured"),
+  lastError: text("last_error"),
+  lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+  ...timestamps
+});
+
+export const emailTemplates = pgTable("email_templates", {
+  key: text("key").primaryKey(),
+  name: text("name").notNull(),
+  subject: text("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content").notNull(),
+  ...timestamps
+});
+
+export const emailLogs = pgTable(
+  "email_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recipient: text("recipient").notNull(),
+    templateKey: text("template_key").notNull(),
+    subject: text("subject").notNull(),
+    status: text("status").notNull().default("pending"),
+    errorMessage: text("error_message"),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    dedupeKey: text("dedupe_key").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("email_logs_dedupe_unique").on(table.dedupeKey),
+    index("email_logs_created_idx").on(table.createdAt)
+  ]
+);

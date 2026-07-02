@@ -53,7 +53,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
       return;
     }
     setState("success");
-    setMessage(`Заявка ${payload.publicNumber} создана. Мы свяжемся с вами для подтверждения.`);
+    setMessage(`Заявка ${payload.publicNumber} создана. Оплата производится по приезду; мы свяжемся с вами для подтверждения.`);
     event.currentTarget.reset();
   }
   return (

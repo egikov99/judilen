@@ -16,21 +16,26 @@ export async function POST(request: Request) {
   const parsed = reviewSchema.safeParse(form);
   if (!parsed.success) return Response.json({ error: "Некорректные данные", details: parsed.error.flatten() }, { status: 422 });
   const [booking] = await db
-    .select({ bookingId: bookings.id, houseId: bookings.houseId, status: bookings.status })
+    .select({ bookingId: bookings.id, houseId: bookings.houseId, status: bookings.status, checkOut: bookings.checkOut, userId: customers.userId })
     .from(bookings)
     .innerJoin(customers, eq(bookings.customerId, customers.id))
     .where(and(eq(bookings.publicNumber, parsed.data.bookingNumber), eq(customers.email, parsed.data.email)))
     .limit(1);
   if (!booking) return Response.json({ error: "Бронирование не найдено" }, { status: 404 });
-  if (booking.status !== "completed") return Response.json({ error: "Отзыв доступен после завершения поездки" }, { status: 409 });
+  const today = new Date().toISOString().slice(0, 10);
+  if (booking.checkOut >= today || ["cancelled", "declined"].includes(booking.status)) {
+    return Response.json({ error: "Отзыв доступен после завершения поездки" }, { status: 409 });
+  }
   await db.insert(reviews).values({
     customerName: parsed.data.name,
     customerEmail: parsed.data.email,
     bookingId: booking.bookingId,
+    userId: booking.userId,
     houseId: booking.houseId,
     rating: parsed.data.rating,
     text: parsed.data.text,
     isPublished: false,
+    status: "pending",
     source: "site"
   }).onConflictDoNothing();
   return Response.redirect(new URL("/otzyvy?sent=1", request.url), 303);

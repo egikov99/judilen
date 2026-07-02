@@ -5,10 +5,14 @@ import { z } from "zod";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 const schema = z.object({ bookingId: z.uuid() });
 
 export async function POST(request: Request) {
+  if (!onlinePaymentsEnabled()) {
+    return problem(409, "Онлайн-оплата временно отключена", "Оплата производится по приезду");
+  }
   const session = await getSession();
   if (!session) return problem(401, "Требуется авторизация");
   const parsed = schema.safeParse(await request.json().catch(() => null));
@@ -47,6 +51,11 @@ export async function POST(request: Request) {
         status: created.status,
         updatedAt: new Date()
       }).where(eq(payments.id, payment.id));
+      await tx.update(bookings).set({
+        paymentMethod: "online",
+        paymentStatus: created.status,
+        updatedAt: new Date()
+      }).where(eq(bookings.id, booking.id));
       if (created.status === "paid") {
         await tx.update(bookings).set({
           paidAmount: booking.totalAmount,

@@ -1,8 +1,9 @@
-import { bookings, db, notificationPreferences, roles, users } from "@judilen/db";
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { bookings, db, notificationPreferences, reviews, roles, users } from "@judilen/db";
+import { and, eq, inArray, isNull, ne } from "drizzle-orm";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { addDays } from "@/lib/date-ranges";
 import { problem } from "@/lib/validation";
+import { sendBookingCustomerEmail } from "@/lib/booking-emails";
 
 const arrivalStatuses = ["confirmed", "awaiting_payment", "paid", "external"] as const;
 
@@ -44,5 +45,29 @@ export async function POST(request: Request) {
     }
   }
 
-  return Response.json({ queued });
+  const tomorrow = addDays(today, 1);
+  const customerArrivals = await db.select({ id: bookings.id }).from(bookings).where(and(
+    eq(bookings.checkIn, tomorrow),
+    inArray(bookings.status, arrivalStatuses)
+  ));
+  for (const booking of customerArrivals) {
+    await sendBookingCustomerEmail(booking.id, "arrival_reminder", `arrival-reminder:${tomorrow}`);
+  }
+
+  const yesterday = addDays(today, -1);
+  const completedStays = await db.select({ id: bookings.id }).from(bookings)
+    .leftJoin(reviews, eq(reviews.bookingId, bookings.id)).where(and(
+    eq(bookings.checkOut, yesterday),
+    inArray(bookings.status, ["confirmed", "awaiting_payment", "paid", "completed"]),
+    isNull(reviews.id)
+  ));
+  for (const booking of completedStays) {
+    await sendBookingCustomerEmail(booking.id, "review_request", `review-request:${yesterday}`);
+  }
+
+  return Response.json({
+    queued,
+    customerArrivalEmails: customerArrivals.length,
+    reviewRequestEmails: completedStays.length
+  });
 }

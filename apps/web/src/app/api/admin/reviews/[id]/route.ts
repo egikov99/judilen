@@ -14,7 +14,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const [before] = await db.select().from(reviews).where(eq(reviews.id, id)).limit(1);
   if (!before) return problem(404, "Отзыв не найден");
-  const [after] = await db.update(reviews).set({ ...parsed.data, updatedAt: new Date() }).where(eq(reviews.id, id)).returning();
+  const moderation = parsed.data.status
+    ? { status: parsed.data.status, isPublished: parsed.data.status === "published" }
+    : parsed.data.isPublished === undefined
+      ? {}
+      : { status: parsed.data.isPublished ? "published" as const : "rejected" as const };
+  const [after] = await db.update(reviews).set({ ...parsed.data, ...moderation, updatedAt: new Date() }).where(eq(reviews.id, id)).returning();
   await writeAudit({ session: auth.session, request, action: "review.update", entityType: "review", entityId: id, before, after });
   revalidateTag("reviews", "max");
   return Response.json({ item: after });

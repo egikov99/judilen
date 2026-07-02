@@ -1,0 +1,24 @@
+import { DEFAULT_EMAIL_TEMPLATES, type EmailTemplateKey } from "@/lib/email-templates";
+import { sendTemplatedEmail } from "@/lib/email";
+import { requirePermission } from "@/lib/session";
+import { problem } from "@/lib/validation";
+
+export async function POST(_request: Request, { params }: { params: Promise<{ key: string }> }) {
+  const auth = await requirePermission("settings.manage");
+  if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
+  if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const { key } = await params;
+  if (!DEFAULT_EMAIL_TEMPLATES[key as EmailTemplateKey]) return problem(404, "Шаблон не найден");
+  const result = await sendTemplatedEmail({
+    to: auth.session.email,
+    templateKey: key as EmailTemplateKey,
+    variables: {
+      customerName: auth.session.name, bookingNumber: "TEST-001", houseName: "Тестовый домик",
+      checkInDate: "01.08.2026", checkOutDate: "03.08.2026", totalPrice: "500 BYN",
+      bookingStatus: "подтверждено", resetPasswordUrl: "#", reviewUrl: "#", loginUrl: "#"
+    },
+    dedupeKey: `template-test:${key}:${auth.session.userId}:${Date.now()}`
+  });
+  if (!result.sent) return problem(503, "Тестовое письмо не отправлено", result.error);
+  return Response.json({ ok: true, recipient: auth.session.email });
+}

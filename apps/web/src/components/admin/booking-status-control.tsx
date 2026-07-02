@@ -30,5 +30,5 @@ export function BookingStatusControl({ id, status }: { id: string; status: keyof
     setSaving(false);
     if (response.ok) setValue(next);
   }
-  return <select value={value} disabled={saving} onChange={(event) => change(event.target.value as keyof typeof labels)} aria-label="Статус бронирования">{Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select>;
+  return <div className="booking-status-control"><select value={value} disabled={saving} onChange={(event) => change(event.target.value as keyof typeof labels)} aria-label="Статус бронирования">{Object.entries(labels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select><small>{value === "paid" ? "Оплата получена" : "Оплата по приезду · не оплачено"}</small></div>;
 }

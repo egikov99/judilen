@@ -4,6 +4,7 @@ import { createAdminNotification } from "@/lib/admin-notifications";
 import { writeAudit } from "@/lib/audit";
 import { requirePermission } from "@/lib/session";
 import { bookingUpdateSchema, problem } from "@/lib/validation";
+import { sendBookingCustomerEmail } from "@/lib/booking-emails";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requirePermission("bookings.update");
@@ -19,6 +20,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const [updated] = await tx.update(bookings).set({
       ...data,
       ...(paidAmount === undefined ? {} : { paidAmount: String(paidAmount) }),
+      ...(parsed.data.status === "paid" ? { paymentStatus: "paid" } : {}),
       updatedAt: new Date()
     }).where(eq(bookings.id, id)).returning();
     if (parsed.data.status && parsed.data.status !== before.status) {
@@ -33,6 +35,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return [updated];
   });
   await writeAudit({ session: auth.session, request, action: "booking.update", entityType: "booking", entityId: id, before, after });
+  if (parsed.data.status === "confirmed" && before.status !== "confirmed") {
+    await sendBookingCustomerEmail(id, "booking_confirmed", "booking-confirmed");
+  } else if (parsed.data.status === "cancelled" && before.status !== "cancelled") {
+    await sendBookingCustomerEmail(id, "booking_cancelled", "booking-cancelled");
+  } else if (Object.keys(parsed.data).some((key) => key !== "managerComment")) {
+    await sendBookingCustomerEmail(id, "booking_changed", `booking-changed:${after.updatedAt.toISOString()}`);
+  }
   if (parsed.data.status === "cancelled" && before.status !== "cancelled") {
     await createAdminNotification({
       eventType: "booking_cancelled",

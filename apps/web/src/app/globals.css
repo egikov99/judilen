@@ -471,6 +471,21 @@ img { display: block; max-width: 100%; }
 .theme-preview article button { min-height: 42px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--color-button); color: white; font-weight: 700; cursor: pointer; }
 .theme-preview article button:hover { background: var(--color-button-hover); }
 .theme-preview > footer { padding: 18px 24px; background: var(--color-footer); color: white; font-size: 13px; }
+.smtp-settings { margin-bottom: 20px; }
+.smtp-settings .settings-heading { justify-content: space-between; }
+.booking-status-control { display: grid; gap: 5px; }
+.booking-status-control small { color: var(--muted); }
+.email-template-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+.email-template-list { display: grid; gap: 6px; padding: 12px; }
+.email-template-list button { padding: 11px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.email-template-list button:hover, .email-template-list button.is-active { background: var(--sage-100); color: var(--forest-900); }
+.email-template-form { display: grid; gap: 18px; }
+.code-editor { min-height: 260px !important; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.template-variables { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.template-variables code { padding: 5px 8px; border-radius: 6px; background: var(--sage-100); font-size: 12px; }
+.email-preview-frame { width: 100%; height: 330px; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+.review-invitation { display: grid; gap: 10px; margin: 14px 0; }
+.review-invitation .button { justify-self: start; }
 @keyframes modal-fade-in { from { opacity: 0; } }
 @keyframes modal-slide-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
 
@@ -491,6 +506,7 @@ img { display: block; max-width: 100%; }
   .admin-content { padding: 26px 22px; }
   .theme-editor { grid-template-columns: 1fr; }
   .theme-preview { position: static; }
+  .email-template-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 800px) {

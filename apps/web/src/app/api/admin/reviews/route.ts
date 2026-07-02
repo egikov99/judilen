@@ -32,7 +32,12 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = adminReviewSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
-  const [review] = await db.insert(reviews).values(parsed.data).onConflictDoNothing().returning();
+  const status = parsed.data.status ?? (parsed.data.isPublished ? "published" : "rejected");
+  const [review] = await db.insert(reviews).values({
+    ...parsed.data,
+    status,
+    isPublished: status === "published"
+  }).onConflictDoNothing().returning();
   if (!review) return problem(409, "Такой отзыв уже существует");
   await writeAudit({ session: auth.session, request, action: "review.create", entityType: "review", entityId: review.id, after: review });
   revalidateTag("reviews", "max");

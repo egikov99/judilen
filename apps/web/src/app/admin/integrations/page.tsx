@@ -2,6 +2,7 @@ import { calendarConflicts, db, externalCalendars, houses, integrationLogs, inte
 import { desc, eq } from "drizzle-orm";
 import { IntegrationManager } from "@/components/admin/integration-manager";
 import { CommunicationIntegrationManager } from "@/components/admin/communication-integration-manager";
+import { SmtpSettings } from "@/components/admin/smtp-settings";
 import { buildCalendarExportUrl } from "@/lib/calendar-links";
 import { requirePageAccess } from "@/lib/session";
 
@@ -26,6 +27,7 @@ export default async function IntegrationsPage() {
   return <main className="admin-content">
     <h1 className="admin-title">Интеграции</h1>
     <p className="admin-subtitle">Каналы сообщений, импорт внешних бронирований и экспорт занятых дат.</p>
+    {access.permissions.includes("settings.manage") && <SmtpSettings />}
     <CommunicationIntegrationManager canManage={access.permissions.includes("integrations.update")} />
     <IntegrationManager
       houses={houseRows}

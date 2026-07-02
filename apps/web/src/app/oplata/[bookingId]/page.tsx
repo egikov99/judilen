@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { bookings, customers, db, houses } from "@judilen/db";
 import { and, eq } from "drizzle-orm";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PaymentButton } from "@/components/payment-button";
 import { PublicShell } from "@/components/public-shell";
 import { formatCurrency } from "@/components/currency";
 import { getSession } from "@/lib/session";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 export const metadata: Metadata = { title: "Оплата бронирования", robots: { index: false, follow: false } };
 
@@ -14,6 +15,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ bookin
   const session = await getSession();
   if (!session) notFound();
   const { bookingId } = await params;
+  if (!onlinePaymentsEnabled()) redirect(`/oplata?bookingId=${encodeURIComponent(bookingId)}`);
   const conditions = [eq(bookings.id, bookingId)];
   if (session.role === "client") conditions.push(eq(customers.userId, session.userId));
   const [booking] = await db.select({

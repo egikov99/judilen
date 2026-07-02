@@ -5,6 +5,7 @@ import { createAdminNotification } from "@/lib/admin-notifications";
 import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
 import { getActiveServicesByIds } from "@/lib/services";
+import { sendNewBookingEmails } from "@/lib/booking-emails";
 
 function bookingNumber() {
   const date = new Date().toISOString().slice(2, 10).replaceAll("-", "");
@@ -95,7 +96,14 @@ export async function POST(request: Request) {
       href: "/admin/bookings",
       dedupeKey: `booking-created:${bookingId}`
     });
-    return Response.json({ publicNumber, status: "awaiting_confirmation" }, { status: 201 });
+    await sendNewBookingEmails(bookingId);
+    return Response.json({
+      bookingId,
+      publicNumber,
+      status: "awaiting_confirmation",
+      paymentMethod: "on_arrival",
+      paymentStatus: "unpaid"
+    }, { status: 201 });
   } catch (error) {
     if (hasDatabaseErrorCode(error, "23P01")) {
       return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
