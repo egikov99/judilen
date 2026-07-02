@@ -1,6 +1,7 @@
 import { bookingStatusHistory, bookings, customers, db } from "@judilen/db";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -40,6 +41,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       comment: parsed.data.reason
     });
   });
+  await createAdminNotification({
+    eventType: "booking_cancelled",
+    title: "Отмена бронирования",
+    bookingId: id,
+    href: "/admin/bookings",
+    dedupeKey: `booking-cancelled:${id}`
+  });
   return Response.json({ ok: true });
 }
-

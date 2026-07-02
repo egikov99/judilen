@@ -1,6 +1,7 @@
 import { bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
 import { getActiveServicesByIds } from "@/lib/services";
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
   const servicesTotal = serviceLines.reduce((sum, line) => sum + line.totalPrice, 0);
   const publicNumber = bookingNumber();
   try {
-    await db.transaction(async (tx) => {
+    const bookingId = await db.transaction(async (tx) => {
       const [customer] = await tx.insert(customers).values({
         email: parsed.data.email,
         firstName: parsed.data.firstName,
@@ -85,6 +86,14 @@ export async function POST(request: Request) {
         toStatus: "awaiting_confirmation",
         comment: "Заявка создана на публичном сайте"
       });
+      return booking.id;
+    });
+    await createAdminNotification({
+      eventType: "booking_created",
+      title: "Новое бронирование",
+      bookingId,
+      href: "/admin/bookings",
+      dedupeKey: `booking-created:${bookingId}`
     });
     return Response.json({ publicNumber, status: "awaiting_confirmation" }, { status: 201 });
   } catch (error) {

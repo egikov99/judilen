@@ -2,6 +2,7 @@ import { bookingStatusHistory, bookings, customers, db, payments } from "@judile
 import { getPaymentProvider } from "@judilen/integrations";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -61,10 +62,16 @@ export async function POST(request: Request) {
         });
       }
     });
+    await createAdminNotification({
+      eventType: "payment_status",
+      title: created.status === "paid" ? "Новая оплата" : "Изменение статуса оплаты",
+      bookingId: booking.id,
+      href: "/admin/bookings",
+      dedupeKey: `payment-status:${payment.id}:${created.status}`
+    });
     return Response.json({ confirmationUrl: created.confirmationUrl });
   } catch (error) {
     await db.update(payments).set({ status: "failed", updatedAt: new Date() }).where(eq(payments.id, payment.id));
     return problem(503, "Платежный сервис недоступен", error instanceof Error ? error.message : undefined);
   }
 }
-

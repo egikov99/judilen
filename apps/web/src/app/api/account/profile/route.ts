@@ -1,6 +1,7 @@
 import { customers, db, users } from "@judilen/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -37,6 +38,13 @@ export async function PATCH(request: Request) {
     await tx.update(customers).set({ ...parsed.data, updatedAt: new Date() }).where(eq(customers.userId, session.userId));
     return [updated];
   });
+  if (session.role === "client") {
+    await createAdminNotification({
+      eventType: "customer_updated",
+      title: "Клиент изменил данные",
+      href: "/admin/customers",
+      dedupeKey: `customer-updated:${session.userId}:${Date.now()}`
+    });
+  }
   return Response.json({ item: profile });
 }
-

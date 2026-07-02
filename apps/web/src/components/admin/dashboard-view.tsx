@@ -61,5 +61,5 @@ export function DashboardView({ initial }: { initial: Data }) {
 }
 
 function EventTable({ title, rows }: { title: string; rows: EventRow[] }) {
-  return <section className="panel"><h2>{title}</h2>{rows.length ? <table className="data-table compact-table"><thead><tr><th>Дата</th><th>Дом</th><th>Гость</th><th>Источник</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td>{row.date}</td><td>{row.houseName}</td><td>{row.firstName} {row.lastName}</td><td>{labels[row.source] ?? row.source}</td></tr>)}</tbody></table> : <p className="notice">Нет данных за выбранный период.</p>}</section>;
+  return <section className="panel"><h2>{title}</h2>{rows.length ? <table className="data-table compact-table"><thead><tr><th>Дата</th><th>Дом</th><th>Гость</th><th>Источник</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td data-label="Дата">{row.date}</td><td data-label="Дом">{row.houseName}</td><td data-label="Гость">{row.firstName} {row.lastName}</td><td data-label="Источник">{labels[row.source] ?? row.source}</td></tr>)}</tbody></table> : <p className="notice">Нет данных за выбранный период.</p>}</section>;
 }

@@ -13,6 +13,7 @@ import {
 import { IcalAdapter, reconcileExternalEvents, type ExternalBooking } from "@judilen/integrations";
 import { and, desc, eq, gt, inArray, lt, ne, sql } from "drizzle-orm";
 import { blockingBookingStatuses } from "./booking-availability";
+import { createAdminNotification } from "./admin-notifications";
 
 function isPrivateAddress(address: string) {
   const normalized = address.replace(/^::ffff:/, "");
@@ -167,7 +168,7 @@ export async function syncExternalCalendar(calendarId: string) {
         continue;
       }
 
-      await db.transaction(async (tx) => {
+      const importedBookingId = await db.transaction(async (tx) => {
         const externalEmail = `calendar-${calendar.id}@external.invalid`;
         const [customer] = await tx.insert(customers).values({
           firstName: "Внешнее бронирование",
@@ -202,6 +203,14 @@ export async function syncExternalCalendar(calendarId: string) {
           rawPayload,
           lastSyncedAt: syncStartedAt
         });
+        return booking.id;
+      });
+      await createAdminNotification({
+        eventType: "booking_created",
+        title: "Новое внешнее бронирование",
+        bookingId: importedBookingId,
+        href: "/admin/calendar",
+        dedupeKey: `booking-created:${importedBookingId}`
       });
       imported++;
     }
@@ -244,6 +253,12 @@ export async function syncExternalCalendar(calendarId: string) {
       }).where(eq(integrations.id, calendar.integrationId));
     }
     await logEvent(calendar, "error", message);
+    await createAdminNotification({
+      eventType: "integration_error",
+      title: "Ошибка синхронизации",
+      href: "/admin/integrations",
+      dedupeKey: `integration-error:${calendar.id}:${syncStartedAt.toISOString().slice(0, 13)}`
+    });
     throw error;
   }
 }

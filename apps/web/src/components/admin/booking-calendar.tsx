@@ -16,6 +16,7 @@ export function BookingCalendar({ initial, initialStart, initialEnd, canCreate }
   const [selected, setSelected] = useState<Booking | null>(null);
   const [free, setFree] = useState<{ houseId: string; houseName: string; date: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [houseFilter, setHouseFilter] = useState("");
 
   async function load(start: string, end: string) {
     setLoading(true);
@@ -30,6 +31,8 @@ export function BookingCalendar({ initial, initialStart, initialEnd, canCreate }
   }
   const days: string[] = [];
   for (let day = startDate; day <= endDate; day = addDays(day, 1)) days.push(day);
+  const visibleHouses = houseFilter ? data.houses.filter((house) => house.id === houseFilter) : data.houses;
+  const today = new Date().toISOString().slice(0, 10);
 
   return <div className="form-stack">
     <div className="period-toolbar">
@@ -40,12 +43,25 @@ export function BookingCalendar({ initial, initialStart, initialEnd, canCreate }
       <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
       <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
       <button className="button button-primary" disabled={loading} onClick={() => load(startDate, endDate)}>Показать</button>
+      <select aria-label="Режим календаря" defaultValue="" onChange={(event) => {
+        const length = Number(event.target.value);
+        if (length) load(today, addDays(today, length - 1));
+      }}>
+        <option value="" disabled>Режим</option>
+        <option value="1">День</option>
+        <option value="7">Неделя</option>
+        <option value="14">2 недели</option>
+      </select>
+      <select aria-label="Фильтр по домику" value={houseFilter} onChange={(event) => setHouseFilter(event.target.value)}>
+        <option value="">Все домики</option>
+        {data.houses.map((house) => <option value={house.id} key={house.id}>{house.name}</option>)}
+      </select>
     </div>
     <div className="calendar-legend">{Object.entries(labels).map(([source, label]) => <span className="badge source-badge" data-source={source} key={source}>{label}</span>)}<span className="badge conflict-badge">Конфликт</span></div>
     <section className="panel">
-      {data.houses.length ? <div className="calendar dynamic-calendar" style={{ gridTemplateColumns: `170px repeat(${days.length}, minmax(64px, 1fr))` }}>
+      {visibleHouses.length ? <div className="calendar-scroll"><div className="calendar dynamic-calendar" style={{ gridTemplateColumns: `170px repeat(${days.length}, minmax(64px, 1fr))` }}>
         <div className="calendar-head">Дом / дата</div>{days.map((day) => <div className="calendar-head" key={day}>{new Date(`${day}T00:00:00Z`).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", weekday: "short" })}</div>)}
-        {data.houses.flatMap((house) => [<div className="calendar-house" key={house.id}>{house.name}</div>, ...days.map((day) => {
+        {visibleHouses.flatMap((house) => [<div className="calendar-house" key={house.id}>{house.name}</div>, ...days.map((day) => {
           const booking = data.bookings.find((row) => row.houseId === house.id && row.checkIn <= day && row.checkOut > day);
           const conflict = data.conflicts.find((row) => row.houseId === house.id && row.startDate <= day && row.endDate > day);
           const displaySource = booking?.status === "blocked" ? "blocked" : booking?.source;
@@ -54,7 +70,7 @@ export function BookingCalendar({ initial, initialStart, initialEnd, canCreate }
             {conflict && <span className="calendar-conflict">!</span>}
           </button>;
         })])}
-      </div> : <p className="notice">Домиков пока нет.</p>}
+      </div></div> : <p className="notice">Домики не найдены.</p>}
     </section>
     {!data.bookings.length && <p className="notice">Нет данных за выбранный период.</p>}
     {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><article className="modal-panel" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setSelected(null)}>×</button><h2>{selected.publicNumber}</h2><div className="summary-row"><span>Домик</span><strong>{selected.houseName}</strong></div><div className="summary-row"><span>Даты</span><strong>{selected.checkIn} — {selected.checkOut}</strong></div><div className="summary-row"><span>Клиент</span><strong>{selected.firstName} {selected.lastName}<br />{selected.phone}</strong></div><div className="summary-row"><span>Сумма</span><strong>{formatCurrency(Number(selected.totalAmount))}</strong></div><div className="summary-row"><span>Источник</span><strong>{labels[selected.source] ?? selected.source}</strong></div><div className="summary-row"><span>Статус</span><strong>{selected.status}</strong></div></article></div>}

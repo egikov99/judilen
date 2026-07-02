@@ -1,5 +1,6 @@
 import { bookingStatusHistory, bookings, db } from "@judilen/db";
 import { eq } from "drizzle-orm";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { writeAudit } from "@/lib/audit";
 import { requirePermission } from "@/lib/session";
 import { bookingUpdateSchema, problem } from "@/lib/validation";
@@ -32,5 +33,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return [updated];
   });
   await writeAudit({ session: auth.session, request, action: "booking.update", entityType: "booking", entityId: id, before, after });
+  if (parsed.data.status === "cancelled" && before.status !== "cancelled") {
+    await createAdminNotification({
+      eventType: "booking_cancelled",
+      title: "Отмена бронирования",
+      bookingId: id,
+      href: "/admin/bookings",
+      dedupeKey: `booking-cancelled:${id}`
+    });
+  } else if (parsed.data.status === "paid" || paidAmount !== undefined) {
+    await createAdminNotification({
+      eventType: "payment_status",
+      title: "Изменение статуса оплаты",
+      bookingId: id,
+      href: "/admin/bookings",
+      dedupeKey: `payment-status:booking:${id}:${after.updatedAt.toISOString()}`
+    });
+  }
   return Response.json({ item: after });
 }

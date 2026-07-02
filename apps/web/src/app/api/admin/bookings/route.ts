@@ -2,6 +2,7 @@ import { bookingStatusHistory, bookings, customers, db, houses } from "@judilen/
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { requirePermission } from "@/lib/session";
@@ -113,6 +114,13 @@ export async function POST(request: Request) {
       return booking;
     });
     await writeAudit({ session: auth.session, request, action: "booking.create", entityType: "booking", entityId: created.id, after: created });
+    await createAdminNotification({
+      eventType: "booking_created",
+      title: "Новое бронирование",
+      bookingId: created.id,
+      href: "/admin/bookings",
+      dedupeKey: `booking-created:${created.id}`
+    });
     return Response.json({ item: created }, { status: 201 });
   } catch (error) {
     if (hasDatabaseErrorCode(error, "23P01")) {

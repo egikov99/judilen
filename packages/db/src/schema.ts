@@ -2,6 +2,7 @@ import {
   boolean,
   date,
   integer,
+  index,
   jsonb,
   numeric,
   pgEnum,
@@ -452,3 +453,74 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   usedAt: timestamp("used_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
+
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true })
+  },
+  (table) => [
+    uniqueIndex("push_subscriptions_endpoint_unique").on(table.endpoint),
+    index("push_subscriptions_user_idx").on(table.userId)
+  ]
+);
+
+export const notificationPreferences = pgTable("notification_preferences", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).primaryKey(),
+  pushEnabled: boolean("push_enabled").notNull().default(false),
+  eventTypes: text("event_types").array().notNull().default(sql`ARRAY[
+    'booking_created',
+    'customer_message',
+    'customer_updated',
+    'payment_status',
+    'booking_cancelled',
+    'arrival_reminder',
+    'integration_error'
+  ]::text[]`),
+  reminderHours: integer("reminder_hours").notNull().default(24),
+  ...timestamps
+});
+
+export const adminNotifications = pgTable(
+  "admin_notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    eventType: text("event_type").notNull(),
+    title: text("title").notNull(),
+    href: text("href"),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }),
+    dedupeKey: text("dedupe_key").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("admin_notifications_user_dedupe_unique").on(table.userId, table.dedupeKey),
+    index("admin_notifications_user_created_idx").on(table.userId, table.createdAt)
+  ]
+);
+
+export const notificationLogs = pgTable(
+  "notification_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    eventType: text("event_type").notNull(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "set null" }),
+    status: text("status").notNull(),
+    dedupeKey: text("dedupe_key").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    errorMessage: text("error_message"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("notification_logs_user_dedupe_unique").on(table.userId, table.dedupeKey)
+  ]
+);

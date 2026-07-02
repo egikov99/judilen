@@ -1,6 +1,7 @@
 import { bookings, customerMessages, customers, db } from "@judilen/db";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -37,5 +38,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     message: parsed.data.message,
     isInternal: false
   }).returning();
+  await createAdminNotification({
+    eventType: "customer_message",
+    title: "Новое сообщение клиента",
+    bookingId: id,
+    href: "/admin/bookings",
+    dedupeKey: `customer-message:${item.id}`
+  });
   return Response.json({ item }, { status: 201 });
 }

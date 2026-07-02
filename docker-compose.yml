@@ -49,6 +49,10 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/apps/web/public/uploads}
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-10485760}
       ICAL_SYNC_CRON_SECRET: ${ICAL_SYNC_CRON_SECRET:-}
+      NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:-replace-with-a-random-cron-secret}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-disabled}
       PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-}
       SMTP_HOST: ${SMTP_HOST:-}
@@ -71,6 +75,22 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+
+  notification-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    restart: unless-stopped
+    environment:
+      NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:-replace-with-a-random-cron-secret}
+    command:
+      - sh
+      - -c
+      - while true; do wget -qO- --header="Authorization: Bearer $$NOTIFICATION_CRON_SECRET" --post-data="" http://app:3000/api/cron/arrival-reminders || true; sleep 3600; done
+    depends_on:
+      app:
+        condition: service_healthy
 
 volumes:
   postgres_data:

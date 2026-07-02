@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   },
   description: "Аренда уютных домиков в хвойном лесу: сауна, тишина, авторская кухня и заботливый сервис.",
   applicationName: "Усадьба «Юдилен»",
+  manifest: "/manifest.webmanifest",
+  icons: { apple: "/icons/admin-180.png" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -36,4 +38,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-

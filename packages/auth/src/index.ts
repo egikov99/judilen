@@ -201,7 +201,8 @@ export function adminNavigation(role: Role) {
     { href: "/admin/content", label: "Контент", permission: "content.write" },
     { href: "/admin/reports", label: "Отчеты", permission: "reports.read" },
     { href: "/admin/integrations", label: "Интеграции", permission: "external_calendars.read" },
-    { href: "/admin/users", label: "Пользователи", permission: "users.read" }
+    { href: "/admin/users", label: "Пользователи", permission: "users.read" },
+    { href: "/admin/settings", label: "Настройки", permission: "settings.manage" }
   ] satisfies Array<{ href: string; label: string; permission: Permission }>;
   return items.filter((item) => can(role, item.permission));
 }
