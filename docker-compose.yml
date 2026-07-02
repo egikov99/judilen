@@ -87,7 +87,14 @@ services:
     command:
       - sh
       - -c
-      - while true; do wget -qO- --header="Authorization: Bearer $$NOTIFICATION_CRON_SECRET" --post-data="" http://app:3000/api/cron/arrival-reminders || true; sleep 3600; done
+      - |-
+        while true; do
+          wget -qO- \
+            --header="Authorization: Bearer $$NOTIFICATION_CRON_SECRET" \
+            --post-data="" \
+            http://app:3000/api/cron/arrival-reminders || true
+          sleep 3600
+        done
     depends_on:
       app:
         condition: service_healthy
