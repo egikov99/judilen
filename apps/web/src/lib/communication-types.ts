@@ -7,7 +7,7 @@ export const communicationProviders = [
   "viber"
 ] as const;
 
-export type CommunicationProvider = typeof communicationProviders[number];
+export type CommunicationProvider = typeof communicationProviders[number] | "website";
 
 export type CommunicationField = {
   key: string;
@@ -70,9 +70,15 @@ export const communicationProviderDefinitions: Record<CommunicationProvider, {
     description: "Viber Bot API. Новые боты доступны на коммерческих условиях.",
     publicFields: [{ key: "botName", label: "Имя бота", placeholder: "Юдилен" }],
     secretFields: [{ key: "authToken", label: "Authentication Token", required: true }]
+  },
+  website: {
+    label: "Сайт",
+    description: "Обращения из публичного виджета связи.",
+    publicFields: [],
+    secretFields: []
   }
 };
 
 export function isCommunicationProvider(value: string): value is CommunicationProvider {
-  return communicationProviders.includes(value as CommunicationProvider);
+  return value === "website" || communicationProviders.includes(value as typeof communicationProviders[number]);
 }

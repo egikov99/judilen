@@ -31,6 +31,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!row.channel.isEnabled || row.channel.status !== "connected") {
     return problem(409, "Канал отключён или не прошёл проверку");
   }
+  if (row.channel.provider === "website") {
+    return problem(409, "Ответ через виджет пока недоступен", "Свяжитесь с клиентом по телефону или email из первого сообщения");
+  }
 
   const now = new Date();
   const [message] = await db.insert(chatMessages).values({

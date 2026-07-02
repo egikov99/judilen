@@ -130,7 +130,7 @@ export async function ingestCommunicationMessage(
     const recipients = await userIdsWithPermission("chats.read");
     await createAdminNotification({
       eventType: "customer_message",
-      title: isTelegramGroup ? "Новое сообщение из Telegram-группы" : "Новое сообщение от клиента",
+      title: isTelegramGroup ? "Новое сообщение из Telegram-группы" : channel.provider === "website" ? "Новое сообщение с сайта" : "Новое сообщение от клиента",
       href: `/admin/chats?conversation=${result.conversationId}`,
       dedupeKey: `channel-message:${result.messageId}`,
       userIds: recipients

@@ -722,3 +722,22 @@ export const emailLogs = pgTable(
     index("email_logs_created_idx").on(table.createdAt)
   ]
 );
+
+export const contactWidgetSettings = pgTable(
+  "contact_widget_settings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    channelType: text("channel_type").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    displayName: text("display_name").notNull(),
+    subtitle: text("subtitle"),
+    url: text("url"),
+    phone: text("phone"),
+    username: text("username"),
+    defaultMessage: text("default_message"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    icon: text("icon"),
+    ...timestamps
+  },
+  (table) => [uniqueIndex("contact_widget_settings_channel_unique").on(table.channelType)]
+);

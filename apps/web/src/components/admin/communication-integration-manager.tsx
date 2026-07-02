@@ -34,7 +34,8 @@ const providerIcons = {
   vk: MessageCircle,
   instagram: Camera,
   whatsapp: Phone,
-  viber: MessagesSquare
+  viber: MessagesSquare,
+  website: MessageCircle
 } satisfies Record<CommunicationProvider, typeof Send>;
 
 function initialDrafts() {
