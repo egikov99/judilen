@@ -651,3 +651,17 @@ export const notificationLogs = pgTable(
     uniqueIndex("notification_logs_user_dedupe_unique").on(table.userId, table.dedupeKey)
   ]
 );
+
+export const siteThemeSettings = pgTable("site_theme_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  primaryColor: text("primary_color").notNull(),
+  buttonColor: text("button_color").notNull(),
+  buttonHoverColor: text("button_hover_color").notNull(),
+  backgroundColor: text("background_color").notNull(),
+  cardColor: text("card_color").notNull(),
+  textColor: text("text_color").notNull(),
+  accentColor: text("accent_color").notNull(),
+  headerColor: text("header_color").notNull(),
+  footerColor: text("footer_color").notNull(),
+  ...timestamps
+});

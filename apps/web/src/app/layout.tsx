@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SiteThemeLoader } from "@/components/site-theme-loader";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -34,7 +35,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body><SiteThemeLoader />{children}</body>
     </html>
   );
 }
