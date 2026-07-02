@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "Усадьба «Юдилен»",
     title: "Усадьба «Юдилен»",
     description: "Премиальный отдых в сердце природы.",
-    images: [{ url: "/images/stitch/asset-025.png", width: 512, height: 512, alt: "Домик усадьбы в хвойном лесу" }]
+    images: [{ url: "/images/stitch/asset-025_1.jpg", width: 512, height: 512, alt: "Домик усадьбы в хвойном лесу" }]
   },
   robots: { index: true, follow: true }
 };

@@ -113,7 +113,7 @@ img { display: block; max-width: 100%; }
 
 .hero {
   position: relative; min-height: 760px; display: grid; place-items: center; color: white;
-  background: linear-gradient(rgba(8, 22, 9, .28), rgba(8, 22, 9, .64)), url("/images/stitch/asset-025.png") center/cover;
+  background: linear-gradient(rgba(8, 22, 9, .28), rgba(8, 22, 9, .64)), url("/images/stitch/asset-025_1.jpg") center/cover;
 }
 .hero-content { max-width: 850px; padding: 110px 20px 170px; text-align: center; }
 .kicker { text-transform: uppercase; letter-spacing: .16em; font-size: 12px; font-weight: 700; }
@@ -237,7 +237,7 @@ img { display: block; max-width: 100%; }
 .error { background: #ffdad6; color: #93000a; }
 .trip-card { display: grid; grid-template-columns: minmax(230px,.7fr) 1.3fr; max-width: 900px; }
 
-.auth-page { min-height: calc(100vh - 76px); display: grid; place-items: center; padding: 50px 20px; background: linear-gradient(rgba(11,36,16,.45),rgba(11,36,16,.62)), url("/images/stitch/asset-025.png") center/cover; }
+.auth-page { min-height: calc(100vh - 76px); display: grid; place-items: center; padding: 50px 20px; background: linear-gradient(rgba(11,36,16,.45),rgba(11,36,16,.62)), url("/images/stitch/asset-025_1.jpg") center/cover; }
 .auth-card { width: min(430px, 100%); padding: 38px; border-radius: 22px; background: color-mix(in srgb, var(--paper) 96%, transparent); box-shadow: var(--shadow); }
 .auth-card h1 { font: 700 37px var(--serif); margin: 0 0 8px; }
 

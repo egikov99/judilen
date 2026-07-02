@@ -60,7 +60,7 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
     }
     return [...mapped.values()].map((house) => ({
       ...house,
-      images: house.images.length ? house.images : ["/images/stitch/asset-025.png"]
+      images: house.images.length ? house.images : ["/images/stitch/asset-025_1.jpg"]
     }));
   } catch (error) {
     if (fallbackAllowed() && !availability) {

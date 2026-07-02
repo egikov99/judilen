@@ -32,9 +32,9 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
       <section className="hero">
         <div className="hero-content">
-          <div className="kicker">Природа. Тишина. Забота.</div>
-          <h1>Побег в сердце природы</h1>
-          <p>Премиальный отдых среди хвойного леса. Пространство, где время замедляется, а главное снова становится заметным.</p>
+          <div className="kicker">Озеро. Природа. Семейный отдых.</div>
+          <h1>Отдых на первой береговой линии озера Струсто</h1>
+          <p>Агроэкоусадьба «Юдилен-Струсто» — уютное место для отдыха у воды с большой ухоженной территорией, песчаным берегом, пирсом, беседками и развлечениями для всей семьи.</p>
           <Link className="button button-light" href="#booking">Выбрать даты ↓</Link>
         </div>
       </section>
@@ -43,8 +43,8 @@ export default async function HomePage() {
       <section className="section">
         <div className="container">
           <div className="section-heading">
-            <div><span className="eyebrow">Ваш дом в лесу</span><h2>Домики для тишины и близких</h2></div>
-            <p>Каждый дом спроектирован так, чтобы лес оставался главным героем, а бытовые детали не отвлекали от отдыха.</p>
+            <div><span className="eyebrow">Проживание у озера</span><h2>Домики для семейного отдыха на природе</h2></div>
+            <p>Комфортные домики рядом с озером Струсто: для спокойного отдыха, семейных выходных, рыбалки и прогулок по Браславщине.</p>
           </div>
           <div className="house-grid">{houses.map((house) => <HouseCard key={house.slug} house={house} />)}</div>
         </div>
@@ -54,13 +54,13 @@ export default async function HomePage() {
         <div className="container split">
           <div className="split-image" role="img" aria-label="Вид на лесное озеро из домика" />
           <div>
-            <span className="eyebrow">Философия усадьбы</span>
-            <h2 className="page-title">Комфорт, который не спорит с природой</h2>
-            <p className="page-intro">Мы убрали лишнее и оставили то, что действительно помогает отдыхать: натуральные материалы, чистый воздух, приватность и внимательный сервис.</p>
+            <span className="eyebrow">Территория и отдых</span>
+            <h2 className="page-title">Место, где интересно и взрослым, и детям</h2>
+            <p className="page-intro">На территории усадьбы есть просторные беседки с зоной барбекю, батут, детская площадка, понтонный пирс для рыбалки и песчаный берег с пологим заходом в воду.</p>
             <div className="feature-list">
-              <div className="feature"><span className="feature-icon">⌂</span><div><h3>Продуманные дома</h3><p>Тепло в любой сезон, удобные кухни и качественный сон.</p></div></div>
-              <div className="feature"><span className="feature-icon">♧</span><div><h3>Лес рядом</h3><p>Маршруты начинаются от порога, без машин и шума.</p></div></div>
-              <div className="feature"><span className="feature-icon">♡</span><div><h3>Забота без навязчивости</h3><p>Команда рядом, когда нужна, и незаметна в остальное время.</p></div></div>
+              <div className="feature"><span className="feature-icon">⌂</span><div><h3>Первая береговая линия</h3><p>Озеро Струсто рядом: купание, прогулки у воды, пирс и красивые виды каждый день.</p></div></div>
+              <div className="feature"><span className="feature-icon">♧</span><div><h3>Отдых для всей семьи</h3><p>Детская площадка, батут, беседки, зона барбекю и большая ухоженная территория.</p></div></div>
+              <div className="feature"><span className="feature-icon">♡</span><div><h3>Живой уголок</h3><p>На территории есть домашние животные, которых можно покормить и сделать красивые фотографии.</p></div></div>
             </div>
           </div>
         </div>
@@ -77,10 +77,10 @@ export default async function HomePage() {
         <div className="container">
           <div className="section-heading services-heading">
             <div>
-              <span className="eyebrow">Больше впечатлений</span>
-              <h2>Услуги для вашего отдыха</h2>
+              <span className="eyebrow">Активный отдых</span>
+              <h2>Развлечения на озере и рядом с усадьбой</h2>
             </div>
-            <p>Дополните проживание баней, прогулкой на лодке или другими занятиями на природе.</p>
+            <p>Лодки на веслах и с мотором, сапборды, лодка-барбекю до 6 человек, рыбалка с гидом и прогулки по живописным местам Браславщины.</p>
           </div>
           {services.length ? (
             <div className="home-service-grid">
@@ -106,7 +106,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section"><div className="container"><div className="cta"><h2>Лес уже ждет</h2><p>Выберите дом и даты. Мы подтвердим бронирование и поможем подготовить отдых под ваши пожелания.</p><Link className="button button-light" href="/domiki">Выбрать домик</Link></div></div></section>
+      <section className="section"><div className="container"><div className="cta"><h2>Озеро Струсто уже ждет</h2><p>Выберите домик и даты отдыха. Мы подтвердим бронирование и поможем подобрать развлечения: баню, лодку, сапборды, рыбалку или семейный отдых у воды.</p><Link className="button button-light" href="/domiki">Выбрать домик</Link></div></div></section>
     </PublicShell>
   );
 }
