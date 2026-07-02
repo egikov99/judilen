@@ -305,9 +305,16 @@ describe("communication inbox", () => {
     );
     expect(proxy).toContain('pathname === "/api/integrations/vk/callback"');
     expect(vkCallback).toContain('eventType === "confirmation"');
-    expect(vkCallback).toContain("return plain(confirmationToken)");
+    expect(vkCallback).toContain("process.env.VK_CONFIRMATION_TOKEN");
+    expect(vkCallback).toContain("return plain(configuredConfirmationToken, 200");
+    expect(vkCallback).toContain('"Content-Type": "text/plain; charset=utf-8"');
+    expect(vkCallback).toContain('console.info("vk_callback_response"');
     expect(vkCallback).toContain("secureEquals(text(payload.secret)");
     expect(vkCallback).toContain("delete safePayload.secret");
     expect(vkCallback).toContain("vkEventsLog.eventId");
+
+    const compose = readFileSync(resolve(process.cwd(), "../../docker-compose.yml"), "utf8");
+    expect(compose).toContain("VK_GROUP_ID: ${VK_GROUP_ID:-229727757}");
+    expect(compose).toContain("VK_CONFIRMATION_TOKEN: ${VK_CONFIRMATION_TOKEN:-a7ef0db2}");
   });
 });

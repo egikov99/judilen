@@ -46,6 +46,8 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-replace-with-at-least-32-random-characters}
       COMMUNICATION_ENCRYPTION_KEY: ${COMMUNICATION_ENCRYPTION_KEY:-}
       META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v25.0}
+      VK_GROUP_ID: ${VK_GROUP_ID:-229727757}
+      VK_CONFIRMATION_TOKEN: ${VK_CONFIRMATION_TOKEN:-a7ef0db2}
       SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-604800}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://judilen.digitaleasyup.com}
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/apps/web/public/uploads}
