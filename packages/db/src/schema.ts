@@ -527,6 +527,51 @@ export const chatAttachments = pgTable(
   ]
 );
 
+export const vkIntegrations = pgTable(
+  "vk_integrations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    communicationChannelId: uuid("communication_channel_id")
+      .references(() => communicationChannels.id, { onDelete: "set null" }),
+    groupId: text("group_id").notNull(),
+    groupName: text("group_name"),
+    apiVersion: text("api_version").notNull().default("5.199"),
+    callbackUrl: text("callback_url").notNull(),
+    confirmationToken: text("confirmation_token").notNull(),
+    secretKey: text("secret_key").notNull(),
+    accessToken: text("access_token").notNull(),
+    status: text("status").notNull().default("pending"),
+    lastConfirmedAt: timestamp("last_confirmed_at", { withTimezone: true }),
+    lastEventAt: timestamp("last_event_at", { withTimezone: true }),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("vk_integrations_group_unique").on(table.groupId),
+    uniqueIndex("vk_integrations_channel_unique").on(table.communicationChannelId)
+  ]
+);
+
+export const vkEventsLog = pgTable(
+  "vk_events_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    integrationId: uuid("integration_id")
+      .references(() => vkIntegrations.id, { onDelete: "cascade" })
+      .notNull(),
+    groupId: text("group_id").notNull(),
+    eventType: text("event_type").notNull(),
+    eventId: text("event_id").notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    status: text("status").notNull(),
+    errorMessage: text("error_message"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("vk_events_log_event_unique").on(table.integrationId, table.eventId),
+    index("vk_events_log_integration_created_idx").on(table.integrationId, table.createdAt)
+  ]
+);
+
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),

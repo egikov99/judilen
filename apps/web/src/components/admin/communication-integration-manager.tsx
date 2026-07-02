@@ -7,6 +7,7 @@ import {
   communicationProviders,
   type CommunicationProvider
 } from "@/lib/communication-types";
+import { VkIntegrationSettings } from "./vk-integration-settings";
 
 type ChannelItem = {
   provider: CommunicationProvider;
@@ -129,6 +130,7 @@ export function CommunicationIntegrationManager({ canManage }: { canManage: bool
     {notice && <p className="notice" role="status">{notice}</p>}
     <div className="integration-grid communication-grid">
       {communicationProviders.map((provider) => {
+        if (provider === "vk") return <VkIntegrationSettings canManage={canManage} key={provider} />;
         const definition = communicationProviderDefinitions[provider];
         const item = items.find((candidate) => candidate.provider === provider);
         const Icon = providerIcons[provider];

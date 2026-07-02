@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { detectImageType } from "./uploads";
 import type { IncomingChannelAttachment } from "./communication-adapters";
 
-const telegramDownloadLimit = 20 * 1024 * 1024;
+const attachmentDownloadLimit = 20 * 1024 * 1024;
 
 export function chatAttachmentRoot() {
   return (process.env.CHAT_ATTACHMENT_DIR || "/tmp/judilen-chat-attachments").replace(/\/+$/, "");
@@ -33,7 +33,7 @@ async function telegramFilePath(token: string, fileId: string) {
   if (!response.ok || !payload.ok || !payload.result?.file_path) {
     throw new Error(payload.description || "Telegram getFile failed");
   }
-  if (payload.result.file_size && payload.result.file_size > telegramDownloadLimit) {
+  if (payload.result.file_size && payload.result.file_size > attachmentDownloadLimit) {
     throw new Error("Telegram attachment exceeds the 20 MB download limit");
   }
   return payload.result.file_path;
@@ -44,7 +44,7 @@ export async function downloadTelegramAttachment(
   channelId: string,
   attachment: IncomingChannelAttachment
 ) {
-  if (attachment.sizeBytes && attachment.sizeBytes > telegramDownloadLimit) {
+  if (attachment.sizeBytes && attachment.sizeBytes > attachmentDownloadLimit) {
     throw new Error("Telegram attachment exceeds the 20 MB download limit");
   }
   const filePath = await telegramFilePath(token, attachment.externalFileId);
@@ -54,22 +54,32 @@ export async function downloadTelegramAttachment(
   });
   if (!response.ok) throw new Error(`Telegram file download failed: HTTP ${response.status}`);
   const contentLength = Number(response.headers.get("content-length") ?? 0);
-  if (contentLength > telegramDownloadLimit) throw new Error("Telegram attachment exceeds the 20 MB download limit");
+  if (contentLength > attachmentDownloadLimit) throw new Error("Telegram attachment exceeds the 20 MB download limit");
   const bytes = new Uint8Array(await response.arrayBuffer());
-  if (!bytes.length || bytes.length > telegramDownloadLimit) throw new Error("Telegram attachment has invalid size");
+  if (!bytes.length || bytes.length > attachmentDownloadLimit) throw new Error("Telegram attachment has invalid size");
+  return storeAttachment(channelId, attachment, bytes, response.headers.get("content-type"));
+}
 
+async function storeAttachment(
+  channelId: string,
+  attachment: IncomingChannelAttachment,
+  bytes: Uint8Array,
+  responseMimeType: string | null
+) {
   const image = detectImageType(bytes);
   let kind: "image" | "file" = "file";
   let extension = "bin";
-  let mimeType = attachment.mimeType || "application/octet-stream";
+  let mimeType = responseMimeType?.split(";")[0] || attachment.mimeType || "application/octet-stream";
   if (image) {
     kind = "image";
     extension = image.ext;
     mimeType = image.mime;
-  } else if (mimeType === "application/pdf" && isPdf(bytes)) {
+  } else if (isPdf(bytes)) {
     extension = "pdf";
+    mimeType = "application/pdf";
   } else {
-    mimeType = "application/octet-stream";
+    const candidate = attachment.fileName.split(".").at(-1)?.toLowerCase() ?? "";
+    extension = /^[a-z0-9]{1,8}$/.test(candidate) ? candidate : "bin";
   }
 
   if (!/^[a-z0-9-]+$/i.test(channelId)) throw new Error("Invalid channel id");
@@ -85,6 +95,37 @@ export async function downloadTelegramAttachment(
     storagePath,
     externalFileId: attachment.externalFileId
   };
+}
+
+function isAllowedVkHost(hostname: string) {
+  const host = hostname.toLowerCase();
+  return [
+    "vk.com",
+    "userapi.com",
+    "vkuseraudio.net",
+    "vk-cdn.net",
+    "vkuser.net"
+  ].some((domain) => host === domain || host.endsWith(`.${domain}`));
+}
+
+export async function downloadVkAttachment(channelId: string, attachment: IncomingChannelAttachment) {
+  if (!attachment.sourceUrl) throw new Error("VK attachment URL is missing");
+  if (attachment.sizeBytes && attachment.sizeBytes > attachmentDownloadLimit) {
+    throw new Error("VK attachment exceeds the 20 MB download limit");
+  }
+  const source = new URL(attachment.sourceUrl);
+  if (source.protocol !== "https:" || !isAllowedVkHost(source.hostname)) {
+    throw new Error("VK attachment URL is not allowed");
+  }
+  const response = await fetch(source, { signal: AbortSignal.timeout(20_000), redirect: "follow" });
+  const resolved = new URL(response.url);
+  if (!isAllowedVkHost(resolved.hostname)) throw new Error("VK attachment redirect is not allowed");
+  if (!response.ok) throw new Error(`VK file download failed: HTTP ${response.status}`);
+  const contentLength = Number(response.headers.get("content-length") ?? 0);
+  if (contentLength > attachmentDownloadLimit) throw new Error("VK attachment exceeds the 20 MB download limit");
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (!bytes.length || bytes.length > attachmentDownloadLimit) throw new Error("VK attachment has invalid size");
+  return storeAttachment(channelId, attachment, bytes, response.headers.get("content-type"));
 }
 
 export async function readStoredChatAttachment(storagePath: string) {

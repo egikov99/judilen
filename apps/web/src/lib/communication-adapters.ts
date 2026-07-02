@@ -27,6 +27,7 @@ export type IncomingChannelAttachment = {
   fileName: string;
   mimeType: string;
   sizeBytes: number | null;
+  sourceUrl?: string;
 };
 
 const metaGraphVersion = process.env.META_GRAPH_VERSION ?? "v25.0";
@@ -82,7 +83,7 @@ export async function testCommunicationChannel(channel: CommunicationChannelConf
     const query = new URLSearchParams({
       group_id: publicConfig.groupId,
       access_token: secretConfig.accessToken,
-      v: "5.199"
+      v: publicConfig.apiVersion || "5.199"
     });
     const result = await requestJson(`https://api.vk.com/method/groups.getById?${query}`);
     return text(record(list(result.response)[0]).name) || "VK community";
@@ -159,7 +160,7 @@ export async function sendCommunicationMessage(channel: CommunicationChannelConf
       message: body,
       random_id: String(Date.now()),
       access_token: secretConfig.accessToken,
-      v: "5.199"
+      v: publicConfig.apiVersion || "5.199"
     });
     const result = await requestJson("https://api.vk.com/method/messages.send", {
       method: "POST",
@@ -288,6 +289,52 @@ function vkMessages(payload: Record<string, unknown>) {
   const message = record(record(payload.object).message);
   const peerId = text(message.peer_id);
   if (!peerId) return [];
+  const attachments: IncomingChannelAttachment[] = [];
+  for (const value of list(message.attachments)) {
+    const attachment = record(value);
+    const type = text(attachment.type);
+    const entity = record(attachment[type]);
+    if (type === "photo") {
+      const size = list(entity.sizes)
+        .map(record)
+        .filter((item) => text(item.url))
+        .sort((left, right) => (
+          Number(left.width ?? 0) * Number(left.height ?? 0)
+          - Number(right.width ?? 0) * Number(right.height ?? 0)
+        ))
+        .at(-1);
+      if (size) {
+        attachments.push({
+          externalFileId: `photo${text(entity.owner_id)}_${text(entity.id)}_${text(entity.access_key)}`,
+          kind: "image",
+          fileName: `vk-photo-${text(entity.id) || text(message.id)}.jpg`,
+          mimeType: "image/jpeg",
+          sizeBytes: null,
+          sourceUrl: text(size.url)
+        });
+      }
+    } else if (type === "doc" && text(entity.url)) {
+      const extension = text(entity.ext).toLowerCase();
+      attachments.push({
+        externalFileId: `doc${text(entity.owner_id)}_${text(entity.id)}_${text(entity.access_key)}`,
+        kind: extension.match(/^(jpe?g|png|gif|webp)$/) ? "image" : "file",
+        fileName: text(entity.title) || `vk-document-${text(entity.id)}${extension ? `.${extension}` : ""}`,
+        mimeType: extension === "pdf" ? "application/pdf" : "application/octet-stream",
+        sizeBytes: Number(entity.size) || null,
+        sourceUrl: text(entity.url)
+      });
+    } else if (type === "audio" && text(entity.url)) {
+      attachments.push({
+        externalFileId: `audio${text(entity.owner_id)}_${text(entity.id)}`,
+        kind: "file",
+        fileName: `${text(entity.artist) || "VK"} - ${text(entity.title) || text(entity.id)}.mp3`,
+        mimeType: "audio/mpeg",
+        sizeBytes: null,
+        sourceUrl: text(entity.url)
+      });
+    }
+  }
+  const body = text(message.text) || (attachments.length ? "" : "[Вложение]");
   return [{
     externalChatId: peerId,
     externalUserId: text(message.from_id) || null,
@@ -296,7 +343,8 @@ function vkMessages(payload: Record<string, unknown>) {
     avatarUrl: null,
     isGroup: Number(peerId) >= 2_000_000_000,
     senderName: null,
-    body: text(message.text) || "[Вложение]",
+    body,
+    attachments,
     rawPayload: payload
   }];
 }

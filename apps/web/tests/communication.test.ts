@@ -9,7 +9,7 @@ import {
   type CommunicationChannelConfig
 } from "@/lib/communication-adapters";
 import { communicationProviders } from "@/lib/communication-types";
-import { downloadTelegramAttachment } from "@/lib/chat-attachment-storage";
+import { downloadTelegramAttachment, downloadVkAttachment } from "@/lib/chat-attachment-storage";
 
 function channel(overrides: Partial<CommunicationChannelConfig> = {}): CommunicationChannelConfig {
   return {
@@ -163,6 +163,74 @@ describe("communication inbox", () => {
     });
   });
 
+  it("extracts VK photos and documents instead of a placeholder", () => {
+    const messages = parseIncomingCommunicationMessages(channel({
+      provider: "vk",
+      publicConfig: { groupId: "229727757", apiVersion: "5.199" },
+      secretConfig: { accessToken: "token" }
+    }), {
+      type: "message_new",
+      group_id: 229727757,
+      event_id: "event-1",
+      object: {
+        message: {
+          id: 55,
+          peer_id: 123,
+          from_id: 123,
+          text: "",
+          attachments: [
+            {
+              type: "photo",
+              photo: {
+                owner_id: 123,
+                id: 7,
+                sizes: [
+                  { width: 100, height: 100, url: "https://sun9-1.userapi.com/small.jpg" },
+                  { width: 1200, height: 800, url: "https://sun9-1.userapi.com/large.jpg" }
+                ]
+              }
+            },
+            {
+              type: "doc",
+              doc: {
+                owner_id: 123,
+                id: 8,
+                title: "Правила.pdf",
+                ext: "pdf",
+                size: 4096,
+                url: "https://vk.com/doc-file.pdf"
+              }
+            }
+          ]
+        }
+      }
+    });
+    expect(messages[0].body).toBe("");
+    expect(messages[0].attachments).toEqual([
+      expect.objectContaining({
+        kind: "image",
+        sourceUrl: "https://sun9-1.userapi.com/large.jpg"
+      }),
+      expect.objectContaining({
+        kind: "file",
+        fileName: "Правила.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 4096
+      })
+    ]);
+  });
+
+  it("downloads VK attachments only from trusted HTTPS hosts", async () => {
+    await expect(downloadVkAttachment("channel-id", {
+      externalFileId: "photo1",
+      kind: "image",
+      fileName: "photo.jpg",
+      mimeType: "image/jpeg",
+      sizeBytes: null,
+      sourceUrl: "https://example.com/photo.jpg"
+    })).rejects.toThrow("not allowed");
+  });
+
   it("rejects Telegram webhooks without the configured secret header", () => {
     expect(verifyCommunicationWebhook(channel(), "{}", new Headers(), {})).toBe(false);
     expect(verifyCommunicationWebhook(
@@ -189,6 +257,14 @@ describe("communication inbox", () => {
     );
     expect(attachmentMigration).toContain('"chat_attachments_message_external_unique"');
     expect(attachmentMigration).toContain('"storage_path" text NOT NULL');
+
+    const vkMigration = readFileSync(
+      resolve(process.cwd(), "../../packages/db/migrations/0009_vk_callback.sql"),
+      "utf8"
+    );
+    expect(vkMigration).toContain('CREATE TABLE "vk_integrations"');
+    expect(vkMigration).toContain('"vk_events_log_event_unique"');
+    expect(vkMigration).toContain('"confirmation_token" text NOT NULL');
 
     const cipher = readFileSync(resolve(process.cwd(), "src/lib/credential-cipher.ts"), "utf8");
     expect(cipher).toContain('createCipheriv("aes-256-gcm"');
@@ -222,5 +298,16 @@ describe("communication inbox", () => {
     expect(proxy).toContain('startsWith("/api/webhooks/communications/")');
     expect(webhook).toContain("verifyCommunicationWebhook");
     expect(webhook).toContain("communicationChannels.webhookSecret");
+
+    const vkCallback = readFileSync(
+      resolve(process.cwd(), "src/app/api/integrations/vk/callback/route.ts"),
+      "utf8"
+    );
+    expect(proxy).toContain('pathname === "/api/integrations/vk/callback"');
+    expect(vkCallback).toContain('eventType === "confirmation"');
+    expect(vkCallback).toContain("return plain(confirmationToken)");
+    expect(vkCallback).toContain("secureEquals(text(payload.secret)");
+    expect(vkCallback).toContain("delete safePayload.secret");
+    expect(vkCallback).toContain("vkEventsLog.eventId");
   });
 });

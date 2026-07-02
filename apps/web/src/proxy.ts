@@ -5,7 +5,8 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const mutating = ["POST", "PUT", "PATCH", "DELETE"].includes(request.method);
     const exempt = request.nextUrl.pathname.startsWith("/api/cron/")
-      || request.nextUrl.pathname.startsWith("/api/webhooks/communications/");
+      || request.nextUrl.pathname.startsWith("/api/webhooks/communications/")
+      || request.nextUrl.pathname === "/api/integrations/vk/callback";
     if (mutating && !exempt) {
       const configured = process.env.APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
       if (process.env.NODE_ENV === "production" && !configured) {

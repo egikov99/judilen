@@ -10,7 +10,7 @@ import {
 import { createHash } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { createAdminNotification } from "./admin-notifications";
-import { downloadTelegramAttachment } from "./chat-attachment-storage";
+import { downloadTelegramAttachment, downloadVkAttachment } from "./chat-attachment-storage";
 import { userIdsWithPermission } from "./permission-recipients";
 import type { IncomingChannelMessage } from "./communication-adapters";
 import type { CommunicationProvider } from "./communication-types";
@@ -86,22 +86,29 @@ export async function ingestCommunicationMessage(
     return { created: true, conversationId: conversation.id, messageId: message.id };
   });
 
-  if (result.messageId && input.attachments?.length && (channel.provider === "telegram" || channel.provider === "telegram_group")) {
+  if (result.messageId && input.attachments?.length && (
+    channel.provider === "telegram"
+    || channel.provider === "telegram_group"
+    || channel.provider === "vk"
+  )) {
     const [existingAttachment] = await db.select({ id: chatAttachments.id }).from(chatAttachments)
       .where(eq(chatAttachments.messageId, result.messageId))
       .limit(1);
     let saved = Boolean(existingAttachment);
-    if (!saved && channel.secretConfig?.botToken) {
+    if (!saved && (channel.provider === "vk" || channel.secretConfig?.botToken)) {
       for (const attachment of input.attachments) {
         try {
-          const stored = await downloadTelegramAttachment(channel.secretConfig.botToken, channel.id, attachment);
+          const stored = channel.provider === "vk"
+            ? await downloadVkAttachment(channel.id, attachment)
+            : await downloadTelegramAttachment(channel.secretConfig?.botToken ?? "", channel.id, attachment);
           await db.insert(chatAttachments).values({
             messageId: result.messageId,
             ...stored
           }).onConflictDoNothing();
           saved = true;
         } catch (error) {
-          console.error("telegram_attachment_download_failed", {
+          console.error("communication_attachment_download_failed", {
+            provider: channel.provider,
             channelId: channel.id,
             externalFileId: attachment.externalFileId,
             error
