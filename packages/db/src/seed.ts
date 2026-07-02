@@ -54,6 +54,8 @@ const permissionRows = [
   ["external_calendars.sync", "Синхронизация внешних календарей"],
   ["calendar_conflicts.read", "Просмотр конфликтов календаря"],
   ["calendar_conflicts.update", "Разрешение конфликтов календаря"],
+  ["chats.read", "Просмотр чатов"],
+  ["chats.write", "Ответы в чатах"],
   ["settings.manage", "Системные настройки"]
 ] as const;
 
@@ -71,8 +73,8 @@ const grants: Record<keyof typeof roleLabels, string[]> = {
   super_admin: permissionRows.map(([key]) => key),
   admin: permissionRows.map(([key]) => key).filter((key) => !key.startsWith("users.") && !["users.manage", "integrations.manage", "integrations.delete", "external_calendars.delete"].includes(key)),
   content_manager: ["dashboard.read", "houses.read", "houses.write", "houses.create", "houses.update", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "services.read", "services.create", "services.update", "service_options.read", "service_options.create", "service_options.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
-  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write"],
-  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read"]
+  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write"],
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read"]
 };
 
 for (const [name, label] of Object.entries(roleLabels)) {

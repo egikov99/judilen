@@ -15,6 +15,7 @@ type AuditRow = { id: string; actorId: string | null; action: string; entityId: 
 const groupDefinitions = [
   { label: "Обзор", prefixes: ["dashboard."] },
   { label: "Календарь", prefixes: ["calendar."] },
+  { label: "Чаты", prefixes: ["chats."] },
   { label: "Бронирования", prefixes: ["bookings."] },
   { label: "Домики", prefixes: ["houses."] },
   { label: "Услуги", prefixes: ["services."] },

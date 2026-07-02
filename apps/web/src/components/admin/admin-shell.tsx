@@ -17,6 +17,7 @@ export function AdminShell({ children, navigation, name, role }: {
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuCloseRef = useRef<HTMLButtonElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
@@ -24,6 +25,22 @@ export function AdminShell({ children, navigation, name, role }: {
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js", { scope: "/" });
   }, []);
+
+  useEffect(() => {
+    if (!navigation.some((item) => item.href === "/admin/chats")) return;
+    const load = async () => {
+      const response = await fetch("/api/admin/chats/unread", { cache: "no-store" });
+      if (response.ok) setChatUnread((await response.json()).count ?? 0);
+    };
+    const update = (event: Event) => setChatUnread(Number((event as CustomEvent<number>).detail) || 0);
+    load();
+    const timer = window.setInterval(load, 15_000);
+    window.addEventListener("chat-unread-updated", update);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("chat-unread-updated", update);
+    };
+  }, [navigation]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -58,7 +75,10 @@ export function AdminShell({ children, navigation, name, role }: {
         <button ref={menuCloseRef} className="admin-menu-close" type="button" aria-label="Закрыть меню" onClick={() => setMenuOpen(false)}><X size={22} /></button>
       </div>
       <nav className="admin-nav" aria-label="Администрирование">
-        {navigation.map((item) => <Link className={pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`)) ? "is-active" : ""} href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>{item.label}</Link>)}
+        {navigation.map((item) => <Link className={pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`)) ? "is-active" : ""} href={item.href} key={item.href} onClick={() => setMenuOpen(false)}>
+          <span>{item.label}</span>
+          {item.href === "/admin/chats" && chatUnread > 0 && <span className="admin-nav-count">{chatUnread > 99 ? "99+" : chatUnread}</span>}
+        </Link>)}
       </nav>
       <div className="admin-user"><strong>{name}</strong><div>{role}</div><LogoutButton /></div>
     </aside>

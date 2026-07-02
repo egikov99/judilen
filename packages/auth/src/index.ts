@@ -53,6 +53,8 @@ export type Permission =
   | "external_calendars.sync"
   | "calendar_conflicts.read"
   | "calendar_conflicts.update"
+  | "chats.read"
+  | "chats.write"
   | "settings.manage";
 
 export interface Session {
@@ -76,7 +78,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "users.reset_password", "integrations.manage", "integrations.read", "integrations.create",
     "integrations.update", "integrations.delete", "external_calendars.read", "external_calendars.create",
     "external_calendars.update", "external_calendars.delete", "external_calendars.sync",
-    "calendar_conflicts.read", "calendar_conflicts.update", "settings.manage"
+    "calendar_conflicts.read", "calendar_conflicts.update", "chats.read", "chats.write", "settings.manage"
   ],
   admin: [
     "dashboard.read",
@@ -121,6 +123,8 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "external_calendars.sync",
     "calendar_conflicts.read",
     "calendar_conflicts.update",
+    "chats.read",
+    "chats.write",
     "settings.manage"
   ],
   content_manager: [
@@ -145,8 +149,8 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "reviews.update",
     "content.write"
   ],
-  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write"],
-  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read"]
+  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write"],
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read"]
 };
 
 export function can(role: Role, permission: Permission) {
@@ -194,6 +198,7 @@ export function adminNavigation(role: Role) {
     { href: "/admin", label: "Обзор", permission: "dashboard.read" },
     { href: "/admin/bookings", label: "Бронирования", permission: "bookings.read" },
     { href: "/admin/calendar", label: "Календарь", permission: "calendar.read" },
+    { href: "/admin/chats", label: "Чаты", permission: "chats.read" },
     { href: "/admin/customers", label: "Клиенты", permission: "customers.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
     { href: "/admin/services", label: "Услуги", permission: "services.read" },

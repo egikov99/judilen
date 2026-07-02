@@ -445,6 +445,69 @@ export const customerMessages = pgTable("customer_messages", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
 
+export const communicationChannels = pgTable(
+  "communication_channels",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    provider: text("provider").notNull(),
+    name: text("name").notNull(),
+    isEnabled: boolean("is_enabled").notNull().default(false),
+    status: text("status").notNull().default("disconnected"),
+    publicConfig: jsonb("public_config").$type<Record<string, string>>().notNull().default({}),
+    secretConfigEncrypted: text("secret_config_encrypted"),
+    webhookSecret: text("webhook_secret").notNull(),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("communication_channels_provider_unique").on(table.provider),
+    uniqueIndex("communication_channels_webhook_secret_unique").on(table.webhookSecret)
+  ]
+);
+
+export const chatConversations = pgTable(
+  "chat_conversations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    channelId: uuid("channel_id").references(() => communicationChannels.id, { onDelete: "cascade" }).notNull(),
+    externalChatId: text("external_chat_id").notNull(),
+    externalUserId: text("external_user_id"),
+    displayName: text("display_name").notNull(),
+    avatarUrl: text("avatar_url"),
+    isGroup: boolean("is_group").notNull().default(false),
+    unreadCount: integer("unread_count").notNull().default(0),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    lastMessagePreview: text("last_message_preview"),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("chat_conversations_channel_external_unique").on(table.channelId, table.externalChatId),
+    index("chat_conversations_last_message_idx").on(table.lastMessageAt)
+  ]
+);
+
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id").references(() => chatConversations.id, { onDelete: "cascade" }).notNull(),
+    externalMessageId: text("external_message_id"),
+    direction: text("direction").notNull(),
+    senderName: text("sender_name"),
+    body: text("body").notNull(),
+    status: text("status").notNull(),
+    sentByUserId: uuid("sent_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    rawPayload: jsonb("raw_payload").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("chat_messages_conversation_external_unique").on(table.conversationId, table.externalMessageId),
+    index("chat_messages_conversation_created_idx").on(table.conversationId, table.createdAt)
+  ]
+);
+
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),

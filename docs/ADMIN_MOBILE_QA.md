@@ -17,6 +17,9 @@ For every viewport:
 - Create or edit a house, service, review and user; verify modal actions remain visible.
 - Open Calendar; switch between Day, Week and 2 weeks, filter by house and return to Today.
 - Verify the calendar alone scrolls horizontally without moving the whole page.
+- Open Chats; verify the mobile list and dialog are separate screens, reply composer stays visible and unread count clears.
+- Open communication cards in Integrations; verify token fields, webhook copy action and connection controls fit the viewport.
+- Send a test inbound webhook and confirm the chat counter and sound notification update without a page reload.
 - Open Settings; install the PWA when supported, enable push and send a test notification.
 - Relaunch the installed PWA and confirm it opens at `/admin` without browser chrome.
 - Sign out and confirm notification links require authentication.

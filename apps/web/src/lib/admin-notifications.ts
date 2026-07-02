@@ -30,6 +30,7 @@ function configureWebPush() {
 }
 
 async function eligibleUsers(userIds?: string[]) {
+  if (userIds && !userIds.length) return [];
   return db.select({ id: users.id })
     .from(users)
     .innerJoin(roles, eq(users.roleId, roles.id))

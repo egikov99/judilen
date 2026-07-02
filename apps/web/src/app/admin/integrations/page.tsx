@@ -1,11 +1,12 @@
 import { calendarConflicts, db, externalCalendars, houses, integrationLogs, integrations } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { IntegrationManager } from "@/components/admin/integration-manager";
+import { CommunicationIntegrationManager } from "@/components/admin/communication-integration-manager";
 import { buildCalendarExportUrl } from "@/lib/calendar-links";
-import { requirePagePermission } from "@/lib/session";
+import { requirePageAccess } from "@/lib/session";
 
 export default async function IntegrationsPage() {
-  await requirePagePermission("external_calendars.read");
+  const access = await requirePageAccess("external_calendars.read");
   const [integrationRows, calendarRows, houseRows, logRows, conflictRows] = await Promise.all([
     db.select().from(integrations).orderBy(desc(integrations.createdAt)),
     db.select({ calendar: externalCalendars, houseName: houses.name }).from(externalCalendars).innerJoin(houses, eq(externalCalendars.houseId, houses.id)).orderBy(desc(externalCalendars.createdAt)),
@@ -24,7 +25,8 @@ export default async function IntegrationsPage() {
   const origin = (process.env.APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   return <main className="admin-content">
     <h1 className="admin-title">Интеграции</h1>
-    <p className="admin-subtitle">Единый календарь CRM, импорт внешних бронирований и экспорт занятых дат.</p>
+    <p className="admin-subtitle">Каналы сообщений, импорт внешних бронирований и экспорт занятых дат.</p>
+    <CommunicationIntegrationManager canManage={access.permissions.includes("integrations.update")} />
     <IntegrationManager
       houses={houseRows}
       integrations={integrationRows.map((item) => ({ ...item, lastSyncedAt: item.lastSyncedAt?.toISOString() ?? null }))}
