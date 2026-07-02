@@ -17,7 +17,16 @@ export type IncomingChannelMessage = {
   isGroup: boolean;
   senderName: string | null;
   body: string;
+  attachments?: IncomingChannelAttachment[];
   rawPayload: Record<string, unknown>;
+};
+
+export type IncomingChannelAttachment = {
+  externalFileId: string;
+  kind: "image" | "file";
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number | null;
 };
 
 const metaGraphVersion = process.env.META_GRAPH_VERSION ?? "v25.0";
@@ -235,7 +244,31 @@ function telegramMessages(channel: CommunicationChannelConfig, payload: Record<s
   const isGroup = text(chat.type) !== "private";
   if (channel.provider === "telegram" && isGroup) return [];
   const senderName = [text(from.first_name), text(from.last_name)].filter(Boolean).join(" ") || text(from.username);
-  const body = text(message.text) || text(message.caption) || "[Вложение]";
+  const photo = list(message.photo)
+    .map(record)
+    .sort((left, right) => Number(left.file_size ?? 0) - Number(right.file_size ?? 0))
+    .at(-1);
+  const document = record(message.document);
+  const attachments: IncomingChannelAttachment[] = [];
+  if (photo?.file_id) {
+    attachments.push({
+      externalFileId: text(photo.file_id),
+      kind: "image",
+      fileName: `telegram-photo-${text(message.message_id)}.jpg`,
+      mimeType: "image/jpeg",
+      sizeBytes: Number(photo.file_size) || null
+    });
+  } else if (document.file_id) {
+    const mimeType = text(document.mime_type) || "application/octet-stream";
+    attachments.push({
+      externalFileId: text(document.file_id),
+      kind: mimeType.startsWith("image/") ? "image" : "file",
+      fileName: text(document.file_name) || `telegram-document-${text(message.message_id)}`,
+      mimeType,
+      sizeBytes: Number(document.file_size) || null
+    });
+  }
+  const body = text(message.text) || text(message.caption) || (attachments.length ? "" : "[Вложение]");
   return [{
     externalChatId: chatId,
     externalUserId: text(from.id) || null,
@@ -245,6 +278,7 @@ function telegramMessages(channel: CommunicationChannelConfig, payload: Record<s
     isGroup,
     senderName: senderName || null,
     body,
+    attachments,
     rawPayload: payload
   }];
 }

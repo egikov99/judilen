@@ -76,7 +76,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ pro
   for (const target of targets) {
     const messages = parseIncomingCommunicationMessages(target.config, payload);
     for (const message of messages) {
-      await ingestCommunicationMessage({ id: target.channel.id, provider: target.provider }, message);
+      await ingestCommunicationMessage({
+        id: target.channel.id,
+        provider: target.provider,
+        secretConfig: target.config.secretConfig
+      }, message);
     }
   }
   return new Response(provider === "vk" ? "ok" : "EVENT_RECEIVED", {

@@ -508,6 +508,25 @@ export const chatMessages = pgTable(
   ]
 );
 
+export const chatAttachments = pgTable(
+  "chat_attachments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    messageId: uuid("message_id").references(() => chatMessages.id, { onDelete: "cascade" }).notNull(),
+    kind: text("kind").notNull(),
+    fileName: text("file_name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    sizeBytes: integer("size_bytes"),
+    storagePath: text("storage_path").notNull(),
+    externalFileId: text("external_file_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("chat_attachments_message_external_unique").on(table.messageId, table.externalFileId),
+    index("chat_attachments_message_idx").on(table.messageId)
+  ]
+);
+
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),

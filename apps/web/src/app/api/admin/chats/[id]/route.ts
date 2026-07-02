@@ -1,5 +1,5 @@
-import { chatConversations, chatMessages, communicationChannels, db } from "@judilen/db";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { chatAttachments, chatConversations, chatMessages, communicationChannels, db } from "@judilen/db";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
@@ -22,9 +22,25 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     .where(eq(chatMessages.conversationId, id))
     .orderBy(asc(chatMessages.createdAt))
     .limit(300);
+  const attachments = messages.length
+    ? await db.select().from(chatAttachments)
+        .where(inArray(chatAttachments.messageId, messages.map((item) => item.id)))
+        .orderBy(asc(chatAttachments.createdAt))
+    : [];
   return Response.json({
     conversation,
-    messages: messages.map((item) => ({ ...item, createdAt: item.createdAt.toISOString() }))
+    messages: messages.map((item) => ({
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      attachments: attachments.filter((attachment) => attachment.messageId === item.id).map((attachment) => ({
+        id: attachment.id,
+        kind: attachment.kind,
+        fileName: attachment.fileName,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+        url: `/api/admin/chat-attachments/${attachment.id}`
+      }))
+    }))
   });
 }
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  chatAttachments,
   chatConversations,
   chatMessages,
   communicationChannels,
@@ -9,18 +10,22 @@ import {
 import { createHash } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { createAdminNotification } from "./admin-notifications";
+import { downloadTelegramAttachment } from "./chat-attachment-storage";
 import { userIdsWithPermission } from "./permission-recipients";
 import type { IncomingChannelMessage } from "./communication-adapters";
 import type { CommunicationProvider } from "./communication-types";
 
 export async function ingestCommunicationMessage(
-  channel: { id: string; provider: CommunicationProvider },
+  channel: { id: string; provider: CommunicationProvider; secretConfig?: Record<string, string> },
   input: IncomingChannelMessage
 ) {
   const externalMessageId = input.externalMessageId || createHash("sha256")
     .update(JSON.stringify(input.rawPayload))
     .digest("hex");
   const receivedAt = new Date();
+  const preview = input.body
+    || (input.attachments?.[0]?.kind === "image" ? "Фото" : input.attachments?.[0]?.fileName)
+    || "[Вложение]";
 
   const result = await db.transaction(async (tx) => {
     const [conversation] = await tx.insert(chatConversations).values({
@@ -41,7 +46,7 @@ export async function ingestCommunicationMessage(
       }
     }).returning({ id: chatConversations.id });
 
-    const [message] = await tx.insert(chatMessages).values({
+    const [createdMessage] = await tx.insert(chatMessages).values({
       conversationId: conversation.id,
       externalMessageId,
       direction: "inbound",
@@ -50,13 +55,22 @@ export async function ingestCommunicationMessage(
       status: "received",
       rawPayload: input.rawPayload
     }).onConflictDoNothing().returning({ id: chatMessages.id });
-    if (!message) return { created: false, conversationId: conversation.id };
+    const [existingMessage] = createdMessage ? [] : await tx.select({ id: chatMessages.id })
+      .from(chatMessages)
+      .where(and(
+        eq(chatMessages.conversationId, conversation.id),
+        eq(chatMessages.externalMessageId, externalMessageId)
+      ))
+      .limit(1);
+    const message = createdMessage ?? existingMessage;
+    if (!message) return { created: false, conversationId: conversation.id, messageId: null };
+    if (!createdMessage) return { created: false, conversationId: conversation.id, messageId: message.id };
 
     await Promise.all([
       tx.update(chatConversations).set({
         unreadCount: sql`${chatConversations.unreadCount} + 1`,
         lastMessageAt: receivedAt,
-        lastMessagePreview: input.body.slice(0, 240),
+        lastMessagePreview: preview.slice(0, 240),
         updatedAt: receivedAt
       }).where(eq(chatConversations.id, conversation.id)),
       tx.update(communicationChannels).set({
@@ -71,6 +85,38 @@ export async function ingestCommunicationMessage(
     ]);
     return { created: true, conversationId: conversation.id, messageId: message.id };
   });
+
+  if (result.messageId && input.attachments?.length && (channel.provider === "telegram" || channel.provider === "telegram_group")) {
+    const [existingAttachment] = await db.select({ id: chatAttachments.id }).from(chatAttachments)
+      .where(eq(chatAttachments.messageId, result.messageId))
+      .limit(1);
+    let saved = Boolean(existingAttachment);
+    if (!saved && channel.secretConfig?.botToken) {
+      for (const attachment of input.attachments) {
+        try {
+          const stored = await downloadTelegramAttachment(channel.secretConfig.botToken, channel.id, attachment);
+          await db.insert(chatAttachments).values({
+            messageId: result.messageId,
+            ...stored
+          }).onConflictDoNothing();
+          saved = true;
+        } catch (error) {
+          console.error("telegram_attachment_download_failed", {
+            channelId: channel.id,
+            externalFileId: attachment.externalFileId,
+            error
+          });
+        }
+      }
+    }
+    if (!saved && !input.body) {
+      await Promise.all([
+        db.update(chatMessages).set({ body: "[Вложение]" }).where(eq(chatMessages.id, result.messageId)),
+        db.update(chatConversations).set({ lastMessagePreview: "[Вложение]" })
+          .where(eq(chatConversations.id, result.conversationId))
+      ]);
+    }
+  }
 
   if (result.created) {
     const isTelegramGroup = channel.provider === "telegram_group";

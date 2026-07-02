@@ -6,6 +6,7 @@
 2. Set `APP_URL` to the public HTTPS origin.
 3. Set `COMMUNICATION_ENCRYPTION_KEY` to a stable secret of at least 32 characters.
 4. Keep the encryption key unchanged between deploys. Changing it makes saved channel credentials unreadable.
+5. Persist `CHAT_ATTACHMENT_DIR` between deploys. Docker Compose uses the `chat_attachments` volume.
 
 ## Channel setup
 
@@ -14,6 +15,7 @@
 - Create a bot with BotFather and save its token.
 - Save and test the connection in CRM. CRM registers the webhook automatically.
 - Personal messages and a Telegram group may share one bot token.
+- Telegram photos and documents up to the Bot API download limit are copied to private CRM storage.
 
 For a group, also provide its numeric ID, add the bot to the group and disable Privacy Mode if all group messages must be received.
 
@@ -46,3 +48,4 @@ For a group, also provide its numeric ID, add the bot to the group and disable P
 - Public webhook requests are checked using a secret URL and provider signature where available.
 - Chat reads and replies require separate `chats.read` and `chats.write` permissions.
 - Push notifications contain only a generic event title. Message text remains inside the authenticated CRM.
+- Chat attachments are served through an authenticated `chats.read` endpoint with private, no-store caching.
