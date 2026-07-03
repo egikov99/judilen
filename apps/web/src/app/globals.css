@@ -92,6 +92,11 @@ img { display: block; max-width: 100%; }
 }
 .nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .brand { font: 700 24px/1 var(--serif); color: var(--forest-900); letter-spacing: -.02em; }
+.site-brand { display: inline-flex; min-width: 0; align-items: center; gap: 10px; }
+.site-brand-logo-frame { width: 44px; height: 44px; flex: 0 0 auto; overflow: hidden; }
+.site-brand-logo { width: 100%; height: 100%; object-fit: contain; transform: scale(1.42); }
+.site-brand-label { min-width: 0; }
+.site-brand-footer { color: white; }
 .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; color: var(--color-text); }
 .nav-links a:hover { color: var(--forest-900); }
 .nav-actions { display: flex; align-items: center; gap: 12px; }
@@ -246,6 +251,7 @@ img { display: block; max-width: 100%; }
 .admin-sidebar { position: sticky; top: 0; z-index: 70; height: 100vh; padding: 30px 20px; background: var(--forest-950); color: white; }
 .admin-sidebar-head { display: flex; align-items: center; justify-content: space-between; }
 .admin-sidebar .brand { color: white; display: block; padding: 0 12px 28px; }
+.admin-sidebar .site-brand { display: flex; }
 .admin-nav { display: grid; gap: 7px; }
 .admin-nav a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 10px; color: rgba(255,255,255,.7); font-size: 14px; }
 .admin-nav a:hover, .admin-nav a.is-active { color: white; background: rgba(216,232,200,.12); }
@@ -546,6 +552,7 @@ img { display: block; max-width: 100%; }
 @keyframes modal-slide-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
 
 @media (max-width: 950px) {
+  .site-brand-logo-frame { width: 36px; height: 36px; }
   .nav-links { display: none; }
   .mobile-nav { display: inline-flex; }
   .booking-form { grid-template-columns: 1fr 1fr; }
@@ -570,6 +577,7 @@ img { display: block; max-width: 100%; }
   .admin-sidebar { position: fixed; inset: 0 auto 0 0; width: min(310px, calc(100vw - 48px)); height: 100dvh; padding: 22px 16px; transform: translateX(-105%); transition: transform .2s ease; box-shadow: 18px 0 55px rgba(0,0,0,.25); }
   .admin-sidebar.is-open { transform: translateX(0); }
   .admin-sidebar .brand { display: block; padding: 0 8px 18px; }
+  .admin-sidebar .site-brand { display: flex; }
   .admin-nav { max-height: calc(100dvh - 190px); overflow-y: auto; }
   .admin-nav a { min-height: 46px; font-size: 14px; }
   .admin-user { display: block; }
@@ -590,6 +598,10 @@ img { display: block; max-width: 100%; }
   .container { width: min(100% - 30px, 1180px); }
   .nav { height: 68px; }
   .brand { font-size: 20px; }
+  .site-brand { gap: 8px; }
+  .site-brand-logo-frame { width: 30px; height: 30px; }
+  .site-header .nav { gap: 10px; }
+  .site-header .site-brand-label { max-width: 132px; line-height: 1.05; }
   .nav-actions .button-ghost { display: none; }
   .hero { min-height: 650px; }
   .hero-content { padding-bottom: 120px; }

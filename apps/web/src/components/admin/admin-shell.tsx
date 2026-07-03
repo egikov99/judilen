@@ -5,6 +5,7 @@ import { ExternalLink, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LogoutButton } from "@/components/logout-button";
+import { SiteBrand } from "@/components/site-brand";
 import { NotificationCenter } from "./notification-center";
 
 type NavigationItem = { href: string; label: string };
@@ -71,7 +72,7 @@ export function AdminShell({ children, navigation, name, role }: {
     <button className={`admin-menu-scrim ${menuOpen ? "is-open" : ""}`} type="button" tabIndex={-1} aria-label="Закрыть меню" onClick={() => setMenuOpen(false)} />
     <aside className={`admin-sidebar ${menuOpen ? "is-open" : ""}`}>
       <div className="admin-sidebar-head">
-        <Link className="brand" href="/admin">Юдилен · CRM</Link>
+        <SiteBrand className="site-brand-admin" href="/admin" label="Юдилен · CRM" />
         <button ref={menuCloseRef} className="admin-menu-close" type="button" aria-label="Закрыть меню" onClick={() => setMenuOpen(false)}><X size={22} /></button>
       </div>
       <nav className="admin-nav" aria-label="Администрирование">
