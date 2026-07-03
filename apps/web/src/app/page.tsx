@@ -4,6 +4,8 @@ import { HouseCard } from "@/components/house-card";
 import { PublicShell } from "@/components/public-shell";
 import { formatCurrency } from "@/components/currency";
 import { PublicImage } from "@/components/public-image";
+import { TerritoryGallery } from "@/components/territory-gallery";
+import { getTerritoryGallery, TERRITORY_GALLERY_FALLBACK } from "@/lib/homepage-gallery";
 import { DEFAULT_IMAGE_URL } from "@/lib/image-urls";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
@@ -12,12 +14,19 @@ import { getPublicServices, priceUnitLabels } from "@/lib/services";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [houses, reviews, reviewStats, services] = await Promise.all([
+  const [houses, reviews, reviewStats, services, territoryGalleryRows] = await Promise.all([
     getPublishedHouses(),
     getPublishedReviews(),
     getPublishedReviewStats(),
-    getPublicServices()
+    getPublicServices(),
+    getTerritoryGallery()
   ]);
+  const territoryGallery = territoryGalleryRows.length ? territoryGalleryRows : [{
+    id: "territory-fallback",
+    imageUrl: TERRITORY_GALLERY_FALLBACK,
+    alt: "Вид на лесное озеро из домика",
+    sortOrder: 0
+  }];
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
@@ -53,7 +62,7 @@ export default async function HomePage() {
 
       <section className="section section-soft">
         <div className="container split">
-          <div className="split-image" role="img" aria-label="Вид на лесное озеро из домика" />
+          <TerritoryGallery images={territoryGallery} />
           <div>
             <span className="eyebrow">Территория и отдых</span>
             <h2 className="page-title">Место, где интересно и взрослым, и детям</h2>

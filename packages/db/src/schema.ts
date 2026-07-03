@@ -306,6 +306,22 @@ export const contentPages = pgTable(
   (table) => [uniqueIndex("content_pages_slug_unique").on(table.slug)]
 );
 
+export const homepageGalleryImages = pgTable(
+  "homepage_gallery_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sectionKey: text("section_key").notNull(),
+    imageUrl: text("image_url").notNull(),
+    alt: text("alt").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("homepage_gallery_section_order_unique").on(table.sectionKey, table.sortOrder),
+    index("homepage_gallery_section_idx").on(table.sectionKey)
+  ]
+);
+
 export const integrations = pgTable("integrations", {
   id: uuid("id").defaultRandom().primaryKey(),
   houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }),

@@ -99,6 +99,13 @@
       "when": 1783728000000,
       "tag": "0013_normalize_image_urls",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1783814400000,
+      "tag": "0014_homepage_gallery",
+      "breakpoints": true
     }
   ]
 }
