@@ -1,4 +1,5 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
 export const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"] as const;
 
@@ -23,7 +24,7 @@ export function validateImageUpload(file: { name: string; type: string; size: nu
 }
 
 export function uploadRoot() {
-  return (process.env.UPLOAD_DIR ?? "public/uploads").replace(/\/+$/, "");
+  return resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR ?? "storage/uploads");
 }
 
 export async function saveImageFile(file: File, scope: "houses" | "services" | "content", entityId = "shared") {
@@ -31,18 +32,26 @@ export async function saveImageFile(file: File, scope: "houses" | "services" | "
   const checked = validateImageUpload(file, bytes, Number(process.env.MAX_UPLOAD_BYTES ?? 10 * 1024 * 1024));
   if (!checked.ok) return checked;
   if (!/^[a-z0-9-]+$/i.test(entityId)) return { ok: false as const, error: "path" as const };
-  const directory = `${uploadRoot()}/${scope}/${entityId}`;
-  await mkdir(directory, { recursive: true });
+  const directory = resolve(uploadRoot(), scope, entityId);
   const filename = `${crypto.randomUUID()}.${checked.detected.ext}`;
-  await writeFile(`${directory}/${filename}`, bytes, { flag: "wx", mode: 0o640 });
-  return { ok: true as const, url: `/uploads/${scope}/${entityId}/${filename}` };
+  try {
+    await mkdir(directory, { recursive: true });
+    await writeFile(resolve(directory, filename), bytes, { flag: "wx", mode: 0o640 });
+    return { ok: true as const, url: `/uploads/${scope}/${entityId}/${filename}` };
+  } catch (error) {
+    console.error("Image upload could not be saved", { scope, entityId, directory, error });
+    throw error;
+  }
 }
 
 export async function removeUploadedFile(url: string) {
   if (!url.startsWith("/uploads/")) return;
   if (!/^\/uploads\/(houses|services|content)\/[a-z0-9-]+\/[a-z0-9-]+\.(jpg|png|webp)$/i.test(url)) return;
-  const root = uploadRoot();
-  await unlink(`${root}/${url.slice("/uploads/".length)}`).catch((error: NodeJS.ErrnoException) => {
-    if (error.code !== "ENOENT") throw error;
+  const path = resolve(uploadRoot(), url.slice("/uploads/".length));
+  await unlink(path).catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "ENOENT") {
+      console.error("Uploaded image could not be removed", { url, path, error });
+      throw error;
+    }
   });
 }

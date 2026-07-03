@@ -1,7 +1,10 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
-import { validateImageUpload } from "@/lib/uploads";
+import { afterEach, describe, expect, it } from "vitest";
+import { GET as serveUploadedImage } from "@/app/uploads/[...path]/route";
+import { normalizeImageUrl } from "@/lib/image-urls";
+import { saveImageFile, validateImageUpload } from "@/lib/uploads";
 
 const samples = [
   { name: "photo.jpg", type: "image/jpeg", bytes: new Uint8Array([0xff, 0xd8, 0xff, 0x00]) },
@@ -10,6 +13,15 @@ const samples = [
 ];
 
 describe("image uploads", () => {
+  const originalUploadDir = process.env.UPLOAD_DIR;
+  const temporaryDirectories: string[] = [];
+
+  afterEach(() => {
+    if (originalUploadDir === undefined) delete process.env.UPLOAD_DIR;
+    else process.env.UPLOAD_DIR = originalUploadDir;
+    temporaryDirectories.splice(0).forEach((directory) => rmSync(directory, { recursive: true, force: true }));
+  });
+
   it.each(samples)("accepts $type", ({ name, type, bytes }) => {
     expect(validateImageUpload({ name, type, size: bytes.length }, bytes, 1024).ok).toBe(true);
   });
@@ -29,5 +41,31 @@ describe("image uploads", () => {
     expect(migration).toContain("house_images_one_main");
     expect(route).toContain("imageIds");
     expect(route).toContain("position");
+  });
+
+  it("normalizes historical filesystem and relative URLs", () => {
+    expect(normalizeImageUrl("/app/apps/web/public/uploads/houses/house-id/photo.jpg")).toBe("/uploads/houses/house-id/photo.jpg");
+    expect(normalizeImageUrl("public/uploads/services/shared/photo.webp")).toBe("/uploads/services/shared/photo.webp");
+    expect(normalizeImageUrl("images/stitch/asset-021.png")).toBe("/images/stitch/asset-021.png");
+    expect(normalizeImageUrl("")).toBeNull();
+    expect(normalizeImageUrl("undefined")).toBeNull();
+  });
+
+  it("serves a newly uploaded image without restarting Next.js", async () => {
+    const directory = mkdtempSync(resolve(tmpdir(), "judilen-uploads-"));
+    temporaryDirectories.push(directory);
+    process.env.UPLOAD_DIR = directory;
+
+    const file = new File([samples[0].bytes], "photo.jpg", { type: "image/jpeg" });
+    const saved = await saveImageFile(file, "houses", "house-id");
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+
+    const response = await serveUploadedImage(new Request(`http://localhost${saved.url}`), {
+      params: Promise.resolve({ path: saved.url.split("/").slice(2) })
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/jpeg");
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(samples[0].bytes);
   });
 });

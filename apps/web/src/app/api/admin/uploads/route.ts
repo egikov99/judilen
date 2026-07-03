@@ -15,12 +15,18 @@ export async function POST(request: Request) {
   const form = await request.formData();
   const scope = String(form.get("scope") ?? "houses");
   const file = form.get("file");
-  if (!(file instanceof File)) return problem(422, "Файл не передан");
+  if (!(file instanceof File)) {
+    console.warn("Image upload rejected: file is missing", { scope });
+    return problem(422, "Файл не передан");
+  }
 
   if (scope !== "houses") {
     if (scope !== "services" && scope !== "content") return problem(422, "Неизвестная область загрузки");
     const result = await saveImageFile(file, scope);
-    if (!result.ok) return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+    if (!result.ok) {
+      console.warn("Image upload rejected", { scope, name: file.name, size: file.size, reason: result.error });
+      return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+    }
     return Response.json({ url: result.url }, { status: 201 });
   }
 
@@ -41,7 +47,10 @@ export async function POST(request: Request) {
   if (imageId && (!before || before.houseId !== houseId)) return problem(404, "Фото не найдено");
 
   const result = await saveImageFile(file, "houses", houseId);
-  if (!result.ok) return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+  if (!result.ok) {
+    console.warn("House image upload rejected", { houseId, name: file.name, size: file.size, reason: result.error });
+    return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
+  }
   let image: typeof houseImages.$inferSelect;
   try {
     image = await db.transaction(async (tx) => {

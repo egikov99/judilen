@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { House } from "@/lib/catalog";
 import { formatCurrency } from "@/components/currency";
+import { PublicImage } from "@/components/public-image";
 
 function roomLabel(count: number) {
   const remainder = count % 100;
@@ -15,7 +15,7 @@ export function HouseCard({ house }: { house: House }) {
   return (
     <article className="house-card">
       <div className="house-image">
-        <Image src={house.images[0]} alt={`${house.name} в усадьбе «Юдилен»`} fill sizes="(max-width: 650px) 100vw, (max-width: 950px) 50vw, 33vw" />
+        <PublicImage src={house.images[0]} context={`house-card:${house.id}`} alt={`${house.name} в усадьбе «Юдилен»`} fill sizes="(max-width: 650px) 100vw, (max-width: 950px) 50vw, 33vw" />
         <span className="house-tag">{house.eyebrow}</span>
       </div>
       <div className="house-copy">

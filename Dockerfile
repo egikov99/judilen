@@ -44,8 +44,8 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
-RUN mkdir -p /app/apps/web/public/uploads /app/storage/chat-attachments \
-  && chown -R nextjs:nodejs /app/apps/web/public/uploads /app/storage
+RUN mkdir -p /app/storage/uploads /app/storage/chat-attachments /app/apps/web/public/uploads \
+  && chown -R nextjs:nodejs /app/storage /app/apps/web/public/uploads
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000

@@ -3,6 +3,7 @@ import { asc, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
+import { normalizeImageUrl } from "@/lib/image-urls";
 import { requirePermission } from "@/lib/session";
 import { problem, serviceSchema } from "@/lib/validation";
 
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     [service] = await db.transaction(async (tx) => {
       const [created] = await tx.insert(services).values({
         ...data,
-        imageUrl: imageUrl || null,
+        imageUrl: normalizeImageUrl(imageUrl),
         basePrice: String(basePrice)
       }).returning();
       if (houseIds.length) await tx.insert(serviceHouses).values(houseIds.map((houseId) => ({ serviceId: created.id, houseId })));

@@ -346,6 +346,39 @@ img { display: block; max-width: 100%; }
 .calendar-day:hover { background: var(--sage-100); }
 .source-badge[data-source="manual"], .calendar-booking[data-source="manual"] { background: #e6ece2; color: #354a31; }
 .source-badge[data-source="blocked"], .calendar-booking[data-source="blocked"] { background: #ffe0d8; color: #7f2d1d; }
+.mobile-calendar-booking[data-source="site"] { background: #9bd6ae; color: #174b1d; }
+.mobile-calendar-booking[data-source="crm_manual"] { background: #b6d8f4; color: #19466d; }
+.mobile-calendar-booking[data-source="booking"] { background: #9dc5ee; color: #173f8a; }
+.mobile-calendar-booking[data-source="airbnb"] { background: #f58c9d; color: #641c26; }
+.mobile-calendar-booking[data-source="ostrovok"] { background: #cdb4f4; color: #51318a; }
+.mobile-calendar-booking[data-source="expedia"] { background: #f3cf75; color: #694d00; }
+.mobile-calendar-booking[data-source="google_travel"] { background: #9edbd4; color: #175952; }
+.mobile-calendar-booking[data-source="tripadvisor"] { background: #f2b25f; color: #603800; }
+.mobile-calendar-booking[data-source="ical"] { background: #d8d8d8; color: #3f3f3f; }
+.mobile-calendar-booking[data-source="manual"] { background: #d4ddd0; color: #354a31; }
+.mobile-calendar-booking[data-source="blocked"] { background: #f7ad98; color: #7f2d1d; }
+.mobile-calendar-controls, .calendar-mobile { display: none; }
+.mobile-calendar-date-control { position: relative; }
+.mobile-calendar-date-control > button { display: flex; width: 100%; min-height: 42px; align-items: center; gap: 11px; padding: 0 13px; border: 1px solid #dcded7; border-radius: 7px; background: white; color: var(--ink); cursor: pointer; text-align: left; }
+.mobile-calendar-date-picker { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 12; display: grid; gap: 6px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: white; box-shadow: var(--shadow); }
+.mobile-calendar-date-picker label { color: var(--muted); font-size: 12px; }
+.mobile-calendar-date-picker input { width: 100%; min-height: 42px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+.mobile-calendar-view { display: grid; grid-template-columns: 1fr 1fr; padding: 2px; border-radius: 7px; background: #e9e8e2; }
+.mobile-calendar-view button { min-height: 28px; padding: 3px 8px; border: 0; border-radius: 6px; background: transparent; color: #373a36; cursor: pointer; }
+.mobile-calendar-view button.is-active { background: white; box-shadow: 0 1px 4px rgba(25,35,25,.14); color: #111; font-weight: 700; }
+.mobile-calendar-house { padding: 13px 14px 14px; border-bottom: 1px solid var(--line); }
+.mobile-calendar-house:last-child { border-bottom: 0; }
+.mobile-calendar-house h2 { margin: 0 0 7px; font: 700 23px/1.15 var(--serif); }
+.mobile-calendar-weekdays { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; color: #4f544d; font-size: 12px; text-align: center; }
+.mobile-calendar-weekdays span { min-width: 0; padding: 0 2px 5px; border-right: 1px solid #e2e4de; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-calendar-weekdays span:last-child { border-right: 0; }
+.mobile-calendar-track { position: relative; display: grid; overflow: hidden; border-radius: 5px; }
+.mobile-calendar-row { grid-column: 1 / -1; background: #f5f4ef; border-bottom: 5px solid white; }
+.mobile-calendar-row:last-of-type { border-bottom: 0; }
+.mobile-calendar-day { z-index: 1; min-width: 0; padding: 0; border: 0; border-right: 1px solid #dde0d9; background: transparent; cursor: pointer; }
+.mobile-calendar-day:last-of-type { border-right: 0; }
+.mobile-calendar-day.is-conflict { background: repeating-linear-gradient(135deg, rgba(186,26,26,.12) 0 4px, transparent 4px 8px); }
+.mobile-calendar-booking { z-index: 2; min-width: 0; height: 28px; align-self: center; margin: 0 1px; padding: 0 8px; overflow: hidden; border: 0; border-radius: 5px; box-shadow: 0 1px 3px rgba(20,30,20,.16); cursor: pointer; font-size: 11px; line-height: 28px; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(10,20,10,.55); }
 .modal-panel { position: relative; width: min(520px, 100%); max-height: 90vh; overflow-y: auto; padding: 28px; border-radius: 8px; background: white; box-shadow: 0 24px 70px rgba(0,0,0,.25); }
 .modal-panel h2 { margin-top: 0; font: 700 28px var(--serif); }
@@ -595,8 +628,10 @@ img { display: block; max-width: 100%; }
   .button, .icon-button { min-height: 44px; }
   .period-toolbar { align-items: stretch; }
   .period-toolbar > * { flex: 1 1 140px; }
-  .calendar-scroll { margin-inline: -16px; padding-inline: 16px; overflow-x: auto; overscroll-behavior-inline: contain; }
-  .dynamic-calendar { min-width: max-content; }
+  .calendar-desktop-controls, .calendar-desktop-legend, .calendar-desktop { display: none; }
+  .mobile-calendar-controls { display: grid; gap: 12px; margin: -2px 0 0; padding: 13px 14px 20px; background: #f5f3ed; }
+  .calendar-panel { margin-inline: -12px; padding: 0; overflow: visible; border-right: 0; border-left: 0; border-radius: 0; }
+  .calendar-mobile { display: block; }
   .stat-grid { grid-template-columns: 1fr; }
   .integration-grid { grid-template-columns: 1fr; }
   .copy-field { grid-template-columns: 1fr; }

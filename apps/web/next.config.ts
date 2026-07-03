@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 31_536_000
+    minimumCacheTTL: 31_536_000,
+    localPatterns: [
+      { pathname: "/images/**" },
+      { pathname: "/uploads/**" }
+    ]
   },
   async headers() {
     return [

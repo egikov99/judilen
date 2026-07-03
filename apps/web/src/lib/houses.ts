@@ -3,6 +3,7 @@ import { and, asc, desc, eq, gt, gte, inArray, lt, notExists } from "drizzle-orm
 import { unstable_cache } from "next/cache";
 import { blockingBookingStatuses } from "./booking-availability";
 import { houses as fallbackHouses, type House } from "./catalog";
+import { DEFAULT_IMAGE_URL, normalizeImageUrl } from "./image-urls";
 
 type AvailabilityCriteria = {
   checkIn: string;
@@ -55,12 +56,16 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
         images: [],
         amenities: house.amenities
       };
-      if (image) current.images.push(image.url);
+      if (image) {
+        const imageUrl = normalizeImageUrl(image.url);
+        if (imageUrl) current.images.push(imageUrl);
+        else console.error("House image has an invalid URL", { houseId: house.id, imageId: image.id, url: image.url });
+      }
       mapped.set(house.id, current);
     }
     return [...mapped.values()].map((house) => ({
       ...house,
-      images: house.images.length ? house.images : ["/images/stitch/asset-025_1.jpg"]
+      images: house.images.length ? house.images : [DEFAULT_IMAGE_URL]
     }));
   } catch (error) {
     if (fallbackAllowed() && !availability) {

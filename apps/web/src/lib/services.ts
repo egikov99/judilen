@@ -2,6 +2,7 @@ import { db, serviceHouses, serviceOptions, services } from "@judilen/db";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import type { PublicService } from "./service-types";
+import { normalizeImageUrl } from "./image-urls";
 export { priceUnitLabels } from "./service-types";
 
 function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: typeof serviceOptions.$inferSelect | null; houseId: string | null }>) {
@@ -13,13 +14,16 @@ function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: ty
       title: row.service.title,
       slug: row.service.slug,
       description: row.service.description,
-      imageUrl: row.service.imageUrl,
+      imageUrl: normalizeImageUrl(row.service.imageUrl),
       basePrice: Number(row.service.basePrice),
       priceUnit: row.service.priceUnit,
       sortOrder: row.service.sortOrder,
       houseIds: [],
       options: []
     };
+    if (row.service.imageUrl && !current.imageUrl) {
+      console.error("Service image has an invalid URL", { serviceId: row.service.id, url: row.service.imageUrl });
+    }
     if (row.houseId && !current.houseIds.includes(row.houseId)) current.houseIds.push(row.houseId);
     if (row.option && !optionIds.has(row.option.id)) {
       optionIds.add(row.option.id);

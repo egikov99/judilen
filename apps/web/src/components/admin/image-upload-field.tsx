@@ -32,12 +32,18 @@ export function ImageUploadField({ value, onChange, label = "Фотографи�
     xhr.upload.onprogress = (event) => event.lengthComputable && setProgress(Math.round(event.loaded / event.total * 100));
     xhr.onload = () => {
       const body = JSON.parse(xhr.responseText || "{}");
-      if (xhr.status < 200 || xhr.status >= 300) return setError(body.title ?? "Не удалось загрузить файл");
+      if (xhr.status < 200 || xhr.status >= 300) {
+        console.error("Service image upload failed", { status: xhr.status, response: body });
+        return setError(body.title ?? "Не удалось загрузить файл");
+      }
       onChange(body.url);
       selectFile(null);
       setProgress(0);
     };
-    xhr.onerror = () => setError("Ошибка сети при загрузке");
+    xhr.onerror = () => {
+      console.error("Service image upload failed because of a network error");
+      setError("Ошибка сети при загрузке");
+    };
     xhr.send(form);
   }
 
@@ -48,7 +54,7 @@ export function ImageUploadField({ value, onChange, label = "Фотографи�
       selectFile(event.dataTransfer.files[0] ?? null);
     }}>
       <input className="visually-hidden" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" onChange={(event) => selectFile(event.target.files?.[0] ?? null)} />
-      {preview || value ? <Image src={preview || value} alt="Предпросмотр" width={240} height={150} unoptimized={preview.startsWith("data:")} /> : <span>Перетащите JPG, PNG или WebP либо выберите файл</span>}
+      {preview || value ? <Image src={preview || value} alt="Предпросмотр" width={240} height={150} unoptimized={preview.startsWith("data:") || value.startsWith("/uploads/")} onError={() => console.error("Service image preview failed to load", { src: preview || value })} /> : <span>Перетащите JPG, PNG или WebP либо выберите файл</span>}
     </label>
     {progress > 0 && <progress value={progress} max={100}>{progress}%</progress>}
     {error && <small className="error-text">{error}</small>}

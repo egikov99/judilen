@@ -47,10 +47,16 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     xhr.upload.onprogress = (event) => event.lengthComputable && setProgress(Math.round(event.loaded / event.total * 100));
     xhr.onload = () => {
       const body = JSON.parse(xhr.responseText || "{}");
-      if (xhr.status < 200 || xhr.status >= 300) return setMessage(body.title ?? "Не удалось загрузить фото");
+      if (xhr.status < 200 || xhr.status >= 300) {
+        console.error("House image upload failed", { status: xhr.status, response: body });
+        return setMessage(body.title ?? "Не удалось загрузить фото");
+      }
       selectFile(null); setAlt(""); setCaption(""); setProgress(0); router.refresh();
     };
-    xhr.onerror = () => setMessage("Ошибка сети при загрузке");
+    xhr.onerror = () => {
+      console.error("House image upload failed because of a network error", { houseId });
+      setMessage("Ошибка сети при загрузке");
+    };
     xhr.send(form);
   }
 
@@ -100,7 +106,7 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     {images.length ? <div className="photo-admin-grid">{images.map((image, index) => {
       const edit = { ...image, ...edits[image.id] };
       return <article className="photo-admin-card" key={image.id}>
-        <Image src={image.url} alt={image.alt} width={360} height={240} />
+        <Image src={image.url} alt={image.alt} width={360} height={240} unoptimized={image.url.startsWith("/uploads/")} onError={() => console.error("House image preview failed to load", { imageId: image.id, src: image.url })} />
         <div className="form-stack">
           <div className="field"><label>Alt-текст</label><input value={edit.alt} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, alt: event.target.value } }))} /></div>
           <div className="field"><label>Подпись</label><input value={edit.caption ?? ""} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, caption: event.target.value } }))} /></div>

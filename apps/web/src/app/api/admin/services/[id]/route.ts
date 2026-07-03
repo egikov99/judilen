@@ -2,6 +2,7 @@ import { db, serviceHouses, serviceOptions, services } from "@judilen/db";
 import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
+import { normalizeImageUrl } from "@/lib/image-urls";
 import { requirePermission } from "@/lib/session";
 import { problem, serviceSchema } from "@/lib/validation";
 
@@ -33,7 +34,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const [updated] = await tx.update(services).set({
       ...data,
       ...(basePrice === undefined ? {} : { basePrice: String(basePrice) }),
-      ...(imageUrl === undefined ? {} : { imageUrl: imageUrl || null }),
+      ...(imageUrl === undefined ? {} : { imageUrl: normalizeImageUrl(imageUrl) }),
       updatedAt: new Date()
     }).where(eq(services.id, id)).returning();
     if (houseIds) {

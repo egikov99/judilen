@@ -1,9 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { BookingSearch } from "@/components/booking-search";
 import { HouseCard } from "@/components/house-card";
 import { PublicShell } from "@/components/public-shell";
 import { formatCurrency } from "@/components/currency";
+import { PublicImage } from "@/components/public-image";
+import { DEFAULT_IMAGE_URL } from "@/lib/image-urls";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
 import { getPublicServices, priceUnitLabels } from "@/lib/services";
@@ -89,7 +90,7 @@ export default async function HomePage() {
                 const price = defaultOption?.price ?? service.basePrice;
                 return (
                   <article className="home-service-card" key={service.id}>
-                    {service.imageUrl && <Image className="home-service-image" src={service.imageUrl} alt={service.title} width={512} height={384} loading="lazy" />}
+                    <PublicImage className="home-service-image" src={service.imageUrl ?? DEFAULT_IMAGE_URL} context={`home-service:${service.id}`} alt={service.title} width={512} height={384} loading="lazy" />
                     <div className="home-service-copy">
                       <span className="home-service-price">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span>
                       <h3>{service.title}</h3>

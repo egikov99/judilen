@@ -63,7 +63,7 @@ docs/                     архитектура, API и деплой
 | `DATABASE_URL` | PostgreSQL connection string |
 | `AUTH_SECRET` | Ключ подписи сессии, минимум 32 символа |
 | `SESSION_TTL_SECONDS` | Срок жизни сессии |
-| `UPLOAD_DIR` / `MAX_UPLOAD_BYTES` | Каталог и лимит загрузок |
+| `UPLOAD_DIR` / `MAX_UPLOAD_BYTES` | Persistent-каталог загрузок (в Docker `/app/storage/uploads`) и лимит размера |
 | `ICAL_SYNC_CRON_SECRET` | Авторизация плановой iCal-синхронизации |
 | `PAYMENT_PROVIDER` | Выбранный платежный адаптер |
 | `PAYMENT_WEBHOOK_SECRET` | Проверка webhook платежного провайдера |
