@@ -1,5 +1,5 @@
 import { db, houseImages } from "@judilen/db";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { requirePermission } from "@/lib/session";
@@ -36,7 +36,20 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params;
   const [before] = await db.select().from(houseImages).where(eq(houseImages.id, id)).limit(1);
   if (!before) return problem(404, "Фото не найдено");
-  await db.delete(houseImages).where(eq(houseImages.id, id));
+  await db.transaction(async (tx) => {
+    await tx.delete(houseImages).where(eq(houseImages.id, id));
+    const remaining = await tx.select().from(houseImages).where(eq(houseImages.houseId, before.houseId)).orderBy(asc(houseImages.position));
+    for (const [index, image] of remaining.entries()) {
+      await tx.update(houseImages).set({ position: -(index + 1), updatedAt: new Date() }).where(eq(houseImages.id, image.id));
+    }
+    for (const [index, image] of remaining.entries()) {
+      await tx.update(houseImages).set({
+        position: index,
+        ...(before.isMain && index === 0 ? { isMain: true } : {}),
+        updatedAt: new Date()
+      }).where(eq(houseImages.id, image.id));
+    }
+  });
   await removeUploadedFile(before.url);
   await writeAudit({ session: auth.session, request, action: "house_image.delete", entityType: "house_image", entityId: id, before });
   revalidateTag("houses", "max");

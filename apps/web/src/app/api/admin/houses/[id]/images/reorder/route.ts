@@ -1,10 +1,11 @@
 import { db, houseImages } from "@judilen/db";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
 
-const schema = z.object({ imageIds: z.array(z.uuid()).min(1).max(100) });
+const schema = z.object({ imageIds: z.array(z.uuid()).min(1) });
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requirePermission("house_images.update");
@@ -22,6 +23,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     for (const [index, imageId] of parsed.data.imageIds.entries()) {
       await tx.update(houseImages).set({ position: index, updatedAt: new Date() }).where(eq(houseImages.id, imageId));
     }
+    await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, id));
+    await tx.update(houseImages).set({ isMain: true }).where(eq(houseImages.id, parsed.data.imageIds[0]));
   });
+  revalidateTag("houses", "max");
   return Response.json({ ok: true });
 }

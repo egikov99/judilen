@@ -1,5 +1,5 @@
 import { bookings, db, houseImages, houses as houseTable } from "@judilen/db";
-import { and, asc, desc, eq, gt, gte, inArray, lt, notExists } from "drizzle-orm";
+import { and, asc, eq, gt, gte, inArray, lt, notExists } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { blockingBookingStatuses } from "./booking-availability";
 import { houses as fallbackHouses, type House } from "./catalog";
@@ -40,7 +40,7 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
         availability ? gte(houseTable.guests, availability.guests) : undefined,
         hasOverlappingBooking ? notExists(hasOverlappingBooking) : undefined
       ))
-      .orderBy(asc(houseTable.name), desc(houseImages.isMain), asc(houseImages.position));
+      .orderBy(asc(houseTable.name), asc(houseImages.position));
     const mapped = new Map<string, House>();
     for (const { house, image } of rows) {
       const current = mapped.get(house.id) ?? {

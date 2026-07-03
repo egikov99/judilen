@@ -15,7 +15,6 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
   const [preview, setPreview] = useState("");
   const [alt, setAlt] = useState("");
   const [caption, setCaption] = useState("");
-  const [isMain, setIsMain] = useState(!images.length);
   const [edits, setEdits] = useState<Record<string, Partial<ImageRow>>>({});
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
@@ -39,7 +38,7 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     form.set("alt", current?.alt || alt);
     form.set("caption", current?.caption || caption);
     form.set("position", String(current?.position ?? images.length));
-    form.set("isMain", String(current?.isMain ?? isMain));
+    form.set("isMain", String(current?.isMain ?? !images.length));
     form.set("isActive", String(current?.isActive ?? true));
     if (replace) form.set("imageId", replace.id);
     const xhr = new XMLHttpRequest();
@@ -71,7 +70,10 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
   }
 
   async function remove(id: string) {
-    await fetch(`/api/admin/house-images/${id}`, { method: "DELETE" });
+    setMessage("");
+    const response = await fetch(`/api/admin/house-images/${id}`, { method: "DELETE" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) return setMessage(body.title ?? "Не удалось удалить фото");
     router.refresh();
   }
 
@@ -80,10 +82,13 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     const target = index + direction;
     if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target], next[index]];
-    await fetch(`/api/admin/houses/${houseId}/images/reorder`, {
+    setMessage("");
+    const response = await fetch(`/api/admin/houses/${houseId}/images/reorder`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageIds: next.map((image) => image.id) })
     });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) return setMessage(body.title ?? "Не удалось изменить порядок фотографий");
     router.refresh();
   }
 
@@ -98,7 +103,7 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
       <div className="form-stack">
         <div className="field"><label>Alt-текст</label><input value={alt} onChange={(event) => setAlt(event.target.value)} required /></div>
         <div className="field"><label>Подпись</label><input value={caption} onChange={(event) => setCaption(event.target.value)} /></div>
-        <label><input type="checkbox" checked={isMain} onChange={(event) => setIsMain(event.target.checked)} /> Главное фото</label>
+        <small>Главным будет первое фото в списке. Порядок можно изменить после загрузки.</small>
         {progress > 0 && <progress value={progress} max={100}>{progress}%</progress>}
         <button className="button button-primary" type="button" disabled={!file || alt.trim().length < 3} onClick={() => upload()}>Загрузить фото</button>
       </div>
@@ -106,11 +111,10 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     {images.length ? <div className="photo-admin-grid">{images.map((image, index) => {
       const edit = { ...image, ...edits[image.id] };
       return <article className="photo-admin-card" key={image.id}>
-        <Image src={image.url} alt={image.alt} width={360} height={240} unoptimized={image.url.startsWith("/uploads/")} onError={() => console.error("House image preview failed to load", { imageId: image.id, src: image.url })} />
+        <div className="photo-admin-preview"><Image src={image.url} alt={image.alt} width={360} height={240} unoptimized={image.url.startsWith("/uploads/")} onError={() => console.error("House image preview failed to load", { imageId: image.id, src: image.url })} />{index === 0 && <span className="badge">Главное фото</span>}</div>
         <div className="form-stack">
           <div className="field"><label>Alt-текст</label><input value={edit.alt} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, alt: event.target.value } }))} /></div>
           <div className="field"><label>Подпись</label><input value={edit.caption ?? ""} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, caption: event.target.value } }))} /></div>
-          <label><input type="checkbox" checked={edit.isMain} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, isMain: event.target.checked } }))} /> Главное</label>
           <label><input type="checkbox" checked={edit.isActive} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, isActive: event.target.checked } }))} /> Активно</label>
           <div className="action-row"><button className="icon-button" title="Переместить назад" disabled={index === 0} onClick={() => move(index, -1)}>↑</button><button className="icon-button" title="Переместить вперёд" disabled={index === images.length - 1} onClick={() => move(index, 1)}>↓</button><label className="button button-ghost">Заменить<input className="visually-hidden" type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(event) => event.target.files?.[0] && upload(event.target.files[0], image)} /></label></div>
           <div className="action-row"><button className="button button-primary" onClick={() => save(image)}>Сохранить</button><button className="button button-ghost" onClick={() => remove(image.id)}>Удалить</button></div>

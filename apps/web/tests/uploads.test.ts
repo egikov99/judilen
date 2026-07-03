@@ -38,9 +38,19 @@ describe("image uploads", () => {
   it("enforces one main photo and provides a reorder endpoint", () => {
     const migration = readFileSync(resolve(process.cwd(), "../../packages/db/migrations/0003_house_image_integrity.sql"), "utf8");
     const route = readFileSync(resolve(process.cwd(), "src/app/api/admin/houses/[id]/images/reorder/route.ts"), "utf8");
+    const deletionRoute = readFileSync(resolve(process.cwd(), "src/app/api/admin/house-images/[id]/route.ts"), "utf8");
+    const publicPage = readFileSync(resolve(process.cwd(), "src/app/domiki/[slug]/page.tsx"), "utf8");
+    const gallery = readFileSync(resolve(process.cwd(), "src/components/house-gallery.tsx"), "utf8");
     expect(migration).toContain("house_images_one_main");
     expect(route).toContain("imageIds");
     expect(route).toContain("position");
+    expect(route).not.toContain(".max(100)");
+    expect(deletionRoute).toContain("const remaining");
+    expect(deletionRoute).toContain("position: index");
+    expect(publicPage).not.toContain("images.slice(0,3)");
+    expect(gallery).toContain("images.slice(3)");
+    expect(gallery).toContain('event.key === "Escape"');
+    expect(gallery).toContain("Следующее фото");
   });
 
   it("normalizes historical filesystem and relative URLs", () => {
