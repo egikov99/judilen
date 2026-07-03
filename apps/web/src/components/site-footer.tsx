@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <SiteBrand className="site-brand-footer" />
+            <SiteBrand className="site-brand-footer" logoSrc="/images/judilen-strusto-logo-white.png" />
             <p style={{ maxWidth: 350, color: "rgba(255,255,255,.67)" }}>Тихое место для отдыха среди хвойного леса. Продуманные дома и искренняя забота о гостях.</p>
           </div>
           <div><div className="footer-title">Отдых</div><div className="footer-list"><Link href="/domiki">Домики</Link><Link href="/uslugi">Услуги</Link><Link href="/otzyvy">Отзывы</Link></div></div>
