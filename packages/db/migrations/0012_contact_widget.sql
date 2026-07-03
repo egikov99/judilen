@@ -27,6 +27,13 @@ VALUES
   ('website', 'Чат на сайте', 'Напишите нам', 50, 'message-circle')
 ON CONFLICT ("channel_type") DO NOTHING;
 --> statement-breakpoint
+ALTER TABLE "communication_channels"
+  DROP CONSTRAINT IF EXISTS "communication_channels_provider_check";
+--> statement-breakpoint
+ALTER TABLE "communication_channels"
+  ADD CONSTRAINT "communication_channels_provider_check"
+  CHECK ("provider" IN ('telegram', 'telegram_group', 'vk', 'instagram', 'whatsapp', 'viber', 'website'));
+--> statement-breakpoint
 INSERT INTO "communication_channels"
   ("provider", "name", "is_enabled", "status", "public_config", "webhook_secret")
 VALUES

@@ -46,5 +46,10 @@ describe("contact widget settings", () => {
     const migration = readFileSync(path, "utf8");
     expect(migration).toContain('CREATE TABLE "contact_widget_settings"');
     expect(migration).toContain("('website', 'Чат на сайте', true, 'connected'");
+    const constraint = migration.indexOf('CHECK ("provider" IN');
+    const websiteChannel = migration.indexOf('INSERT INTO "communication_channels"');
+    expect(constraint).toBeGreaterThan(-1);
+    expect(migration.slice(constraint, websiteChannel)).toContain("'website'");
+    expect(constraint).toBeLessThan(websiteChannel);
   });
 });
