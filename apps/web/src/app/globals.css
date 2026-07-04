@@ -625,6 +625,28 @@ img { display: block; max-width: 100%; }
 .contact-chat-window .field textarea { min-height: 95px; }
 .contact-chat-window .button { width: 100%; }
 .contact-chat-success { display: grid; justify-items: center; gap: 18px; padding: 32px 10px; color: var(--color-primary); text-align: center; }
+.contact-widget-unread { position: absolute; top: -5px; right: -5px; display: grid; min-width: 23px; height: 23px; place-items: center; padding: 0 6px; border: 2px solid var(--color-card); border-radius: 999px; background: #ba1a1a; color: white; font-size: 10px; font-weight: 800; }
+.website-chat { display: grid; min-height: 0; grid-template-rows: minmax(180px, 1fr) auto; overflow: hidden; border: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent); border-radius: 14px; background: var(--color-card); }
+.website-chat-widget { height: min(520px, calc(100dvh - 190px)); border: 0; border-radius: 0; }
+.website-chat-account { height: min(600px, 70dvh); margin-top: 20px; }
+.website-chat-messages { display: flex; min-height: 0; flex-direction: column; gap: 10px; padding: 16px; overflow-y: auto; overscroll-behavior: contain; background: color-mix(in srgb, var(--color-primary) 4%, var(--color-card)); }
+.website-chat-placeholder { margin: auto; color: var(--muted); font-size: 13px; }
+.website-chat-message { width: fit-content; max-width: 84%; padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: white; color: var(--color-text); box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+.website-chat-message.is-client { align-self: flex-end; border-radius: 14px 14px 4px; background: var(--color-primary); color: white; }
+.website-chat-message.is-system { align-self: center; background: transparent; box-shadow: none; color: var(--muted); text-align: center; }
+.website-chat-message p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.website-chat-message small, .website-chat-message time { display: block; font-size: 10px; opacity: .68; }
+.website-chat-message small { margin-bottom: 3px; font-weight: 700; }
+.website-chat-message time { margin-top: 5px; text-align: right; }
+.website-chat-composer { display: grid; gap: 10px; padding: 12px; border-top: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent); background: var(--color-card); }
+.website-chat-profile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.website-chat-input-row { display: grid; grid-template-columns: minmax(0, 1fr) 46px; gap: 8px; align-items: end; }
+.website-chat-input-row textarea { width: 100%; min-height: 46px; max-height: 120px; resize: vertical; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.website-chat-input-row .button { width: 46px; min-width: 46px; height: 46px; padding: 0; border-radius: 50%; }
+.website-chat-sending { color: var(--muted); }
+.website-chat-error { margin: 0; }
+.account-chat-card > h2 { margin-bottom: 6px; font: 700 30px var(--serif); }
+.account-chat-card > p { margin-top: 0; color: var(--muted); }
 .contact-widget-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; }
 @keyframes contact-widget-in { from { opacity: 0; transform: translateY(10px) scale(.96); } }
 @keyframes modal-fade-in { from { opacity: 0; } }
@@ -811,6 +833,10 @@ img { display: block; max-width: 100%; }
   .contact-widget-toggle { width: 56px; height: 56px; }
   .contact-chat-window { max-height: calc(100dvh - 158px); }
   .contact-chat-body { max-height: calc(100dvh - 234px); }
+  .website-chat-widget { height: calc(100dvh - 234px); min-height: 330px; }
+  .website-chat-account { height: min(560px, 72dvh); }
+  .website-chat-profile { grid-template-columns: 1fr; }
+  .website-chat-message { max-width: 90%; }
   .public-site main:has(input:focus, textarea:focus, select:focus) ~ .floating-contact-widget { opacity: 0; pointer-events: none; }
 }
 

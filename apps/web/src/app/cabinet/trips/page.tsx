@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { SiteHeader } from "@/components/site-header";
 import { formatCurrency } from "@/components/currency";
+import { WebsiteChat } from "@/components/website-chat";
 import { requireSession } from "@/lib/session";
 import { onlinePaymentsEnabled } from "@/lib/payments";
 
@@ -40,7 +41,9 @@ export default async function TripsPage() {
 
   return <><SiteHeader /><main className="public-site">
     <section className="page-hero"><div className="container"><div style={{ display: "flex", justifyContent: "space-between", gap: 25, alignItems: "end" }}><div><span className="eyebrow">Личный кабинет</span><h1 className="page-title">Мои поездки</h1><p className="page-intro">Здравствуйте, {session.name}. Здесь собраны бронирования, оплаты и детали заезда.</p></div><LogoutButton /></div></div></section>
-    <section className="section"><div className="container form-stack">{trips.length ? trips.map((trip) => {
+    <section className="section"><div className="container form-stack">
+      <section className="form-card account-chat-card"><span className="eyebrow">Поддержка</span><h2>Чат с администратором</h2><p>Продолжите переписку с сотрудниками базы отдыха.</p><WebsiteChat isOpen variant="account" /></section>
+      {trips.length ? trips.map((trip) => {
       const due = Number(trip.totalAmount) - Number(trip.paidAmount);
       const canReview = trip.checkOut < today && !trip.reviewId && !["cancelled", "declined"].includes(trip.status);
       const paymentHref = onlinePaymentsEnabled() ? `/oplata/${trip.id}` : `/oplata?bookingId=${trip.id}`;

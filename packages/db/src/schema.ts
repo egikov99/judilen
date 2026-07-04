@@ -557,9 +557,11 @@ export const chatConversations = pgTable(
     channelId: uuid("channel_id").references(() => communicationChannels.id, { onDelete: "cascade" }).notNull(),
     externalChatId: text("external_chat_id").notNull(),
     externalUserId: text("external_user_id"),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
     displayName: text("display_name").notNull(),
     avatarUrl: text("avatar_url"),
     isGroup: boolean("is_group").notNull().default(false),
+    status: text("status").notNull().default("open"),
     unreadCount: integer("unread_count").notNull().default(0),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
     lastMessagePreview: text("last_message_preview"),
@@ -567,7 +569,23 @@ export const chatConversations = pgTable(
   },
   (table) => [
     uniqueIndex("chat_conversations_channel_external_unique").on(table.channelId, table.externalChatId),
+    uniqueIndex("chat_conversations_channel_user_unique").on(table.channelId, table.userId).where(sql`${table.userId} is not null`),
     index("chat_conversations_last_message_idx").on(table.lastMessageAt)
+  ]
+);
+
+export const websiteChatVisitors = pgTable(
+  "website_chat_visitors",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    conversationId: uuid("conversation_id").references(() => chatConversations.id, { onDelete: "cascade" }).notNull(),
+    visitorHash: text("visitor_hash").notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("website_chat_visitors_hash_unique").on(table.visitorHash),
+    index("website_chat_visitors_conversation_idx").on(table.conversationId)
   ]
 );
 
@@ -583,6 +601,7 @@ export const chatMessages = pgTable(
     status: text("status").notNull(),
     sentByUserId: uuid("sent_by_user_id").references(() => users.id, { onDelete: "set null" }),
     rawPayload: jsonb("raw_payload").$type<Record<string, unknown>>(),
+    readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
   },
   (table) => [

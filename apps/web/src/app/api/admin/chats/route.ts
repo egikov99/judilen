@@ -13,6 +13,7 @@ export async function GET() {
     displayName: chatConversations.displayName,
     avatarUrl: chatConversations.avatarUrl,
     isGroup: chatConversations.isGroup,
+    status: chatConversations.status,
     unreadCount: chatConversations.unreadCount,
     lastMessageAt: chatConversations.lastMessageAt,
     lastMessagePreview: chatConversations.lastMessagePreview

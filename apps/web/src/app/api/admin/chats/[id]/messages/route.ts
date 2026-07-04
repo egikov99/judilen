@@ -31,11 +31,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!row.channel.isEnabled || row.channel.status !== "connected") {
     return problem(409, "Канал отключён или не прошёл проверку");
   }
+  const now = new Date();
   if (row.channel.provider === "website") {
-    return problem(409, "Ответ через виджет пока недоступен", "Свяжитесь с клиентом по телефону или email из первого сообщения");
+    const [message] = await db.insert(chatMessages).values({
+      conversationId: id,
+      direction: "outbound",
+      senderName: auth.session.name,
+      body: parsed.data.body,
+      status: "sent",
+      sentByUserId: auth.session.userId
+    }).returning();
+    await db.update(chatConversations).set({
+      lastMessageAt: now,
+      lastMessagePreview: parsed.data.body.slice(0, 240),
+      updatedAt: now
+    }).where(eq(chatConversations.id, id));
+    return Response.json({ item: { ...message, createdAt: message.createdAt.toISOString() } }, { status: 201 });
   }
 
-  const now = new Date();
   const [message] = await db.insert(chatMessages).values({
     conversationId: id,
     direction: "outbound",

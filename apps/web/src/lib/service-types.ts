@@ -14,7 +14,7 @@ export interface PublicService {
   description: string;
   images: string[];
   basePrice: number;
-  priceUnit: "hour" | "day" | "booking" | "person" | "item";
+  priceUnit: "hour" | "three_hours" | "day" | "booking" | "person" | "item";
   sortOrder: number;
   houseIds: string[];
   options: PublicServiceOption[];
@@ -22,6 +22,7 @@ export interface PublicService {
 
 export const priceUnitLabels: Record<PublicService["priceUnit"], string> = {
   hour: "за час",
+  three_hours: "за 3 часа",
   day: "за день",
   booking: "за бронь",
   person: "за человека",

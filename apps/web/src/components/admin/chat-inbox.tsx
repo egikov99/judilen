@@ -12,6 +12,7 @@ type Conversation = {
   displayName: string;
   avatarUrl: string | null;
   isGroup: boolean;
+  status: "open" | "closed" | "archived";
   unreadCount: number;
   lastMessageAt: string | null;
   lastMessagePreview: string | null;
@@ -41,6 +42,13 @@ type SelectedChat = {
   provider: CommunicationProvider;
   displayName: string;
   isGroup: boolean;
+  status: "open" | "closed" | "archived";
+};
+
+const conversationStatusLabels: Record<SelectedChat["status"], string> = {
+  open: "Открыт",
+  closed: "Закрыт",
+  archived: "В архиве"
 };
 
 function formatTime(value: string | null) {
@@ -142,7 +150,7 @@ export function ChatInbox({ initialConversationId, canWrite }: {
   useEffect(() => {
     if (!selectedId) return;
     const initial = window.setTimeout(() => loadConversation(selectedId, true), 0);
-    const timer = window.setInterval(() => loadConversation(selectedId), 5_000);
+    const timer = window.setInterval(() => loadConversation(selectedId, true), 5_000);
     return () => {
       window.clearTimeout(initial);
       window.clearInterval(timer);
@@ -223,7 +231,7 @@ export function ChatInbox({ initialConversationId, canWrite }: {
       {selected ? <>
         <header className="chat-dialog-header">
           <button className="icon-button chat-back-button" type="button" aria-label="Назад к чатам" onClick={closeConversation}><ArrowLeft size={20} /></button>
-          <div><strong>{selected.displayName}</strong><span>{communicationProviderDefinitions[selected.provider].label}{selected.isGroup ? " · группа" : ""}</span></div>
+          <div><strong>{selected.displayName}</strong><span>{communicationProviderDefinitions[selected.provider].label}{selected.isGroup ? " · группа" : ""} · {conversationStatusLabels[selected.status]}</span></div>
         </header>
         <div className="chat-messages" ref={messageList}>
           {messages.map((message) => <article className={`chat-message is-${message.direction}`} key={message.id}>

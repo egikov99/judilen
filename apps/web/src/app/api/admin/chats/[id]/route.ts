@@ -12,7 +12,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     id: chatConversations.id,
     provider: communicationChannels.provider,
     displayName: chatConversations.displayName,
-    isGroup: chatConversations.isGroup
+    isGroup: chatConversations.isGroup,
+    status: chatConversations.status
   }).from(chatConversations)
     .innerJoin(communicationChannels, eq(chatConversations.channelId, communicationChannels.id))
     .where(eq(chatConversations.id, id))
@@ -49,12 +50,18 @@ export async function PATCH(_request: Request, { params }: { params: Promise<{ i
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const { id } = await params;
+  const now = new Date();
   const [conversation] = await db.update(chatConversations).set({
     unreadCount: 0,
-    updatedAt: new Date()
+    updatedAt: now
   }).where(and(
     eq(chatConversations.id, id),
     sql`${chatConversations.unreadCount} > 0`
   )).returning({ id: chatConversations.id });
+  await db.update(chatMessages).set({ readAt: now }).where(and(
+    eq(chatMessages.conversationId, id),
+    eq(chatMessages.direction, "inbound"),
+    sql`${chatMessages.readAt} is null`
+  ));
   return Response.json({ ok: true, changed: Boolean(conversation) });
 }
