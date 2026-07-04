@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createEntityImageUploadForm } from "@/lib/entity-image-upload";
 
 interface ImageRow {
   id: string;
@@ -16,16 +16,20 @@ interface ImageRow {
 }
 
 type SelectedImage = { file: File; preview: string };
+type Feedback = { kind: "success" | "error"; text: string };
 
-export function HouseImagesManager({ houseId, images }: { houseId: string; images: ImageRow[] }) {
-  const router = useRouter();
+function reportDevError(message: string, context: unknown) {
+  if (process.env.NODE_ENV !== "production") console.error(message, context);
+}
+
+export function HouseImagesManager({ houseId, images: initialImages }: { houseId: string; images: ImageRow[] }) {
+  const [images, setImages] = useState(initialImages);
   const [selected, setSelected] = useState<SelectedImage[]>([]);
   const [alt, setAlt] = useState("");
   const [caption, setCaption] = useState("");
   const [edits, setEdits] = useState<Record<string, Partial<ImageRow>>>({});
-  const [uploaded, setUploaded] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   async function selectFiles(files: FileList | File[]) {
     const next = await Promise.all(Array.from(files).map((file) => new Promise<SelectedImage>((resolve) => {
@@ -37,37 +41,27 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
   }
 
   async function uploadSelected() {
-    if (!selected.length || alt.trim().length < 3) return;
+    if (!selected.length) return;
     setBusy(true);
-    setMessage("");
-    setUploaded(0);
-    let completed = 0;
+    setFeedback(null);
     try {
-      for (const [index, image] of selected.entries()) {
-        const form = new FormData();
-        form.set("file", image.file);
-        form.set("scope", "houses");
-        form.set("houseId", houseId);
-        form.set("alt", selected.length > 1 ? `${alt.trim()}, фото ${index + 1}` : alt.trim());
-        form.set("caption", caption.trim());
-        form.set("position", String(images.length + index));
-        form.set("isMain", String(!images.length && index === 0));
-        form.set("isActive", "true");
-        const response = await fetch("/api/admin/uploads", { method: "POST", body: form });
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.title ?? `Не удалось загрузить ${image.file.name}`);
-        completed = index + 1;
-        setUploaded(completed);
-      }
+      const form = createEntityImageUploadForm(
+        selected.map((image) => image.file),
+        { key: "houseId", id: houseId },
+        { alt, caption }
+      );
+      const response = await fetch(`/api/admin/houses/${houseId}/images/upload`, { method: "POST", body: form });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.title ?? `Не удалось загрузить фотографии (HTTP ${response.status})`);
+      const created = Array.isArray(body.items) ? body.items as ImageRow[] : [];
+      setImages((rows) => [...rows, ...created]);
       setSelected([]);
       setAlt("");
       setCaption("");
-      router.refresh();
+      setFeedback({ kind: "success", text: `Фотографии загружены: ${created.length}` });
     } catch (error) {
-      console.error("House image upload failed", { houseId, error });
-      setSelected((items) => items.slice(completed));
-      setMessage(error instanceof Error ? error.message : "Не удалось загрузить фотографии");
-      if (completed > 0) router.refresh();
+      reportDevError("House image upload failed", { houseId, error });
+      setFeedback({ kind: "error", text: error instanceof Error ? error.message : "Не удалось загрузить фотографии" });
     } finally {
       setBusy(false);
     }
@@ -76,7 +70,7 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
   async function replace(image: ImageRow, file: File) {
     const current = { ...image, ...edits[image.id] };
     setBusy(true);
-    setMessage("");
+    setFeedback(null);
     const form = new FormData();
     form.set("file", file);
     form.set("scope", "houses");
@@ -87,33 +81,44 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     form.set("position", String(current.position));
     form.set("isMain", String(current.isMain));
     form.set("isActive", String(current.isActive));
-    const response = await fetch("/api/admin/uploads", { method: "POST", body: form });
-    const body = await response.json().catch(() => ({}));
-    setBusy(false);
-    if (!response.ok) {
-      console.error("House image replacement failed", { houseId, imageId: image.id, status: response.status, response: body });
-      return setMessage(body.title ?? "Не удалось заменить фотографию");
+    try {
+      const response = await fetch("/api/admin/uploads", { method: "POST", body: form });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.title ?? "Не удалось заменить фотографию");
+      setImages((rows) => rows.map((row) => row.id === image.id ? body.item : row));
+      setFeedback({ kind: "success", text: "Фотография заменена" });
+    } catch (error) {
+      reportDevError("House image replacement failed", { houseId, imageId: image.id, error });
+      setFeedback({ kind: "error", text: error instanceof Error ? error.message : "Не удалось заменить фотографию" });
+    } finally {
+      setBusy(false);
     }
-    router.refresh();
   }
 
   async function save(image: ImageRow) {
+    setBusy(true);
+    setFeedback(null);
     const response = await fetch(`/api/admin/house-images/${image.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(edits[image.id] ?? image)
     });
-    const body = await response.json();
-    if (!response.ok) return setMessage(body.title ?? "Не удалось сохранить фото");
-    router.refresh();
+    const body = await response.json().catch(() => ({}));
+    setBusy(false);
+    if (!response.ok) return setFeedback({ kind: "error", text: body.title ?? "Не удалось сохранить фото" });
+    setImages((rows) => rows.map((row) => row.id === image.id ? body.item : row));
+    setFeedback({ kind: "success", text: "Данные фотографии сохранены" });
   }
 
   async function remove(id: string) {
-    setMessage("");
+    setBusy(true);
+    setFeedback(null);
     const response = await fetch(`/api/admin/house-images/${id}`, { method: "DELETE" });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) return setMessage(body.title ?? "Не удалось удалить фото");
-    router.refresh();
+    setBusy(false);
+    if (!response.ok) return setFeedback({ kind: "error", text: body.title ?? "Не удалось удалить фото" });
+    setImages((rows) => rows.filter((row) => row.id !== id).map((row, index) => ({ ...row, position: index, isMain: index === 0 })));
+    setFeedback({ kind: "success", text: "Фотография удалена" });
   }
 
   async function move(index: number, direction: -1 | 1) {
@@ -121,21 +126,24 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     const target = index + direction;
     if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target], next[index]];
-    setMessage("");
+    setBusy(true);
+    setFeedback(null);
     const response = await fetch(`/api/admin/houses/${houseId}/images/reorder`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageIds: next.map((image) => image.id) })
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) return setMessage(body.title ?? "Не удалось изменить порядок фотографий");
-    router.refresh();
+    setBusy(false);
+    if (!response.ok) return setFeedback({ kind: "error", text: body.title ?? "Не удалось изменить порядок фотографий" });
+    setImages(next.map((image, nextIndex) => ({ ...image, position: nextIndex, isMain: nextIndex === 0 })));
+    setFeedback({ kind: "success", text: "Порядок фотографий сохранён" });
   }
 
   return <section className="panel house-photo-panel">
     <h2>Фотографии</h2>
     <p className="admin-section-description">Можно выбрать сразу несколько файлов. Все фотографии сохраняются; первая в списке используется в карточке домика.</p>
-    {message && <div className="notice error">{message}</div>}
+    {feedback && <div className={`notice${feedback.kind === "error" ? " error" : ""}`} role={feedback.kind === "error" ? "alert" : "status"}>{feedback.text}</div>}
     <div className="photo-upload-form">
       <label className="upload-dropzone" onDragOver={(event) => event.preventDefault()} onDrop={(event) => {
         event.preventDefault();
@@ -145,12 +153,12 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
         <span>Перетащите фотографии сюда или выберите файлы</span>
       </label>
       <div className="form-stack">
-        <div className="field"><label>Alt-текст</label><input value={alt} onChange={(event) => setAlt(event.target.value)} required /></div>
+        <div className="field"><label>Alt-текст (необязательно)</label><input value={alt} onChange={(event) => setAlt(event.target.value)} /></div>
         <div className="field"><label>Подпись</label><input value={caption} onChange={(event) => setCaption(event.target.value)} /></div>
-        <small>Для нескольких файлов номер добавится к alt-тексту автоматически.</small>
-        {busy && <progress value={uploaded} max={selected.length}>{uploaded} из {selected.length}</progress>}
-        <button className="button button-primary" type="button" disabled={busy || !selected.length || alt.trim().length < 3} onClick={() => void uploadSelected()}>
-          {busy ? `Загружено ${uploaded} из ${selected.length}` : `Загрузить${selected.length ? ` (${selected.length})` : ""}`}
+        <small>Если поле пустое, alt-текст будет создан из имени файла.</small>
+        {busy && <progress aria-label="Загрузка фотографий" />}
+        <button className="button button-primary" type="button" disabled={busy || !selected.length} onClick={() => void uploadSelected()}>
+          {busy ? `Загрузка (${selected.length})…` : `Загрузить${selected.length ? ` (${selected.length})` : ""}`}
         </button>
       </div>
     </div>
@@ -163,7 +171,7 @@ export function HouseImagesManager({ houseId, images }: { houseId: string; image
     {images.length ? <div className="photo-admin-grid">{images.map((image, index) => {
       const edit = { ...image, ...edits[image.id] };
       return <article className="photo-admin-card" key={image.id}>
-        <div className="photo-admin-preview"><Image src={image.url} alt={image.alt} width={360} height={240} unoptimized={image.url.startsWith("/uploads/")} onError={() => console.error("House image preview failed to load", { imageId: image.id, src: image.url })} />{index === 0 && <span className="badge">Главное фото</span>}</div>
+        <div className="photo-admin-preview"><Image src={image.url} alt={image.alt} width={360} height={240} unoptimized={image.url.startsWith("/uploads/")} onError={() => reportDevError("House image preview failed to load", { imageId: image.id, src: image.url })} />{index === 0 && <span className="badge">Главное фото</span>}</div>
         <div className="form-stack">
           <div className="field"><label>Alt-текст</label><input value={edit.alt} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, alt: event.target.value } }))} /></div>
           <div className="field"><label>Подпись</label><input value={edit.caption ?? ""} onChange={(event) => setEdits((value) => ({ ...value, [image.id]: { ...edit, caption: event.target.value } }))} /></div>

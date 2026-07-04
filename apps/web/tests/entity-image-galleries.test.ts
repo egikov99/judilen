@@ -15,26 +15,46 @@ describe("house and service image galleries", () => {
     expect(migration).not.toContain("LIMIT 3");
   });
 
-  it("supports multiple uploads, individual deletion, and ordering for services", () => {
+  it("uploads service files in one multipart request and supports deletion and ordering", () => {
     const manager = source("src/components/admin/service-images-manager.tsx");
     const upload = source("src/app/api/admin/services/[id]/images/route.ts");
     const deletion = source("src/app/api/admin/service-images/[id]/route.ts");
     const reorder = source("src/app/api/admin/services/[id]/images/reorder/route.ts");
     expect(manager).toContain("multiple");
-    expect(manager).toContain("selected.entries()");
+    expect(manager).toContain("createEntityImageUploadForm");
+    expect(manager).toContain('fetch(`/api/admin/services/${serviceId}/images`, { method: "POST", body: form })');
+    expect(manager).toContain("onClick={() => void uploadSelected()}");
+    expect(manager).toContain("disabled={busy || !selected.length}");
+    expect(upload).toContain('form.getAll("files")');
     expect(upload).toContain('saveImageFile(file, "services", id)');
+    expect(upload).toContain("Response.json({ items");
     expect(deletion).toContain("removeUploadedFile(before.url)");
     expect(reorder).toContain("imageIds");
     expect(reorder).not.toContain(".max(");
   });
 
-  it("supports multiple sequential house uploads without stale positions", () => {
+  it("uploads house files in one multipart request without stale positions", () => {
     const manager = source("src/components/admin/house-images-manager.tsx");
-    const upload = source("src/app/api/admin/uploads/route.ts");
+    const upload = source("src/app/api/admin/houses/[id]/images/upload/route.ts");
     expect(manager).toContain("multiple");
-    expect(manager).toContain("selected.entries()");
+    expect(manager).toContain("createEntityImageUploadForm");
+    expect(manager).toContain("/api/admin/houses/${houseId}/images/upload");
+    expect(manager).toContain("onClick={() => void uploadSelected()}");
+    expect(manager).toContain("disabled={busy || !selected.length}");
+    expect(upload).toContain('form.getAll("files")');
     expect(upload).toContain("pg_advisory_xact_lock");
-    expect(upload).toContain("(last?.position ?? -1) + 1");
+    expect(upload).toContain("firstPosition");
+    expect(upload).toContain("Response.json({ items");
+  });
+
+  it("does not silently require alt text before upload", () => {
+    const managers = [
+      source("src/components/admin/house-images-manager.tsx"),
+      source("src/components/admin/service-images-manager.tsx")
+    ].join("\n");
+    expect(managers).not.toMatch(/if \(!selected\.length \|\| alt\.trim/);
+    expect(managers).not.toMatch(/disabled=\{[^}]*alt\.trim/);
+    expect(managers).toContain("alt-текст будет создан из имени файла");
   });
 
   it("returns image arrays from house and service APIs", () => {
@@ -70,6 +90,7 @@ describe("house and service image galleries", () => {
       source("src/components/admin/service-images-manager.tsx"),
       source("src/components/house-gallery.tsx"),
       source("src/app/api/admin/houses/[id]/images/route.ts"),
+      source("src/app/api/admin/houses/[id]/images/upload/route.ts"),
       source("src/app/api/admin/services/[id]/images/route.ts")
     ].join("\n");
     expect(sources).not.toMatch(/maxFiles|MAX_IMAGES|limit:\s*3|image[123]|photo[123]/i);
