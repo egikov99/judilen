@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, Download, Send, Smartphone } from "lucide-react";
+import { BellRing, Download, KeyRound, RotateCcw, Send, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { notificationEventLabels, notificationEventTypes, type NotificationEventType } from "@/lib/notification-types";
 
@@ -13,6 +13,15 @@ type Preference = {
 type InstallPrompt = Event & {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
+
+type VapidStatus = {
+  configured: boolean;
+  publicKey: string | null;
+  privateKeyPreview: string | null;
+  source: "env" | "database" | null;
+  automaticallyGenerated: boolean;
+  message: string;
 };
 
 function applicationServerKey(value: string) {
@@ -29,6 +38,7 @@ export function PushSettings() {
   });
   const [subscribed, setSubscribed] = useState(false);
   const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
+  const [vapidStatus, setVapidStatus] = useState<VapidStatus | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
@@ -41,6 +51,17 @@ export function PushSettings() {
         setSubscribed(data.subscribed);
         setVapidPublicKey(data.vapidPublicKey);
       });
+    fetch("/api/admin/notifications/vapid", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (data.item) {
+          setVapidStatus(data.item);
+          setVapidPublicKey(data.item.publicKey);
+        }
+        if (!response.ok) throw new Error(data.title ?? "Не удалось проверить VAPID-ключи");
+        return data;
+      })
+      .catch((error) => setMessage(error instanceof Error ? error.message : "Не удалось проверить VAPID-ключи"));
     const handler = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as InstallPrompt);
@@ -68,6 +89,7 @@ export function PushSettings() {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") throw new Error("Разрешение на уведомления не предоставлено");
       const registration = await navigator.serviceWorker.ready;
+      await (await registration.pushManager.getSubscription())?.unsubscribe();
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey(vapidPublicKey)
@@ -111,6 +133,34 @@ export function PushSettings() {
     setBusy(false);
   }
 
+  async function regenerateVapidKeys() {
+    if (!window.confirm("Перегенерировать VAPID-ключи? Все существующие push-подписки перестанут работать, пользователям потребуется включить push заново.")) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/notifications/vapid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail ?? data.title ?? "Не удалось перегенерировать ключи");
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        await (await registration.pushManager.getSubscription())?.unsubscribe();
+      }
+      setVapidStatus(data.item);
+      setVapidPublicKey(data.item.publicKey);
+      setSubscribed(false);
+      setPreference((current) => ({ ...current, pushEnabled: false }));
+      setMessage(`VAPID-ключи перегенерированы. Сброшено подписок: ${data.invalidatedSubscriptions ?? 0}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Не удалось перегенерировать ключи");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function toggleEvent(eventType: NotificationEventType) {
     setPreference((current) => ({
       ...current,
@@ -137,6 +187,18 @@ export function PushSettings() {
         <button className="button button-ghost" type="button" disabled={busy || !subscribed} onClick={sendTest}><Send size={17} /> Тест</button>
       </div>
       {message && <p className="notice" role="status">{message}</p>}
+    </section>
+
+    <section className="panel settings-panel settings-events vapid-settings">
+      <div className="settings-heading"><KeyRound size={22} /><div><h2>VAPID-ключи</h2><p>Серверная подпись для безопасной доставки push-уведомлений.</p></div><span className={`badge ${vapidStatus?.configured ? "" : "badge-warn"}`}>{vapidStatus?.configured ? "Настроено" : vapidStatus ? "Не настроено" : "Проверка…"}</span></div>
+      {vapidStatus && <>
+        <p className="notice">{vapidStatus.message}</p>
+        {vapidStatus.publicKey && <div className="vapid-key-row"><span>Public key</span><code>{vapidStatus.publicKey}</code></div>}
+        {vapidStatus.privateKeyPreview && <div className="vapid-key-row"><span>Private key</span><code>{vapidStatus.privateKeyPreview}</code></div>}
+        <p className="admin-help">Источник: {vapidStatus.source === "env" ? "переменные окружения" : vapidStatus.source === "database" ? "защищённая конфигурация в БД" : "недоступен"}. Приватный ключ полностью не отображается.</p>
+        <button className="button button-ghost" type="button" disabled={busy || vapidStatus.source === "env"} onClick={regenerateVapidKeys}><RotateCcw size={17} /> Перегенерировать ключи</button>
+        {vapidStatus.source === "env" && <p className="admin-help">Для ротации ключей измените VAPID_PUBLIC_KEY и VAPID_PRIVATE_KEY в окружении и перезапустите сервер.</p>}
+      </>}
     </section>
 
     <section className="panel settings-panel settings-events">

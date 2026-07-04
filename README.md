@@ -68,6 +68,7 @@ docs/                     архитектура, API и деплой
 | `PAYMENT_PROVIDER` | Выбранный платежный адаптер |
 | `PAYMENT_WEBHOOK_SECRET` | Проверка webhook платежного провайдера |
 | `SMTP_*` | Транзакционные письма |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Необязательная ручная настройка push; без ENV пара автоматически генерируется и хранится зашифрованной в PostgreSQL |
 | `PORTAINER_WEBHOOK_URL` | Только GitHub Secret, не runtime env приложения |
 
 Полный шаблон находится в [.env.example](./.env.example).

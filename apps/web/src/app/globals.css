@@ -541,6 +541,10 @@ img { display: block; max-width: 100%; }
 .settings-heading h2, .settings-heading p { margin: 0; }
 .settings-heading p { margin-top: 4px; color: var(--muted); }
 .settings-events { grid-column: 1 / -1; }
+.vapid-settings { align-items: start; }
+.vapid-key-row { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: start; gap: 12px; }
+.vapid-key-row > span { color: var(--muted); font-size: 13px; font-weight: 700; }
+.vapid-key-row code { min-width: 0; padding: 9px 11px; overflow-wrap: anywhere; border-radius: 8px; background: color-mix(in srgb, var(--color-primary) 7%, var(--color-card)); font-size: 12px; user-select: all; }
 .settings-events > label { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .settings-navigation { display: flex; gap: 8px; margin: -12px 0 24px; overflow-x: auto; border-bottom: 1px solid var(--line); }
 .settings-navigation a { flex: 0 0 auto; padding: 10px 14px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 700; white-space: nowrap; }
@@ -814,6 +818,7 @@ img { display: block; max-width: 100%; }
   .smtp-error-summary > div { grid-template-columns: 1fr; gap: 2px; }
   .settings-grid { grid-template-columns: 1fr; }
   .settings-events { grid-column: auto; }
+  .vapid-key-row { grid-template-columns: 1fr; gap: 5px; }
   .theme-field-grid { grid-template-columns: 1fr; }
   .notification-panel { inset: 64px 0 0; width: 100%; max-height: none; border-width: 1px 0 0; }
   .notification-list { max-height: calc(100dvh - 164px); }

@@ -10,6 +10,7 @@ import {
 import { and, eq, inArray, ne } from "drizzle-orm";
 import webpush from "web-push";
 import { notificationEventTypes, type NotificationEventType } from "./notification-types";
+import { ensureVapidConfiguration } from "./vapid";
 
 type NotificationInput = {
   eventType: NotificationEventType;
@@ -20,13 +21,8 @@ type NotificationInput = {
   userIds?: string[];
 };
 
-function configureWebPush() {
-  const publicKey = process.env.VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT ?? `mailto:${process.env.SMTP_FROM ?? "admin@judilen.local"}`;
-  if (!publicKey || !privateKey) return false;
-  webpush.setVapidDetails(subject, publicKey, privateKey);
-  return true;
+async function configureWebPush() {
+  await ensureVapidConfiguration();
 }
 
 async function eligibleUsers(userIds?: string[]) {
@@ -42,7 +38,15 @@ async function eligibleUsers(userIds?: string[]) {
 }
 
 async function deliverPush(userId: string, payload: string) {
-  if (!configureWebPush()) return { status: "disabled", error: "VAPID keys are not configured" };
+  try {
+    await configureWebPush();
+  } catch (error) {
+    console.error("vapid_configuration_failed", error);
+    return {
+      status: "disabled",
+      error: error instanceof Error ? error.message : "VAPID keys are not configured"
+    };
+  }
   const subscriptions = await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
   if (!subscriptions.length) return { status: "skipped", error: "No active push subscriptions" };
 

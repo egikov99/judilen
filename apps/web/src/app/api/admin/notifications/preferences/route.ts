@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { notificationEventTypes } from "@/lib/notification-types";
 import { requirePermission } from "@/lib/session";
+import { ensureVapidConfiguration } from "@/lib/vapid";
 import { problem } from "@/lib/validation";
 
 const preferenceSchema = z.object({
@@ -15,9 +16,10 @@ export async function GET() {
   const auth = await requirePermission("dashboard.read");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
-  const [[preference], [subscription]] = await Promise.all([
+  const [[preference], [subscription], vapid] = await Promise.all([
     db.select().from(notificationPreferences).where(eq(notificationPreferences.userId, auth.session.userId)).limit(1),
-    db.select({ id: pushSubscriptions.id }).from(pushSubscriptions).where(eq(pushSubscriptions.userId, auth.session.userId)).limit(1)
+    db.select({ id: pushSubscriptions.id }).from(pushSubscriptions).where(eq(pushSubscriptions.userId, auth.session.userId)).limit(1),
+    ensureVapidConfiguration().catch(() => null)
   ]);
   return Response.json({
     preference: preference ?? {
@@ -27,7 +29,7 @@ export async function GET() {
       reminderHours: 24
     },
     subscribed: Boolean(subscription),
-    vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? null
+    vapidPublicKey: vapid?.publicKey ?? null
   });
 }
 
