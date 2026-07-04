@@ -71,17 +71,33 @@ describe("house and service image galleries", () => {
   });
 
   it("keeps cover crop only in cards and preserves proportions in detail galleries", () => {
-    const gallery = source("src/components/house-gallery.tsx");
+    const gallery = source("src/components/image-gallery.tsx");
+    const houseGallery = source("src/components/house-gallery.tsx");
     const styles = source("src/app/globals.css");
     const servicePage = source("src/app/uslugi/[slug]/page.tsx");
     expect(gallery).not.toContain("slice(0, 3)");
-    expect(gallery).toContain("images.map(");
+    expect(gallery).toContain("galleryImages.map(");
+    expect(houseGallery).toContain("<ImageGallery");
     expect(styles).toContain(".house-image img { width: 100%; height: 100%; object-fit: cover;");
     expect(styles).toContain(".service-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover;");
-    expect(styles).toContain(".detail-image-gallery-item img { display: block; width: 100%; height: auto; object-fit: contain;");
-    expect(styles).toContain("max-width: 90vw");
+    expect(styles).toContain(".image-gallery-main img { display: block; width: 100%; height: auto;");
+    expect(styles).toContain("object-fit: contain;");
+    expect(styles).toContain("max-width: 95vw");
     expect(styles).toContain("max-height: 90dvh");
-    expect(servicePage).toContain("<DetailImageGallery");
+    expect(servicePage).toContain("<ImageGallery");
+  });
+
+  it("provides thumbnails, fallback, swipe, and accessible lightbox controls", () => {
+    const gallery = source("src/components/image-gallery.tsx");
+    expect(gallery).toContain("fallbackImage");
+    expect(gallery).toContain("image-gallery-thumbnails");
+    expect(gallery).toContain("setSelectedIndex(index)");
+    expect(gallery).toContain("onTouchStart");
+    expect(gallery).toContain("onTouchEnd");
+    expect(gallery).toContain('event.key === "Escape"');
+    expect(gallery).toContain('event.key === "ArrowLeft"');
+    expect(gallery).toContain('event.key === "ArrowRight"');
+    expect(gallery).toContain("galleryImages.length > 1");
   });
 
   it("contains no three-image field or file-count limit in entity image code", () => {
@@ -89,6 +105,7 @@ describe("house and service image galleries", () => {
       source("src/components/admin/house-images-manager.tsx"),
       source("src/components/admin/service-images-manager.tsx"),
       source("src/components/house-gallery.tsx"),
+      source("src/components/image-gallery.tsx"),
       source("src/app/api/admin/houses/[id]/images/route.ts"),
       source("src/app/api/admin/houses/[id]/images/upload/route.ts"),
       source("src/app/api/admin/services/[id]/images/route.ts")

@@ -40,7 +40,7 @@ describe("image uploads", () => {
     const route = readFileSync(resolve(process.cwd(), "src/app/api/admin/houses/[id]/images/reorder/route.ts"), "utf8");
     const deletionRoute = readFileSync(resolve(process.cwd(), "src/app/api/admin/house-images/[id]/route.ts"), "utf8");
     const publicPage = readFileSync(resolve(process.cwd(), "src/app/domiki/[slug]/page.tsx"), "utf8");
-    const gallery = readFileSync(resolve(process.cwd(), "src/components/house-gallery.tsx"), "utf8");
+    const gallery = readFileSync(resolve(process.cwd(), "src/components/image-gallery.tsx"), "utf8");
     expect(migration).toContain("house_images_one_main");
     expect(route).toContain("imageIds");
     expect(route).toContain("position");
@@ -49,7 +49,7 @@ describe("image uploads", () => {
     expect(deletionRoute).toContain("position: index");
     expect(publicPage).not.toContain("images.slice(0,3)");
     expect(gallery).not.toContain("images.slice(");
-    expect(gallery).toContain("images.map(");
+    expect(gallery).toContain("galleryImages.map(");
     expect(gallery).toContain('event.key === "Escape"');
     expect(gallery).toContain("Следующее фото");
   });

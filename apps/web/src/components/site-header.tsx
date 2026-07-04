@@ -7,6 +7,7 @@ export function SiteHeader() {
       <nav className="container nav" aria-label="Основная навигация">
         <SiteBrand priority />
         <div className="nav-links">
+          <Link href="/">Главная</Link>
           <Link href="/domiki">Домики</Link>
           <Link href="/uslugi">Услуги</Link>
           <Link href="/otzyvy">Отзывы</Link>
