@@ -2,12 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 import { AdminModal } from "@/components/admin/admin-modal";
-import { ImageUploadField } from "@/components/admin/image-upload-field";
+import { ServiceImagesManager, type ServiceImageRow } from "@/components/admin/service-images-manager";
 import { formatCurrency } from "@/components/currency";
 
 export type PriceUnit = "hour" | "day" | "booking" | "person" | "item";
 export interface ServiceRow {
-  id: string; title: string; slug: string; description: string; imageUrl: string | null;
+  id: string; title: string; slug: string; description: string; images: ServiceImageRow[];
   basePrice: string; priceUnit: PriceUnit; isActive: boolean; sortOrder: number;
 }
 export interface OptionRow {
@@ -17,7 +17,7 @@ export interface OptionRow {
 export interface HouseRow { id: string; name: string; }
 
 const emptyService = {
-  title: "", slug: "", description: "", imageUrl: "", basePrice: "0",
+  title: "", slug: "", description: "", images: [] as ServiceImageRow[], basePrice: "0",
   priceUnit: "booking" as PriceUnit, isActive: true, sortOrder: 0, houseIds: [] as string[]
 };
 const emptyOption = {
@@ -33,7 +33,7 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
   onChanged: (message: string) => void;
   optionPermissions: { create: boolean; update: boolean; delete: boolean };
 }) {
-  const [draft, setDraft] = useState({ ...(service ?? emptyService), imageUrl: service?.imageUrl ?? "", houseIds });
+  const [draft, setDraft] = useState({ ...(service ?? emptyService), houseIds });
   const [serviceId, setServiceId] = useState(service?.id ?? "");
   const [optionRows, setOptionRows] = useState(initialOptions);
   const [optionDraft, setOptionDraft] = useState<(typeof emptyOption & { id?: string }) | null>(null);
@@ -47,7 +47,7 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
     const response = await fetch(serviceId ? `/api/admin/services/${serviceId}` : "/api/admin/services", {
       method: serviceId ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...draft, basePrice: Number(draft.basePrice), imageUrl: draft.imageUrl || null })
+      body: JSON.stringify({ ...draft, images: undefined, basePrice: Number(draft.basePrice) })
     });
     const body = await response.json().catch(() => ({}));
     setSaving("");
@@ -106,11 +106,14 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
     <form className="form-stack" onSubmit={saveService}>
       <div className="form-grid"><div className="field"><label>Название</label><input autoFocus value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} minLength={2} maxLength={140} required /></div><div className="field"><label>Slug</label><input value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required /></div></div>
       <div className="field"><label>Описание</label><textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} minLength={5} required /></div>
-      <div className="form-grid"><ImageUploadField value={draft.imageUrl} onChange={(imageUrl) => setDraft({ ...draft, imageUrl })} label="Фото услуги" /><div className="form-stack"><div className="field"><label>Базовая цена</label><input type="number" min="0" step="0.01" value={draft.basePrice} onChange={(event) => setDraft({ ...draft, basePrice: event.target.value })} required /></div><div className="field"><label>Единица</label><select value={draft.priceUnit} onChange={(event) => setDraft({ ...draft, priceUnit: event.target.value as PriceUnit })}><option value="hour">за час</option><option value="day">за день</option><option value="booking">за бронь</option><option value="person">за человека</option><option value="item">за штуку</option></select></div><div className="field"><label>Порядок</label><input type="number" min="0" value={draft.sortOrder} onChange={(event) => setDraft({ ...draft, sortOrder: Number(event.target.value) })} /></div></div></div>
+      <div className="form-grid"><div className="field"><label>Базовая цена</label><input type="number" min="0" step="0.01" value={draft.basePrice} onChange={(event) => setDraft({ ...draft, basePrice: event.target.value })} required /></div><div className="field"><label>Единица</label><select value={draft.priceUnit} onChange={(event) => setDraft({ ...draft, priceUnit: event.target.value as PriceUnit })}><option value="hour">за час</option><option value="day">за день</option><option value="booking">за бронь</option><option value="person">за человека</option><option value="item">за штуку</option></select></div></div>
+      <div className="field"><label>Порядок</label><input type="number" min="0" value={draft.sortOrder} onChange={(event) => setDraft({ ...draft, sortOrder: Number(event.target.value) })} /></div>
       <div className="field"><label>Домики</label><select multiple value={draft.houseIds} onChange={(event) => setDraft({ ...draft, houseIds: [...event.target.selectedOptions].map((item) => item.value) })}>{houses.map((house) => <option key={house.id} value={house.id}>{house.name}</option>)}</select><small>Если ничего не выбрано, услуга доступна для всех домиков.</small></div>
       <label><input type="checkbox" checked={draft.isActive} onChange={(event) => setDraft({ ...draft, isActive: event.target.checked })} /> Опубликована</label>
       <div className="modal-actions"><button className="button button-primary" disabled={!!saving}>{saving === "service" ? "Сохранение…" : "Сохранить услугу"}</button><button className="button button-ghost" type="button" disabled={!!saving} onClick={onClose}>Закрыть</button></div>
     </form>
+
+    {serviceId ? <ServiceImagesManager serviceId={serviceId} initialImages={service?.images ?? []} /> : <p className="notice">Сначала сохраните услугу, после этого можно загрузить фотографии.</p>}
 
     <section className="service-options-section">
       <div className="section-heading compact-heading"><div><span className="eyebrow">Настройки</span><h3>Варианты услуги</h3></div>{serviceId && optionPermissions.create && <button className="button button-ghost" type="button" onClick={() => setOptionDraft({ ...emptyOption, sortOrder: optionRows.length })}>Добавить вариант</button>}</div>

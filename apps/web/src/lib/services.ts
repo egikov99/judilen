@@ -1,11 +1,14 @@
-import { db, serviceHouses, serviceOptions, services } from "@judilen/db";
+import { db, serviceHouses, serviceImages, serviceOptions, services } from "@judilen/db";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import type { PublicService } from "./service-types";
 import { normalizeImageUrl } from "./image-urls";
 export { priceUnitLabels } from "./service-types";
 
-function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: typeof serviceOptions.$inferSelect | null; houseId: string | null }>) {
+function mapRows(
+  rows: Array<{ service: typeof services.$inferSelect; option: typeof serviceOptions.$inferSelect | null; houseId: string | null }>,
+  imageRows: Array<typeof serviceImages.$inferSelect>
+) {
   const mapped = new Map<string, PublicService>();
   const optionIds = new Set<string>();
   for (const row of rows) {
@@ -14,16 +17,13 @@ function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: ty
       title: row.service.title,
       slug: row.service.slug,
       description: row.service.description,
-      imageUrl: normalizeImageUrl(row.service.imageUrl),
+      images: [],
       basePrice: Number(row.service.basePrice),
       priceUnit: row.service.priceUnit,
       sortOrder: row.service.sortOrder,
       houseIds: [],
       options: []
     };
-    if (row.service.imageUrl && !current.imageUrl) {
-      console.error("Service image has an invalid URL", { serviceId: row.service.id, url: row.service.imageUrl });
-    }
     if (row.houseId && !current.houseIds.includes(row.houseId)) current.houseIds.push(row.houseId);
     if (row.option && !optionIds.has(row.option.id)) {
       optionIds.add(row.option.id);
@@ -38,6 +38,13 @@ function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: ty
     }
     mapped.set(row.service.id, current);
   }
+  for (const image of imageRows) {
+    const service = mapped.get(image.serviceId);
+    if (!service) continue;
+    const imageUrl = normalizeImageUrl(image.url);
+    if (imageUrl) service.images.push(imageUrl);
+    else console.error("Service image has an invalid URL", { serviceId: image.serviceId, imageId: image.id, url: image.url });
+  }
   return [...mapped.values()].map((service) => ({
     ...service,
     options: service.options.sort((a, b) => a.sortOrder - b.sortOrder)
@@ -45,13 +52,16 @@ function mapRows(rows: Array<{ service: typeof services.$inferSelect; option: ty
 }
 
 async function loadPublicServices() {
-  const rows = await db.select({ service: services, option: serviceOptions, houseId: serviceHouses.houseId })
-    .from(services)
-    .leftJoin(serviceOptions, and(eq(serviceOptions.serviceId, services.id), eq(serviceOptions.isActive, true)))
-    .leftJoin(serviceHouses, eq(serviceHouses.serviceId, services.id))
-    .where(eq(services.isActive, true))
-    .orderBy(asc(services.sortOrder), asc(serviceOptions.sortOrder));
-  return mapRows(rows);
+  const [rows, imageRows] = await Promise.all([
+    db.select({ service: services, option: serviceOptions, houseId: serviceHouses.houseId })
+      .from(services)
+      .leftJoin(serviceOptions, and(eq(serviceOptions.serviceId, services.id), eq(serviceOptions.isActive, true)))
+      .leftJoin(serviceHouses, eq(serviceHouses.serviceId, services.id))
+      .where(eq(services.isActive, true))
+      .orderBy(asc(services.sortOrder), asc(serviceOptions.sortOrder)),
+    db.select().from(serviceImages).orderBy(asc(serviceImages.sortOrder))
+  ]);
+  return mapRows(rows, imageRows);
 }
 
 export const getPublicServices = unstable_cache(loadPublicServices, ["public-services"], {
@@ -69,15 +79,18 @@ export async function getPublicServiceBySlug(slug: string) {
 
 export async function getActiveServicesByIds(serviceIds: string[], houseId: string) {
   if (!serviceIds.length) return [];
-  const rows = await db.select({ service: services, option: serviceOptions, houseId: serviceHouses.houseId })
-    .from(services)
-    .leftJoin(serviceOptions, and(eq(serviceOptions.serviceId, services.id), eq(serviceOptions.isActive, true)))
-    .leftJoin(serviceHouses, eq(serviceHouses.serviceId, services.id))
-    .where(and(
-      eq(services.isActive, true),
-      inArray(services.id, serviceIds),
-      or(eq(serviceHouses.houseId, houseId), sql`${serviceHouses.houseId} is null`)
-    ))
-    .orderBy(asc(services.sortOrder), asc(serviceOptions.sortOrder));
-  return mapRows(rows);
+  const [rows, imageRows] = await Promise.all([
+    db.select({ service: services, option: serviceOptions, houseId: serviceHouses.houseId })
+      .from(services)
+      .leftJoin(serviceOptions, and(eq(serviceOptions.serviceId, services.id), eq(serviceOptions.isActive, true)))
+      .leftJoin(serviceHouses, eq(serviceHouses.serviceId, services.id))
+      .where(and(
+        eq(services.isActive, true),
+        inArray(services.id, serviceIds),
+        or(eq(serviceHouses.houseId, houseId), sql`${serviceHouses.houseId} is null`)
+      ))
+      .orderBy(asc(services.sortOrder), asc(serviceOptions.sortOrder)),
+    db.select().from(serviceImages).where(inArray(serviceImages.serviceId, serviceIds)).orderBy(asc(serviceImages.sortOrder))
+  ]);
+  return mapRows(rows, imageRows);
 }

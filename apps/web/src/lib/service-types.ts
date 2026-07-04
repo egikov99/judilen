@@ -12,7 +12,7 @@ export interface PublicService {
   title: string;
   slug: string;
   description: string;
-  imageUrl: string | null;
+  images: string[];
   basePrice: number;
   priceUnit: "hour" | "day" | "booking" | "person" | "item";
   sortOrder: number;

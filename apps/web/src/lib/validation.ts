@@ -40,6 +40,13 @@ export const weekdayPricesSchema = z.object(Object.fromEntries(
   weekdays.map((weekday) => [weekday, positiveHousePrice])
 ) as Record<(typeof weekdays)[number], typeof positiveHousePrice>);
 
+export const entityImageInputSchema = z.object({
+  id: z.uuid().optional(),
+  url: z.string().trim().min(1).max(1000),
+  alt: z.string().trim().min(2).max(250),
+  sortOrder: z.coerce.number().int().min(0).optional()
+});
+
 export const houseSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100),
   name: z.string().trim().min(2).max(120),
@@ -50,6 +57,7 @@ export const houseSchema = z.object({
   amenities: z.array(z.string().trim().min(1).max(80)).max(50),
   basePrice: positiveHousePrice.optional(),
   weekdayPrices: weekdayPricesSchema,
+  images: z.array(entityImageInputSchema).optional(),
   seoTitle: z.string().trim().min(10).max(70),
   seoDescription: z.string().trim().min(30).max(180),
   isPublished: z.boolean()
@@ -59,7 +67,7 @@ export const serviceSchema = z.object({
   title: z.string().trim().min(2).max(140),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120),
   description: z.string().trim().min(5).max(5000),
-  imageUrl: z.string().trim().max(1000).nullable().optional(),
+  images: z.array(entityImageInputSchema).optional(),
   basePrice: z.coerce.number().nonnegative().max(10_000_000),
   priceUnit: z.enum(["hour", "day", "booking", "person", "item"]),
   isActive: z.boolean(),
@@ -95,6 +103,11 @@ export const houseImageSchema = z.object({
   position: z.coerce.number().int().min(0).max(100_000).optional(),
   isMain: z.boolean().optional(),
   isActive: z.boolean().optional()
+});
+
+export const serviceImageSchema = z.object({
+  alt: z.string().trim().min(2).max(250),
+  sortOrder: z.coerce.number().int().min(0).optional()
 });
 
 export const bookingStatusSchema = z.enum([

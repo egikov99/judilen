@@ -1,5 +1,5 @@
 import { db, houseImages, houses } from "@judilen/db";
-import { eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
 import { requireAllPermissions, requirePermission } from "@/lib/session";
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   if (scope !== "houses") {
-    if (scope !== "services" && scope !== "content") return problem(422, "Неизвестная область загрузки");
+    if (scope !== "content") return problem(422, "Неизвестная область загрузки");
     const result = await saveImageFile(file, scope);
     if (!result.ok) {
       console.warn("Image upload rejected", { scope, name: file.name, size: file.size, reason: result.error });
@@ -54,11 +54,27 @@ export async function POST(request: Request) {
   let image: typeof houseImages.$inferSelect;
   try {
     image = await db.transaction(async (tx) => {
-      if (isMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
       if (before) {
+        if (isMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
         return (await tx.update(houseImages).set({ url: result.url, alt, caption: caption || null, position, isMain, isActive, updatedAt: new Date() }).where(eq(houseImages.id, before.id)).returning())[0];
       }
-      return (await tx.insert(houseImages).values({ houseId, url: result.url, alt, caption: caption || null, position, isMain, isActive }).returning())[0];
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`house-images:${houseId}`}))`);
+      const [last] = await tx.select({ position: houseImages.position })
+        .from(houseImages)
+        .where(eq(houseImages.houseId, houseId))
+        .orderBy(desc(houseImages.position))
+        .limit(1);
+      const shouldBeMain = isMain || !last;
+      if (shouldBeMain) await tx.update(houseImages).set({ isMain: false }).where(eq(houseImages.houseId, houseId));
+      return (await tx.insert(houseImages).values({
+        houseId,
+        url: result.url,
+        alt,
+        caption: caption || null,
+        position: (last?.position ?? -1) + 1,
+        isMain: shouldBeMain,
+        isActive
+      }).returning())[0];
     });
   } catch (error) {
     await removeUploadedFile(result.url);

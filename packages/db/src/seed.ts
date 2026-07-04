@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { eq, inArray } from "drizzle-orm";
-import { db, houseImages, houses, houseWeekdayPrices, permissions, reviews, rolePermissions, roles, serviceHouses, serviceOptions, services, users, sqlClient } from "./index";
+import { db, houseImages, houses, houseWeekdayPrices, permissions, reviews, rolePermissions, roles, serviceHouses, serviceImages, serviceOptions, services, users, sqlClient } from "./index";
 
 const permissionRows = [
   ["dashboard.read", "Просмотр панели"],
@@ -195,9 +195,15 @@ await db.insert(houseImages).values([
 ]).onConflictDoNothing();
 
 await db.insert(services).values([
-  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "Аренда лодки", slug: "arenda-lodki", description: "Лодки для прогулок и рыбалки на озере.", imageUrl: "/images/stitch/asset-044.png", basePrice: "50", priceUnit: "hour", isActive: true, sortOrder: 10 },
-  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "Баня", slug: "banya", description: "Подготовленная баня с травяным чаем и зоной отдыха.", imageUrl: "/images/stitch/asset-020.png", basePrice: "80", priceUnit: "hour", isActive: true, sortOrder: 20 },
-  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Дополнительное место", slug: "dopolnitelnoe-mesto", description: "Спальное место для гостя сверх базового размещения.", imageUrl: "/images/stitch/asset-038.png", basePrice: "45", priceUnit: "person", isActive: true, sortOrder: 30 }
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", title: "Аренда лодки", slug: "arenda-lodki", description: "Лодки для прогулок и рыбалки на озере.", basePrice: "50", priceUnit: "hour", isActive: true, sortOrder: 10 },
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", title: "Баня", slug: "banya", description: "Подготовленная баня с травяным чаем и зоной отдыха.", basePrice: "80", priceUnit: "hour", isActive: true, sortOrder: 20 },
+  { id: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", title: "Дополнительное место", slug: "dopolnitelnoe-mesto", description: "Спальное место для гостя сверх базового размещения.", basePrice: "45", priceUnit: "person", isActive: true, sortOrder: 30 }
+]).onConflictDoNothing();
+
+await db.insert(serviceImages).values([
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001", url: "/images/stitch/asset-044.png", alt: "Аренда лодки", sortOrder: 0 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1002", url: "/images/stitch/asset-020.png", alt: "Баня", sortOrder: 0 },
+  { serviceId: "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1003", url: "/images/stitch/asset-038.png", alt: "Дополнительное место", sortOrder: 0 }
 ]).onConflictDoNothing();
 
 const demoServiceTitles = ["Аренда лодки", "Баня", "Дополнительное место"];

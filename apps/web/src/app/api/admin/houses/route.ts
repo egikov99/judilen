@@ -2,6 +2,7 @@ import { db, houseImages, houses, houseWeekdayPrices } from "@judilen/db";
 import { asc, eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { writeAudit } from "@/lib/audit";
+import { normalizeImageUrl } from "@/lib/image-urls";
 import { requirePermission } from "@/lib/session";
 import { houseSchema, problem } from "@/lib/validation";
 import { weekdayPriceRange, weekdayPricesFromRows, weekdays } from "@/lib/weekday-prices";
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = houseSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
-  const { weekdayPrices, ...data } = parsed.data;
+  const { weekdayPrices, images = [], ...data } = parsed.data;
   const minimumPrice = Math.min(...weekdays.map((weekday) => weekdayPrices[weekday]));
   const house = await db.transaction(async (tx) => {
     const [created] = await tx.insert(houses).values({
@@ -58,9 +59,19 @@ export async function POST(request: Request) {
       weekday,
       price: String(weekdayPrices[weekday])
     })));
+    if (images.length) {
+      await tx.insert(houseImages).values(images.map((image, index) => ({
+        houseId: created.id,
+        url: normalizeImageUrl(image.url) ?? image.url,
+        alt: image.alt,
+        position: index,
+        isMain: index === 0,
+        isActive: true
+      })));
+    }
     return created;
   });
   await writeAudit({ session: auth.session, request, action: "house.create", entityType: "house", entityId: house.id, after: { ...house, weekdayPrices } });
   revalidateTag("houses", "max");
-  return Response.json({ item: { ...house, weekdayPrices, minPrice: minimumPrice, maxPrice: Math.max(...weekdays.map((weekday) => weekdayPrices[weekday])) } }, { status: 201 });
+  return Response.json({ item: { ...house, images, weekdayPrices, minPrice: minimumPrice, maxPrice: Math.max(...weekdays.map((weekday) => weekdayPrices[weekday])) } }, { status: 201 });
 }

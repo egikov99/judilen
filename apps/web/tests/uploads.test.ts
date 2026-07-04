@@ -48,7 +48,8 @@ describe("image uploads", () => {
     expect(deletionRoute).toContain("const remaining");
     expect(deletionRoute).toContain("position: index");
     expect(publicPage).not.toContain("images.slice(0,3)");
-    expect(gallery).toContain("images.slice(3)");
+    expect(gallery).not.toContain("images.slice(");
+    expect(gallery).toContain("images.map(");
     expect(gallery).toContain('event.key === "Escape"');
     expect(gallery).toContain("Следующее фото");
   });
@@ -77,5 +78,23 @@ describe("image uploads", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/jpeg");
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(samples[0].bytes);
+  });
+
+  it("stores and serves ten service images without a file-count limit", async () => {
+    const directory = mkdtempSync(resolve(tmpdir(), "judilen-service-uploads-"));
+    temporaryDirectories.push(directory);
+    process.env.UPLOAD_DIR = directory;
+    const saved = await Promise.all(Array.from({ length: 10 }, (_, index) => (
+      saveImageFile(new File([samples[0].bytes], `service-${index}.jpg`, { type: "image/jpeg" }), "services", "service-id")
+    )));
+    expect(saved.every((item) => item.ok)).toBe(true);
+    expect(new Set(saved.flatMap((item) => item.ok ? [item.url] : [])).size).toBe(10);
+    for (const item of saved) {
+      if (!item.ok) continue;
+      const response = await serveUploadedImage(new Request(`http://localhost${item.url}`), {
+        params: Promise.resolve({ path: item.url.split("/").slice(2) })
+      });
+      expect(response.status).toBe(200);
+    }
   });
 });

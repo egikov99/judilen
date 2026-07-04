@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PublicShell } from "@/components/public-shell";
 import { formatCurrency } from "@/components/currency";
 import { PublicImage } from "@/components/public-image";
@@ -17,7 +18,7 @@ export default async function ServicesPage() {
         {services.length ? <div className="service-grid">{services.map((service) => {
           const defaultOption = service.options.find((option) => option.isDefault) ?? service.options[0];
           const price = defaultOption?.price ?? service.basePrice;
-          return <article className="service-card" key={service.id}><PublicImage src={service.imageUrl ?? DEFAULT_IMAGE_URL} context={`service-card:${service.id}`} alt={service.title} width={512} height={512} loading="lazy" /><div><span className="eyebrow">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span><h2>{service.title}</h2><p>{service.description}</p>{!!service.options.length && <div className="form-stack">{service.options.map((option) => <div className="summary-row" key={option.id}><span>{option.title}</span><strong>{formatCurrency(option.price)}</strong></div>)}</div>}</div></article>;
+          return <article className="service-card" key={service.id}><PublicImage src={service.images[0] ?? DEFAULT_IMAGE_URL} context={`service-card:${service.id}`} alt={service.title} width={512} height={512} loading="lazy" /><div><span className="eyebrow">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span><h2>{service.title}</h2><p>{service.description}</p>{!!service.options.length && <div className="form-stack">{service.options.map((option) => <div className="summary-row" key={option.id}><span>{option.title}</span><strong>{formatCurrency(option.price)}</strong></div>)}</div>}<Link className="text-link" href={`/uslugi/${service.slug}`}>Подробнее →</Link></div></article>;
         })}</div> : <p className="notice">Услуги пока не опубликованы.</p>}
       </div></section>
     </PublicShell>

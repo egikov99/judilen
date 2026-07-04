@@ -1,12 +1,12 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { PublicImage } from "@/components/public-image";
 
-export function HouseGallery({ houseId, houseName, images }: {
-  houseId: string;
-  houseName: string;
+export function DetailImageGallery({ galleryId, title, images }: {
+  galleryId: string;
+  title: string;
   images: string[];
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -43,31 +43,28 @@ export function HouseGallery({ houseId, houseName, images }: {
     };
   }, [images.length, isOpen]);
 
-  const featured = images.slice(0, 3);
-  const remaining = images.slice(3);
-
   return <>
-    <div className={`house-gallery house-gallery-count-${Math.min(featured.length, 3)}`}>
-      {featured.map((image, index) => <button type="button" className="house-gallery-item" onClick={() => setActiveIndex(index)} aria-label={`Открыть фото ${index + 1} из ${images.length}`} key={`${image}-${index}`}>
-        <PublicImage src={image} context={`house-gallery:${houseId}:${index}`} alt={`${houseName}, фото ${index + 1}`} width={900} height={700} priority={index === 0} loading={index === 0 ? "eager" : "lazy"} />
+    <div className="detail-image-gallery">
+      {images.map((image, index) => <button type="button" className="detail-image-gallery-item" onClick={() => setActiveIndex(index)} aria-label={`Открыть фото ${index + 1} из ${images.length}`} key={`${image}-${index}`}>
+        <img src={image} alt={`${title}, фото ${index + 1}`} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} onError={() => console.error("Detail gallery image failed to load", { galleryId, index, src: image })} />
       </button>)}
     </div>
-    {!!remaining.length && <div className="house-gallery-more">
-      {remaining.map((image, offset) => {
-        const index = offset + 3;
-        return <button type="button" className="house-gallery-item" onClick={() => setActiveIndex(index)} aria-label={`Открыть фото ${index + 1} из ${images.length}`} key={`${image}-${index}`}>
-          <PublicImage src={image} context={`house-gallery:${houseId}:${index}`} alt={`${houseName}, фото ${index + 1}`} width={600} height={450} loading="lazy" />
-        </button>;
-      })}
-    </div>}
-    {activeImage && activeIndex !== null && <div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={`Фотографии домика ${houseName}`} onClick={close}>
+    {activeImage && activeIndex !== null && <div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={`Фотографии: ${title}`} onClick={close}>
       <div className="gallery-lightbox-content" onClick={(event) => event.stopPropagation()}>
         <button ref={closeButtonRef} type="button" className="gallery-lightbox-close" aria-label="Закрыть просмотр" onClick={close}><X size={28} /></button>
         {images.length > 1 && <button type="button" className="gallery-lightbox-nav gallery-lightbox-previous" aria-label="Предыдущее фото" onClick={previous}><ChevronLeft size={34} /></button>}
-        <PublicImage src={activeImage} context={`house-lightbox:${houseId}:${activeIndex}`} alt={`${houseName}, фото ${activeIndex + 1} из ${images.length}`} width={1600} height={1200} priority />
+        <img src={activeImage} alt={`${title}, фото ${activeIndex + 1} из ${images.length}`} onError={() => console.error("Detail lightbox image failed to load", { galleryId, index: activeIndex, src: activeImage })} />
         {images.length > 1 && <button type="button" className="gallery-lightbox-nav gallery-lightbox-next" aria-label="Следующее фото" onClick={next}><ChevronRight size={34} /></button>}
         <span className="gallery-lightbox-counter">{activeIndex + 1} / {images.length}</span>
       </div>
     </div>}
   </>;
+}
+
+export function HouseGallery({ houseId, houseName, images }: {
+  houseId: string;
+  houseName: string;
+  images: string[];
+}) {
+  return <DetailImageGallery galleryId={`house:${houseId}`} title={houseName} images={images} />;
 }

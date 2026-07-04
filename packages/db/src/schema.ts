@@ -218,7 +218,6 @@ export const services = pgTable(
     title: text("title").notNull(),
     slug: text("slug").notNull(),
     description: text("description").notNull(),
-    imageUrl: text("image_url"),
     basePrice: numeric("base_price", { precision: 12, scale: 2 }).notNull().default("0"),
     priceUnit: servicePriceUnit("price_unit").notNull().default("booking"),
     isActive: boolean("is_active").notNull().default(true),
@@ -228,6 +227,22 @@ export const services = pgTable(
   (table) => [
     uniqueIndex("services_slug_unique").on(table.slug),
     uniqueIndex("services_title_unique").on(table.title)
+  ]
+);
+
+export const serviceImages = pgTable(
+  "service_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+    url: text("url").notNull(),
+    alt: text("alt").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("service_images_service_order_unique").on(table.serviceId, table.sortOrder),
+    index("service_images_service_idx").on(table.serviceId)
   ]
 );
 
