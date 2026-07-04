@@ -571,6 +571,26 @@ img { display: block; max-width: 100%; }
 .theme-preview > footer { padding: 18px 24px; background: var(--color-footer); color: white; font-size: 13px; }
 .smtp-settings { margin-bottom: 20px; }
 .smtp-settings .settings-heading { justify-content: space-between; }
+.smtp-diagnostic { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 14px; margin: 20px 0; padding: 18px; border: 1px solid; border-radius: 14px; }
+.smtp-diagnostic.is-success { border-color: #9bc69c; background: #edf8ed; color: #174b1d; }
+.smtp-diagnostic.is-error { border-color: #efaaa4; background: #fff1ef; color: #7d1d18; }
+.smtp-diagnostic-icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: color-mix(in srgb, currentColor 12%, transparent); }
+.smtp-diagnostic-content { min-width: 0; }
+.smtp-diagnostic-content h3 { margin: 0 0 5px; font-size: 19px; }
+.smtp-diagnostic-content > p { margin: 0; color: inherit; }
+.smtp-check-list { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+.smtp-check-list li { display: flex; align-items: flex-start; gap: 8px; }
+.smtp-check-list svg { flex: 0 0 auto; margin-top: 2px; }
+.smtp-error-summary { display: grid; gap: 9px; margin: 16px 0; }
+.smtp-error-summary > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; }
+.smtp-error-summary dt { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.smtp-error-summary dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.smtp-recommendations { margin-top: 14px; }
+.smtp-recommendations ul { margin: 7px 0 0; padding-left: 20px; }
+.smtp-technical-details { margin-top: 15px; border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); padding-top: 12px; }
+.smtp-technical-details summary { font-weight: 700; cursor: pointer; }
+.smtp-technical-details pre { max-height: 240px; margin: 10px 0 0; padding: 12px; overflow: auto; border-radius: 8px; background: rgba(0,0,0,.07); color: inherit; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.smtp-copy-error { margin-top: 12px; }
 .booking-status-control { display: grid; gap: 5px; }
 .booking-status-control small { color: var(--muted); }
 .email-template-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
@@ -768,6 +788,8 @@ img { display: block; max-width: 100%; }
   .admin-list-toolbar { align-items: stretch; flex-direction: column; }
   .permission-matrix section { grid-template-columns: 1fr; }
   .permission-matrix section > div { grid-template-columns: 1fr; }
+  .smtp-diagnostic { grid-template-columns: 1fr; padding: 15px; }
+  .smtp-error-summary > div { grid-template-columns: 1fr; gap: 2px; }
   .settings-grid { grid-template-columns: 1fr; }
   .settings-events { grid-column: auto; }
   .theme-field-grid { grid-template-columns: 1fr; }

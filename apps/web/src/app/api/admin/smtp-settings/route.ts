@@ -2,8 +2,9 @@ import { db, emailLogs, smtpSettings } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { encryptCredentials } from "@/lib/credential-cipher";
-import { getSmtpSettings, SMTP_SETTINGS_ID } from "@/lib/email";
+import { diagnoseSmtpConnection, getSmtpSettings, logSmtpDiagnostic, sendTemplatedEmail, SMTP_SETTINGS_ID } from "@/lib/email";
 import { requirePermission } from "@/lib/session";
+import { classifySmtpError } from "@/lib/smtp-diagnostics";
 import { problem } from "@/lib/validation";
 
 const schema = z.object({
@@ -14,7 +15,8 @@ const schema = z.object({
   encryption: z.enum(["none", "ssl", "starttls"]),
   fromEmail: z.email().max(254),
   fromName: z.string().trim().min(1).max(160),
-  replyToEmail: z.union([z.email().max(254), z.literal("")]).optional().default("")
+  replyToEmail: z.union([z.email().max(254), z.literal("")]).optional().default(""),
+  testRecipient: z.union([z.email().max(254), z.literal("")]).optional().default("")
 });
 
 export async function GET() {
@@ -74,5 +76,43 @@ export async function PUT(request: Request) {
   };
   await db.insert(smtpSettings).values({ id: SMTP_SETTINGS_ID, ...values })
     .onConflictDoUpdate({ target: smtpSettings.id, set: values });
-  return Response.json({ ok: true, hasPassword: Boolean(passwordEncrypted) });
+  try {
+    const diagnostic = await diagnoseSmtpConnection();
+    if (parsed.data.testRecipient) {
+      const result = await sendTemplatedEmail({
+        to: parsed.data.testRecipient,
+        templateKey: "booking_received",
+        variables: {
+          customerName: auth.session.name,
+          bookingNumber: "SMTP-TEST",
+          houseName: "Тестовое письмо",
+          checkInDate: "01.08.2026",
+          checkOutDate: "03.08.2026"
+        },
+        dedupeKey: `smtp-save-test:${auth.session.userId}:${Date.now()}`
+      });
+      if (!result.sent) throw result.diagnostic ?? new Error(result.error ?? "Тестовое письмо не отправлено");
+      diagnostic.checks.push({ stage: "send", status: "passed", message: `Тестовое письмо отправлено на ${parsed.data.testRecipient}.` });
+    }
+    await db.update(smtpSettings).set({
+      status: "connected", lastError: null, lastCheckedAt: new Date(), updatedAt: new Date()
+    }).where(eq(smtpSettings.id, SMTP_SETTINGS_ID));
+    return Response.json({
+      success: true,
+      settingsSaved: true,
+      hasPassword: Boolean(passwordEncrypted),
+      status: "connected",
+      title: "Настройки сохранены",
+      message: "Подключение установлено. Авторизация прошла успешно. SMTP готов к отправке писем.",
+      recipient: parsed.data.testRecipient || undefined,
+      checks: diagnostic.checks
+    });
+  } catch (error) {
+    const diagnostic = classifySmtpError(error);
+    logSmtpDiagnostic("SMTP verification after settings save failed", error, diagnostic);
+    await db.update(smtpSettings).set({
+      status: "error", lastError: diagnostic.details, lastCheckedAt: new Date(), updatedAt: new Date()
+    }).where(eq(smtpSettings.id, SMTP_SETTINGS_ID));
+    return Response.json({ ...diagnostic, settingsSaved: true, hasPassword: Boolean(passwordEncrypted) }, { status: 503 });
+  }
 }

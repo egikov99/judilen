@@ -2,10 +2,12 @@ import "server-only";
 
 import { db, emailLogs, emailTemplates, smtpSettings } from "@judilen/db";
 import { eq } from "drizzle-orm";
+import { lookup } from "node:dns/promises";
 import nodemailer from "nodemailer";
 import { decryptCredentials } from "./credential-cipher";
 import { DEFAULT_EMAIL_TEMPLATES, type EmailTemplateKey } from "./email-templates";
 import { getSiteTheme } from "./site-theme-db";
+import { classifySmtpError, type SmtpDiagnosticError } from "./smtp-diagnostics";
 
 export const SMTP_SETTINGS_ID = "00000000-0000-0000-0000-000000000002";
 
@@ -52,7 +54,11 @@ export async function getSmtpSettings() {
 
 async function createTransport() {
   const settings = await getSmtpSettings();
-  if (!settings?.host || !settings.fromEmail) throw new Error("SMTP не настроен");
+  if (!settings?.host || !settings.fromEmail) {
+    const error = new Error("SMTP host и From email должны быть настроены") as Error & { code?: string };
+    error.code = "ECONFIG";
+    throw error;
+  }
   const encrypted = settings.passwordEncrypted ? decryptCredentials(settings.passwordEncrypted) : {};
   const password = encrypted.password ?? process.env.SMTP_PASSWORD;
   const transport = nodemailer.createTransport({
@@ -61,14 +67,55 @@ async function createTransport() {
     secure: settings.encryption === "ssl",
     requireTLS: settings.encryption === "starttls",
     ignoreTLS: settings.encryption === "none",
-    auth: settings.username ? { user: settings.username, pass: password } : undefined
+    auth: settings.username ? { user: settings.username, pass: password } : undefined,
+    connectionTimeout: 12_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000
   });
   return { transport, settings };
 }
 
+export async function diagnoseSmtpConnection() {
+  const settings = await getSmtpSettings();
+  if (!settings?.host || !settings.fromEmail) {
+    const error = new Error("SMTP host и From email должны быть настроены");
+    const diagnostic = classifySmtpError(error, "configuration");
+    logSmtpDiagnostic("SMTP configuration validation failed", error, diagnostic);
+    throw diagnostic;
+  }
+
+  try {
+    await lookup(settings.host);
+  } catch (error) {
+    const diagnostic = classifySmtpError(error, "dns");
+    logSmtpDiagnostic("SMTP DNS lookup failed", error, diagnostic);
+    throw diagnostic;
+  }
+
+  const checks = [
+    { stage: "dns", status: "passed", message: `DNS-запись ${settings.host} найдена.` }
+  ];
+  let transport: Awaited<ReturnType<typeof createTransport>>["transport"] | null = null;
+  try {
+    ({ transport } = await createTransport());
+    await transport.verify();
+    checks.push(
+      { stage: "connection", status: "passed", message: `Соединение с ${settings.host}:${settings.port} установлено.` },
+      { stage: "tls", status: settings.encryption === "none" ? "skipped" : "passed", message: settings.encryption === "none" ? "Шифрование отключено настройками." : `${settings.encryption === "ssl" ? "SSL/TLS" : "STARTTLS"} работает.` },
+      { stage: "authentication", status: settings.username ? "passed" : "skipped", message: settings.username ? "Авторизация прошла успешно." : "Авторизация не настроена." }
+    );
+    return { success: true as const, host: settings.host, port: settings.port, encryption: settings.encryption, checks };
+  } catch (error) {
+    const diagnostic = classifySmtpError(error);
+    logSmtpDiagnostic("SMTP transport verification failed", error, diagnostic);
+    throw diagnostic;
+  } finally {
+    transport?.close();
+  }
+}
+
 export async function verifySmtpConnection() {
-  const { transport } = await createTransport();
-  await transport.verify();
+  await diagnoseSmtpConnection();
 }
 
 async function loadTemplate(key: EmailTemplateKey) {
@@ -129,10 +176,20 @@ export async function sendTemplatedEmail(options: {
     await db.update(emailLogs).set({ status: "sent", sentAt: new Date() }).where(eq(emailLogs.id, log.id));
     return { sent: true, duplicate: false };
   } catch (error) {
-    const message = error instanceof Error ? error.message.slice(0, 1000) : "Неизвестная ошибка SMTP";
+    const diagnostic = classifySmtpError(error, "send");
+    console.error("SMTP email delivery failed", { diagnostic, stack: error instanceof Error ? error.stack : undefined });
+    const message = diagnostic.details;
     await db.update(emailLogs).set({ status: "failed", errorMessage: message }).where(eq(emailLogs.id, log.id));
-    return { sent: false, duplicate: false, error: message };
+    return { sent: false, duplicate: false, error: diagnostic.message, diagnostic };
   }
+}
+
+export function logSmtpDiagnostic(context: string, error: unknown, diagnostic: SmtpDiagnosticError) {
+  console.error(context, {
+    diagnostic,
+    stack: error instanceof Error ? error.stack : undefined,
+    cause: error instanceof Error && "cause" in error ? error.cause : undefined
+  });
 }
 
 export function sendPasswordResetEmail(to: string, resetUrl: string) {
