@@ -1,9 +1,10 @@
-import { bookings, db, houseImages, houses as houseTable } from "@judilen/db";
+import { bookings, db, houseImages, houses as houseTable, houseWeekdayPrices } from "@judilen/db";
 import { and, asc, eq, gt, gte, inArray, lt, notExists } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 import { blockingBookingStatuses } from "./booking-availability";
 import { houses as fallbackHouses, type House } from "./catalog";
 import { DEFAULT_IMAGE_URL, normalizeImageUrl } from "./image-urls";
+import { uniformWeekdayPrices, weekdayPriceRange } from "./weekday-prices";
 
 type AvailabilityCriteria = {
   checkIn: string;
@@ -31,18 +32,22 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
           gt(bookings.checkOut, availability.checkIn)
         ))
       : null;
-    const rows = await db
-      .select({ house: houseTable, image: houseImages })
-      .from(houseTable)
-      .leftJoin(houseImages, and(eq(houseTable.id, houseImages.houseId), eq(houseImages.isActive, true)))
-      .where(and(
-        eq(houseTable.isPublished, true),
-        availability ? gte(houseTable.guests, availability.guests) : undefined,
-        hasOverlappingBooking ? notExists(hasOverlappingBooking) : undefined
-      ))
-      .orderBy(asc(houseTable.name), asc(houseImages.position));
+    const [rows, priceRows] = await Promise.all([
+      db
+        .select({ house: houseTable, image: houseImages })
+        .from(houseTable)
+        .leftJoin(houseImages, and(eq(houseTable.id, houseImages.houseId), eq(houseImages.isActive, true)))
+        .where(and(
+          eq(houseTable.isPublished, true),
+          availability ? gte(houseTable.guests, availability.guests) : undefined,
+          hasOverlappingBooking ? notExists(hasOverlappingBooking) : undefined
+        ))
+        .orderBy(asc(houseTable.name), asc(houseImages.position)),
+      db.select().from(houseWeekdayPrices)
+    ]);
     const mapped = new Map<string, House>();
     for (const { house, image } of rows) {
+      const basePrice = Number(house.basePrice);
       const current = mapped.get(house.id) ?? {
         id: house.id,
         slug: house.slug,
@@ -52,7 +57,10 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
         longDescription: house.description,
         guests: house.guests,
         rooms: house.rooms,
-        price: Number(house.basePrice),
+        price: basePrice,
+        minPrice: basePrice,
+        maxPrice: basePrice,
+        weekdayPrices: uniformWeekdayPrices(basePrice),
         images: [],
         amenities: house.amenities
       };
@@ -63,8 +71,13 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
       }
       mapped.set(house.id, current);
     }
+    for (const row of priceRows) {
+      const house = mapped.get(row.houseId);
+      if (house) house.weekdayPrices[row.weekday] = Number(row.price);
+    }
     return [...mapped.values()].map((house) => ({
       ...house,
+      ...weekdayPriceRange(house.weekdayPrices),
       images: house.images.length ? house.images : [DEFAULT_IMAGE_URL]
     }));
   } catch (error) {

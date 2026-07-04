@@ -78,6 +78,15 @@ export const reviewModerationStatus = pgEnum("review_moderation_status", [
   "published",
   "rejected"
 ]);
+export const houseWeekday = pgEnum("house_weekday", [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday"
+]);
 
 export const roles = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -187,6 +196,21 @@ export const houseImages = pgTable(
   ]
 );
 
+export const houseWeekdayPrices = pgTable(
+  "house_weekday_prices",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "cascade" }).notNull(),
+    weekday: houseWeekday("weekday").notNull(),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("house_weekday_prices_house_weekday_unique").on(table.houseId, table.weekday),
+    index("house_weekday_prices_house_idx").on(table.houseId)
+  ]
+);
+
 export const services = pgTable(
   "services",
   {
@@ -278,6 +302,22 @@ export const bookingStatusHistory = pgTable("booking_status_history", {
   comment: text("comment"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
+
+export const bookingNightlyPrices = pgTable(
+  "booking_nightly_prices",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
+    nightDate: date("night_date").notNull(),
+    weekday: houseWeekday("weekday").notNull(),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("booking_nightly_prices_booking_date_unique").on(table.bookingId, table.nightDate),
+    index("booking_nightly_prices_booking_idx").on(table.bookingId)
+  ]
+);
 
 export const payments = pgTable("payments", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -172,8 +172,11 @@ img { display: block; max-width: 100%; }
 .house-copy p { min-height: 48px; color: var(--muted); }
 .house-meta { display: flex; gap: 18px; color: var(--muted); font-size: 13px; padding: 16px 0; border-block: 1px solid #edf0e9; }
 .house-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 18px; }
-.price { color: var(--forest-900); font-weight: 750; }
+.price { min-width: 0; color: var(--forest-900); font-weight: 750; line-height: 1.45; }
 .price strong { font: 700 25px var(--serif); }
+.house-price-range { font-size: 12px; white-space: nowrap; }
+.house-price-range strong { font-size: 19px; }
+.house-footer .text-link { flex: 0 0 auto; }
 .text-link { color: var(--forest-900); font-weight: 700; }
 
 .split { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(40px, 7vw, 100px); }
@@ -243,6 +246,10 @@ img { display: block; max-width: 100%; }
 .booking-card .field { margin-top: 15px; }
 .booking-card .button { width: 100%; margin-top: 18px; }
 .summary-row { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px solid #edf0e9; }
+.public-weekday-prices { max-width: 560px; padding: 4px 18px; border: 1px solid #e2e7dd; border-radius: 14px; background: var(--paper); }
+.booking-price-breakdown { margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: var(--sage-100); }
+.booking-price-breakdown summary { color: var(--forest-900); font-weight: 700; cursor: pointer; }
+.booking-price-breakdown .summary-row { font-size: 13px; }
 
 .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .service-card { overflow: hidden; border-radius: 18px; background: var(--paper); box-shadow: var(--shadow); }
@@ -375,6 +382,14 @@ img { display: block; max-width: 100%; }
 .photo-admin-preview img { width: 100%; height: 100%; object-fit: cover; }
 .photo-admin-preview .badge { position: absolute; top: 10px; left: 10px; }
 .photo-admin-card > .form-stack { padding: 18px; }
+.weekday-price-fieldset { min-width: 0; margin: 8px 0; padding: 20px; border: 1px solid var(--line); border-radius: 10px; }
+.weekday-price-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.weekday-price-heading h2 { margin: 0; font: 750 18px var(--sans); }
+.weekday-price-heading small { color: var(--muted); }
+.weekday-price-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.price-input { position: relative; }
+.price-input input { padding-right: 52px; }
+.price-input span { position: absolute; top: 50%; right: 12px; color: var(--muted); font-size: 12px; font-weight: 750; transform: translateY(-50%); pointer-events: none; }
 .homepage-gallery-panel { margin-bottom: 20px; }
 .admin-section-description { margin: -5px 0 20px; color: var(--muted); }
 .homepage-gallery-dropzone { min-height: 170px; }
@@ -603,6 +618,7 @@ img { display: block; max-width: 100%; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .integration-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .photo-admin-grid { grid-template-columns: 1fr; }
+  .weekday-price-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-stat-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-layout { grid-template-columns: 230px 1fr; }
   .admin-sidebar { padding-inline: 14px; }
@@ -653,6 +669,9 @@ img { display: block; max-width: 100%; }
   .section-heading { display: block; }
   .section-heading p { margin-top: 18px; }
   .house-grid, .review-grid, .service-grid, .home-service-grid { grid-template-columns: 1fr; }
+  .weekday-price-heading { align-items: stretch; flex-direction: column; }
+  .weekday-price-heading .button { width: 100%; }
+  .weekday-price-grid { grid-template-columns: 1fr; }
   .split-image { min-height: 390px; }
   .territory-gallery-arrow { width: 42px; height: 42px; }
   .territory-gallery-previous { left: 10px; }

@@ -1,4 +1,4 @@
-import { bookingStatusHistory, bookings, customers, db, houses } from "@judilen/db";
+import { bookingNightlyPrices, bookingStatusHistory, bookings, customers, db, houses, houseWeekdayPrices } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
@@ -7,6 +7,7 @@ import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { calculateNightlyPrices, weekdayPricesFromRows } from "@/lib/weekday-prices";
 
 const manualBookingSchema = z.object({
   houseId: z.uuid(),
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = manualBookingSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
-  const [house] = await db.select({ guests: houses.guests }).from(houses).where(eq(houses.id, parsed.data.houseId)).limit(1);
+  const [house] = await db.select({ guests: houses.guests, basePrice: houses.basePrice }).from(houses).where(eq(houses.id, parsed.data.houseId)).limit(1);
   if (!house) return problem(404, "Домик не найден");
   if (parsed.data.guests > house.guests) {
     return problem(422, "Количество гостей превышает вместимость домика");
@@ -72,6 +73,12 @@ export async function POST(request: Request) {
   if (await findOverlappingBooking(parsed.data.houseId, parsed.data.checkIn, parsed.data.checkOut)) {
     return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
   }
+  const weekdayPriceRows = await db.select().from(houseWeekdayPrices).where(eq(houseWeekdayPrices.houseId, parsed.data.houseId));
+  const nightlyPrices = calculateNightlyPrices(
+    parsed.data.checkIn,
+    parsed.data.checkOut,
+    weekdayPricesFromRows(weekdayPriceRows, Number(house.basePrice))
+  );
   const publicNumber = bookingNumber();
   try {
     const created = await db.transaction(async (tx) => {
@@ -105,6 +112,12 @@ export async function POST(request: Request) {
         source: "crm_manual",
         managerComment: parsed.data.managerComment
       }).returning();
+      await tx.insert(bookingNightlyPrices).values(nightlyPrices.map((night) => ({
+        bookingId: booking.id,
+        nightDate: night.date,
+        weekday: night.weekday,
+        price: String(night.price)
+      })));
       await tx.insert(bookingStatusHistory).values({
         bookingId: booking.id,
         toStatus: parsed.data.status,

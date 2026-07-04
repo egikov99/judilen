@@ -8,6 +8,9 @@ export interface House {
   guests: number;
   rooms: number;
   price: number;
+  minPrice: number;
+  maxPrice: number;
+  weekdayPrices: import("./weekday-prices").WeekdayPrices;
   images: string[];
   amenities: string[];
 }
@@ -27,6 +30,9 @@ export const houses: House[] = [
     guests: 4,
     rooms: 2,
     price: 520,
+    minPrice: 520,
+    maxPrice: 520,
+    weekdayPrices: { monday: 520, tuesday: 520, wednesday: 520, thursday: 520, friday: 520, saturday: 520, sunday: 520 },
     images: ["/images/stitch/asset-021.png", "/images/stitch/asset-028.png", "/images/stitch/asset-023.png", "/images/stitch/asset-041.png"],
     amenities: ["Приватная сауна", "Камин", "Панорамная терраса", "Wi‑Fi", "Кухня", "Теплый пол"]
   },
@@ -40,6 +46,9 @@ export const houses: House[] = [
     guests: 6,
     rooms: 3,
     price: 430,
+    minPrice: 430,
+    maxPrice: 430,
+    weekdayPrices: { monday: 430, tuesday: 430, wednesday: 430, thursday: 430, friday: 430, saturday: 430, sunday: 430 },
     images: ["/images/stitch/asset-008.png", "/images/stitch/asset-017.png", "/images/stitch/asset-026.png"],
     amenities: ["Мангал", "Терраса", "Wi‑Fi", "Кухня", "Детская кроватка"]
   },
@@ -53,6 +62,9 @@ export const houses: House[] = [
     guests: 2,
     rooms: 1,
     price: 320,
+    minPrice: 320,
+    maxPrice: 320,
+    weekdayPrices: { monday: 320, tuesday: 320, wednesday: 320, thursday: 320, friday: 320, saturday: 320, sunday: 320 },
     images: ["/images/stitch/asset-014.png", "/images/stitch/asset-015.png", "/images/stitch/asset-045.png"],
     amenities: ["Терраса", "Wi‑Fi", "Мини-кухня", "Вид на лес"]
   }

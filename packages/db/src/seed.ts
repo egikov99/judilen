@@ -1,6 +1,6 @@
 import { hash } from "@node-rs/argon2";
 import { eq, inArray } from "drizzle-orm";
-import { db, houseImages, houses, permissions, reviews, rolePermissions, roles, serviceHouses, serviceOptions, services, users, sqlClient } from "./index";
+import { db, houseImages, houses, houseWeekdayPrices, permissions, reviews, rolePermissions, roles, serviceHouses, serviceOptions, services, users, sqlClient } from "./index";
 
 const permissionRows = [
   ["dashboard.read", "Просмотр панели"],
@@ -173,6 +173,16 @@ await db.insert(houses).values([
     isPublished: true
   }
 ]).onConflictDoNothing();
+
+const demoHousePrices = [
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", price: "520" },
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12302", price: "430" },
+  { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12303", price: "320" }
+];
+const demoWeekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
+await db.insert(houseWeekdayPrices).values(demoHousePrices.flatMap((house) => (
+  demoWeekdays.map((weekday) => ({ ...house, weekday }))
+))).onConflictDoNothing();
 
 await db.insert(houseImages).values([
   { houseId: "8fc5f68a-330f-4f50-b6e4-dcb260b12301", url: "/images/stitch/asset-021.png", alt: "Люкс «Кедр» в хвойном лесу", position: 0, isMain: true },

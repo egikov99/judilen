@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { weekdays } from "@/lib/weekday-prices";
 
 export const loginSchema = z.object({
   email: z.email().max(254).transform((value) => value.toLowerCase().trim()),
@@ -34,6 +35,11 @@ export const availabilitySearchSchema = z.object({
   path: ["checkOut"]
 });
 
+const positiveHousePrice = z.coerce.number().positive().max(10_000_000);
+export const weekdayPricesSchema = z.object(Object.fromEntries(
+  weekdays.map((weekday) => [weekday, positiveHousePrice])
+) as Record<(typeof weekdays)[number], typeof positiveHousePrice>);
+
 export const houseSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100),
   name: z.string().trim().min(2).max(120),
@@ -42,7 +48,8 @@ export const houseSchema = z.object({
   guests: z.coerce.number().int().min(1).max(30),
   rooms: z.coerce.number().int().min(1).max(20),
   amenities: z.array(z.string().trim().min(1).max(80)).max(50),
-  basePrice: z.coerce.number().nonnegative().max(10_000_000),
+  basePrice: positiveHousePrice.optional(),
+  weekdayPrices: weekdayPricesSchema,
   seoTitle: z.string().trim().min(10).max(70),
   seoDescription: z.string().trim().min(30).max(180),
   isPublished: z.boolean()

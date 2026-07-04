@@ -1,4 +1,4 @@
-import { bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
+import { bookingNightlyPrices, bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { createAdminNotification } from "@/lib/admin-notifications";
@@ -6,6 +6,7 @@ import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
 import { getActiveServicesByIds } from "@/lib/services";
 import { sendNewBookingEmails } from "@/lib/booking-emails";
+import { calculateStayTotal, roundMoney } from "@/lib/weekday-prices";
 
 function bookingNumber() {
   const date = new Date().toISOString().slice(2, 10).replaceAll("-", "");
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
   if (await findOverlappingBooking(house.id, parsed.data.checkIn, parsed.data.checkOut)) {
     return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
   }
-  const nights = Math.ceil((Date.parse(parsed.data.checkOut) - Date.parse(parsed.data.checkIn)) / 86_400_000);
+  const stay = calculateStayTotal(parsed.data.checkIn, parsed.data.checkOut, house.weekdayPrices);
   const activeServices = await getActiveServicesByIds([...new Set(parsed.data.services.map((item) => item.serviceId))], house.id);
   let invalidService = false;
   const serviceLines = parsed.data.services.map((line) => {
@@ -40,11 +41,12 @@ export async function POST(request: Request) {
       serviceOptionId: option?.id ?? null,
       quantity: line.quantity,
       unitPrice,
-      totalPrice: unitPrice * line.quantity
+      totalPrice: roundMoney(unitPrice * line.quantity)
     };
   }).filter((line) => line !== null);
   if (invalidService) return problem(422, "Выбранная услуга недоступна для этого домика");
-  const servicesTotal = serviceLines.reduce((sum, line) => sum + line.totalPrice, 0);
+  const servicesTotal = roundMoney(serviceLines.reduce((sum, line) => sum + line.totalPrice, 0));
+  const totalAmount = roundMoney(stay.total + servicesTotal);
   const publicNumber = bookingNumber();
   try {
     const bookingId = await db.transaction(async (tx) => {
@@ -70,8 +72,14 @@ export async function POST(request: Request) {
         checkOut: parsed.data.checkOut,
         guests: parsed.data.guests,
         status: "awaiting_confirmation",
-        totalAmount: String(nights * house.price + servicesTotal)
+        totalAmount: String(totalAmount)
       }).returning({ id: bookings.id });
+      await tx.insert(bookingNightlyPrices).values(stay.breakdown.map((night) => ({
+        bookingId: booking.id,
+        nightDate: night.date,
+        weekday: night.weekday,
+        price: String(night.price)
+      })));
       if (serviceLines.length) {
         await tx.insert(bookingServices).values(serviceLines.map((line) => ({
           bookingId: booking.id,
@@ -102,7 +110,9 @@ export async function POST(request: Request) {
       publicNumber,
       status: "awaiting_confirmation",
       paymentMethod: "on_arrival",
-      paymentStatus: "unpaid"
+      paymentStatus: "unpaid",
+      totalAmount,
+      nightlyPrices: stay.breakdown
     }, { status: 201 });
   } catch (error) {
     if (hasDatabaseErrorCode(error, "23P01")) {

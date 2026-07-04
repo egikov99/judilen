@@ -25,7 +25,7 @@ export function HouseCard({ house }: { house: House }) {
           <span>Максимум {house.guests} человек</span>
           <span>{house.rooms} {roomLabel(house.rooms)}</span>
         </div>
-        <div className="house-footer"><span className="price"><strong>{formatCurrency(house.price)}</strong> / ночь</span><Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
+        <div className="house-footer"><span className={`price ${house.minPrice !== house.maxPrice ? "house-price-range" : ""}`}>{house.minPrice === house.maxPrice ? <><strong>{formatCurrency(house.minPrice)}</strong> / ночь</> : <>от <strong>{formatCurrency(house.minPrice)}</strong> до <strong>{formatCurrency(house.maxPrice)}</strong> / ночь</>}</span><Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
       </div>
     </article>
   );

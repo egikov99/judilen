@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatCurrency } from "@/components/currency";
 import { formatPrice, type House } from "@/lib/catalog";
 import { priceUnitLabels, type PublicService } from "@/lib/service-types";
+import { calculateStayTotal, roundMoney, weekdayLabels } from "@/lib/weekday-prices";
 
 function guestLabel(count: number) {
   if (count === 1) return "1 гость";
@@ -16,14 +17,16 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
   const [message, setMessage] = useState("");
   const [selected, setSelected] = useState<Record<string, { enabled: boolean; optionId: string; quantity: number }>>({});
   const [dates, setDates] = useState({ checkIn: "", checkOut: "" });
-  const nights = dates.checkIn && dates.checkOut ? Math.max(0, Math.ceil((Date.parse(dates.checkOut) - Date.parse(dates.checkIn)) / 86_400_000)) : 0;
-  const servicesTotal = services.reduce((sum, service) => {
+  const stay = dates.checkIn && dates.checkOut
+    ? calculateStayTotal(dates.checkIn, dates.checkOut, house.weekdayPrices)
+    : { breakdown: [], total: 0 };
+  const servicesTotal = roundMoney(services.reduce((sum, service) => {
     const state = selected[service.id];
     if (!state?.enabled) return sum;
     const option = service.options.find((item) => item.id === state.optionId) ?? service.options.find((item) => item.isDefault) ?? service.options[0];
     return sum + (option?.price ?? service.basePrice) * state.quantity;
-  }, 0);
-  const total = nights * house.price + servicesTotal;
+  }, 0));
+  const total = roundMoney(stay.total + servicesTotal);
 
   function serviceSelection(service: PublicService) {
     return selected[service.id] ?? {
@@ -55,10 +58,12 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
     setState("success");
     setMessage(`Заявка ${payload.publicNumber} создана. Оплата производится по приезду; мы свяжемся с вами для подтверждения.`);
     event.currentTarget.reset();
+    setDates({ checkIn: "", checkOut: "" });
+    setSelected({});
   }
   return (
     <aside className="booking-card">
-      <span className="eyebrow">от {formatCurrency(house.price)} / ночь</span>
+      <span className="eyebrow">{house.minPrice === house.maxPrice ? <>{formatCurrency(house.minPrice)} / ночь</> : <>от {formatCurrency(house.minPrice)} до {formatCurrency(house.maxPrice)} / ночь</>}</span>
       <h2 style={{ fontFamily: "var(--serif)", marginBottom: 4 }}>Запросить бронирование</h2>
       <form onSubmit={submit}>
         <div className="form-grid">
@@ -94,6 +99,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
             </div>;
           })}
         </div>}
+        {!!stay.breakdown.length && <details className="booking-price-breakdown"><summary>{stay.breakdown.length} ноч. · проживание {formatCurrency(stay.total)}</summary>{stay.breakdown.map((night) => <div className="summary-row" key={night.date}><span>{night.date} · {weekdayLabels[night.weekday].toLowerCase()}</span><strong>{formatCurrency(night.price)}</strong></div>)}</details>}
         <div className="summary-row"><span>Итого</span><strong>{total > 0 ? formatCurrency(total) : "Выберите даты"}</strong></div>
         <label style={{ display: "flex", gap: 9, marginTop: 16, fontSize: 12 }}><input name="consent" type="checkbox" required /> Согласен с политикой конфиденциальности</label>
         <button className="button button-primary" disabled={state === "loading"}>{state === "loading" ? "Отправляем…" : "Отправить заявку"}</button>
