@@ -2,6 +2,7 @@ import { bookingServices, bookings, customers, db, houses, services } from "@jud
 import { and, asc, eq, gt, gte, inArray, lt, notInArray } from "drizzle-orm";
 import { blockingBookingStatuses } from "./booking-availability";
 import { addDays } from "./date-ranges";
+import { calculatePaidBookingMetrics } from "./paid-booking-metrics";
 
 const arrivalStatuses = ["pending", "awaiting_confirmation", "confirmed", "awaiting_payment", "paid", "external"] as const;
 
@@ -41,15 +42,14 @@ export async function getAdminDashboardData(startDate: string, endDate: string) 
   for (const booking of periodBookings) sources.set(booking.source, (sources.get(booking.source) ?? 0) + 1);
   const serviceStats = new Map<string, number>();
   for (const row of serviceRows) serviceStats.set(row.title, (serviceStats.get(row.title) ?? 0) + row.quantity);
-  const revenue = periodBookings.reduce((sum, booking) => sum + Number(booking.paidAmount), 0);
-  const totalAmount = periodBookings.reduce((sum, booking) => sum + Number(booking.totalAmount), 0);
+  const paidMetrics = calculatePaidBookingMetrics(periodBookings);
   return {
     startDate, endDate,
     metrics: {
-      revenue,
+      revenue: paidMetrics.revenue,
       bookingCount: periodBookings.length,
       occupancy: houseRows.length ? Math.min(100, Math.round(occupiedNights / (houseRows.length * periodDays) * 100)) : 0,
-      averageCheck: periodBookings.length ? totalAmount / periodBookings.length : 0,
+      averageCheck: paidMetrics.averageCheck,
       cancellations: periodBookings.filter((booking) => ["cancelled", "declined"].includes(booking.status)).length,
       newRequests: periodBookings.filter((booking) => ["new", "pending", "awaiting_confirmation"].includes(booking.status)).length
     },
