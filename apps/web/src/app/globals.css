@@ -103,6 +103,7 @@ img { display: block; max-width: 100%; }
 .nav-links a:hover { color: var(--forest-900); }
 .nav-actions { display: flex; align-items: center; gap: 12px; }
 .mobile-nav { display: none; }
+.mobile-menu-scrim, .mobile-menu-panel { display: none; }
 
 .button {
   display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 9px;
@@ -611,8 +612,22 @@ img { display: block; max-width: 100%; }
 @media (max-width: 950px) {
   .site-brand-logo-frame { width: 36px; height: 36px; }
   .site-brand-footer .site-brand-logo-frame { width: 46px; }
+  .site-header .nav { position: relative; }
   .nav-links { display: none; }
-  .mobile-nav { display: inline-flex; }
+  .nav-actions { display: none; }
+  .mobile-nav { display: grid; }
+  .mobile-menu-toggle { position: relative; z-index: 34; width: 46px; height: 46px; flex: 0 0 46px; place-items: center; padding: 0; border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent); border-radius: 50%; background: var(--color-card); color: var(--color-primary); box-shadow: 0 8px 22px rgba(21,66,18,.12); cursor: pointer; }
+  .mobile-menu-toggle:hover, .mobile-menu-toggle:focus-visible { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card)); outline: 2px solid color-mix(in srgb, var(--color-primary) 35%, transparent); outline-offset: 2px; }
+  .mobile-menu-scrim { position: fixed; inset: 76px 0 0; z-index: 31; display: block; width: 100vw; height: calc(100dvh - 76px); padding: 0; border: 0; background: rgba(3,10,4,.48); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .22s ease, visibility .22s ease; }
+  .mobile-menu-scrim.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+  .mobile-menu-panel { position: fixed; top: 88px; right: max(20px, env(safe-area-inset-right)); z-index: 33; display: grid; width: min(380px, calc(100vw - 40px)); max-height: calc(100dvh - 104px); gap: 18px; padding: 18px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent); border-radius: 18px; background: var(--color-card); color: var(--color-text); box-shadow: 0 24px 65px rgba(3,10,4,.28); opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-10px) scale(.98); transform-origin: top right; transition: opacity .2s ease, transform .2s ease, visibility .2s ease; }
+  .mobile-menu-panel.is-open { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); }
+  .mobile-menu-links { display: grid; }
+  .mobile-menu-links a { display: flex; min-height: 48px; align-items: center; padding: 8px 12px; border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent); font-weight: 650; }
+  .mobile-menu-links a:last-child { border-bottom: 0; }
+  .mobile-menu-links a:hover, .mobile-menu-links a:focus-visible { border-radius: 10px; background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card)); color: var(--color-primary); outline: none; }
+  .mobile-menu-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mobile-menu-actions .button { min-width: 0; padding-inline: 14px; }
   .booking-form { grid-template-columns: 1fr 1fr; }
   .house-grid, .review-grid, .service-grid, .home-service-grid { grid-template-columns: repeat(2, 1fr); }
   .split, .detail-layout, .contact-grid { grid-template-columns: 1fr; }
@@ -662,7 +677,10 @@ img { display: block; max-width: 100%; }
   .site-brand-footer .site-brand-logo-frame { width: 38px; }
   .site-header .nav { gap: 10px; }
   .site-header .site-brand-label { max-width: 132px; line-height: 1.05; }
-  .nav-actions .button-ghost { display: none; }
+  .mobile-menu-scrim { inset-block-start: 68px; height: calc(100dvh - 68px); }
+  .mobile-menu-panel { top: 78px; right: 15px; width: calc(100vw - 30px); max-height: calc(100dvh - 92px); padding: 16px; border-radius: 15px; }
+  .mobile-menu-toggle { width: 44px; height: 44px; flex-basis: 44px; }
+  .mobile-menu-actions { grid-template-columns: 1fr; }
   .hero { min-height: 650px; }
   .hero-content { padding-bottom: 120px; }
   .hero h1 { font-size: 47px; }
