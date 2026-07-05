@@ -46,10 +46,12 @@ describe("contact widget settings", () => {
     const migration = readFileSync(path, "utf8");
     expect(migration).toContain('CREATE TABLE "contact_widget_settings"');
     expect(migration).toContain("('website', 'Чат на сайте', true, 'connected'");
-    const constraint = migration.indexOf('CHECK ("provider" IN');
+    const droppedConstraint = migration.indexOf('DROP CONSTRAINT IF EXISTS "communication_channels_provider_check"');
     const websiteChannel = migration.indexOf('INSERT INTO "communication_channels"');
-    expect(constraint).toBeGreaterThan(-1);
-    expect(migration.slice(constraint, websiteChannel)).toContain("'website'");
-    expect(constraint).toBeLessThan(websiteChannel);
+    const updatedConstraint = migration.indexOf('CHECK ("provider" IN');
+    expect(droppedConstraint).toBeGreaterThan(-1);
+    expect(websiteChannel).toBeGreaterThan(droppedConstraint);
+    expect(updatedConstraint).toBeGreaterThan(websiteChannel);
+    expect(migration.slice(updatedConstraint)).toContain("'website'");
   });
 });
