@@ -31,7 +31,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return Response.json({
     conversation,
     messages: messages.map((item) => ({
-      ...item,
+      id: item.id,
+      direction: item.direction,
+      senderName: item.senderName,
+      body: item.body,
+      status: item.status,
+      readAt: item.readAt?.toISOString() ?? null,
       createdAt: item.createdAt.toISOString(),
       attachments: attachments.filter((attachment) => attachment.messageId === item.id).map((attachment) => ({
         id: attachment.id,

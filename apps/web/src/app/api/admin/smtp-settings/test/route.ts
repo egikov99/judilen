@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/session";
 import { classifySmtpError } from "@/lib/smtp-diagnostics";
 import { problem } from "@/lib/validation";
 import { z } from "zod";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const schema = z.object({ recipient: z.email().max(254).optional() });
 
@@ -12,6 +13,13 @@ export async function POST(request: Request) {
   const auth = await requirePermission("settings.manage");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const rate = await checkRateLimit(request, {
+    scope: "smtp.test",
+    limit: 10,
+    windowMs: 10 * 60_000,
+    identifier: auth.session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = schema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return problem(422, "Укажите корректный адрес для тестового письма");
   const recipient = parsed.data.recipient ?? "";

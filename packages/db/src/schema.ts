@@ -466,6 +466,17 @@ export const settings = pgTable("settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });
 
+export const securityRateLimits = pgTable(
+  "security_rate_limits",
+  {
+    keyHash: text("key_hash").primaryKey(),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull(),
+    requestCount: integer("request_count").notNull().default(1),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [index("security_rate_limits_updated_idx").on(table.updatedAt)]
+);
+
 export const auditLogs = pgTable("audit_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),

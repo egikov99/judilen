@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const schema = z.object({
   firstName: z.string().trim().min(2).max(80).optional(),
@@ -26,6 +27,13 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const session = await getSession();
   if (!session) return problem(401, "Требуется авторизация");
+  const rate = await checkRateLimit(request, {
+    scope: "account.profile-update",
+    limit: 20,
+    windowMs: 60 * 60_000,
+    identifier: session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
   const [profile] = await db.transaction(async (tx) => {

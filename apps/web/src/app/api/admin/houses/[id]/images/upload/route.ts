@@ -5,6 +5,7 @@ import { writeAudit } from "@/lib/audit";
 import { requireAllPermissions } from "@/lib/session";
 import { removeUploadedFile, saveImageFile } from "@/lib/uploads";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const auth = await requireAllPermissions(["uploads.create", "house_images.create"]);
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const rate = await checkRateLimit(request, {
+    scope: "admin.house-images.upload",
+    limit: 60,
+    windowMs: 60 * 60_000,
+    identifier: auth.session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
 
   const { id } = await params;
   const [house] = await db.select({ id: houses.id }).from(houses).where(eq(houses.id, id)).limit(1);
@@ -28,13 +36,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const alt = String(form.get("alt") ?? "").trim().slice(0, 250);
   const caption = String(form.get("caption") ?? "").trim();
   if (!files.length) return problem(422, "Файлы не переданы");
+  if (files.length > 50 || files.reduce((sum, file) => sum + file.size, 0) > 100 * 1024 * 1024) {
+    return problem(413, "За один раз можно загрузить до 50 файлов общим размером до 100 МБ");
+  }
 
   const saved: Array<{ file: File; url: string }> = [];
   for (const file of files) {
     const result = await saveImageFile(file, "houses", id);
     if (!result.ok) {
       await Promise.all(saved.map((item) => removeUploadedFile(item.url)));
-      console.warn("House image batch upload rejected", { houseId: id, name: file.name, size: file.size, reason: result.error });
+      console.warn("House image batch upload rejected", { houseId: id, size: file.size, reason: result.error });
       return problem(
         result.error === "size" ? 413 : 415,
         result.error === "size"

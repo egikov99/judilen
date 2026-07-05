@@ -10,13 +10,34 @@ import { sendCommunicationMessage } from "@/lib/communication-adapters";
 import { channelConfig } from "@/lib/communication-channels";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { safeErrorForLog } from "@/lib/redaction";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const messageSchema = z.object({ body: z.string().trim().min(1).max(4000) });
+
+function messageResponse(message: typeof chatMessages.$inferSelect) {
+  return {
+    id: message.id,
+    direction: message.direction,
+    senderName: message.senderName,
+    body: message.body,
+    status: message.status,
+    readAt: message.readAt?.toISOString() ?? null,
+    createdAt: message.createdAt.toISOString()
+  };
+}
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requirePermission("chats.write");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const rate = await checkRateLimit(request, {
+    scope: "admin.chat-message",
+    limit: 120,
+    windowMs: 60 * 60_000,
+    identifier: auth.session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = messageSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Введите сообщение", parsed.error.flatten());
   const { id } = await params;
@@ -46,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       lastMessagePreview: parsed.data.body.slice(0, 240),
       updatedAt: now
     }).where(eq(chatConversations.id, id));
-    return Response.json({ item: { ...message, createdAt: message.createdAt.toISOString() } }, { status: 201 });
+    return Response.json({ item: messageResponse(message) }, { status: 201 });
   }
 
   const [message] = await db.insert(chatMessages).values({
@@ -72,9 +93,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       lastMessagePreview: parsed.data.body.slice(0, 240),
       updatedAt: now
     }).where(eq(chatConversations.id, id));
-    return Response.json({ item: { ...sent, createdAt: sent.createdAt.toISOString() } }, { status: 201 });
+    return Response.json({ item: messageResponse(sent) }, { status: 201 });
   } catch (error) {
     await db.update(chatMessages).set({ status: "failed" }).where(eq(chatMessages.id, message.id));
-    return problem(502, "Сообщение не отправлено", error instanceof Error ? error.message : undefined);
+    console.error("communication_message_send_failed", {
+      conversationId: id,
+      provider: row.channel.provider,
+      error: safeErrorForLog(error)
+    });
+    return problem(502, "Сообщение не отправлено");
   }
 }

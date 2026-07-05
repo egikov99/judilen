@@ -97,7 +97,11 @@ const adminRole = allRoles.find((role) => role.name === "super_admin");
 if (!adminRole) throw new Error("Admin role was not created");
 const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@judilen.local").toLowerCase().trim();
 const existingAdmin = await db.select({ id: users.id }).from(users).where(eq(users.email, adminEmail)).limit(1);
-const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!";
+const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "";
+const passwordRequired = !existingAdmin.length || process.env.SEED_ADMIN_RESET_PASSWORD === "true";
+if (passwordRequired && (adminPassword.length < 12 || !/[A-Za-zА-Яа-я]/.test(adminPassword) || !/\d/.test(adminPassword))) {
+  throw new Error("SEED_ADMIN_PASSWORD must contain at least 12 characters, letters and digits");
+}
 if (!existingAdmin.length) {
   await db.insert(users).values({
     email: adminEmail,
@@ -105,7 +109,7 @@ if (!existingAdmin.length) {
     roleId: adminRole.id,
     firstName: "Администратор"
   });
-  console.log(`Created administrator ${adminEmail}`);
+  console.log("Created initial administrator");
 } else if (process.env.SEED_ADMIN_RESET_PASSWORD === "true") {
   await db.update(users).set({
     passwordHash: await hash(adminPassword),
@@ -113,14 +117,14 @@ if (!existingAdmin.length) {
     isActive: true,
     updatedAt: new Date()
   }).where(eq(users.id, existingAdmin[0].id));
-  console.log(`Reset password for administrator ${adminEmail}`);
+  console.log("Reset initial administrator password");
 } else {
   await db.update(users).set({
     roleId: adminRole.id,
     isActive: true,
     updatedAt: new Date()
   }).where(eq(users.id, existingAdmin[0].id));
-  console.log(`Administrator ${adminEmail} already exists; password was not changed`);
+  console.log("Initial administrator already exists; password was not changed");
 }
 
 const includeDemoData = process.env.SEED_DEMO_DATA !== "false";

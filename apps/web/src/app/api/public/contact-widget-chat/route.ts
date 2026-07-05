@@ -10,6 +10,7 @@ import {
   websiteChatRateLimited
 } from "@/lib/website-chat";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const visitorTokenSchema = z.string().min(32).max(200).regex(/^[A-Za-z0-9_-]+$/);
 const contactSchema = z.string().trim().min(5).max(254).refine((value) => (
@@ -19,6 +20,7 @@ const messageSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
   contact: contactSchema.optional(),
   message: z.string().trim().min(1).max(4000),
+  consent: z.boolean().optional(),
   website: z.string().max(0).optional().default("")
 });
 
@@ -61,10 +63,17 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const parsed = messageSchema.safeParse(await request.json().catch(() => null));
+  const rate = await checkRateLimit(request, {
+    scope: "website-chat.send",
+    limit: 30,
+    windowMs: 60 * 60_000
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   if (!parsed.success) return problem(422, "Проверьте имя, контакт и сообщение", parsed.error.flatten());
   const session = await getSession();
   const token = visitorToken(request);
   if (!session && !token) return problem(401, "Не удалось определить посетителя");
+  if (!session && parsed.data.consent !== true) return problem(422, "Подтвердите согласие на обработку персональных данных");
 
   const [settings, channel] = await Promise.all([
     db.select({ id: contactWidgetSettings.id }).from(contactWidgetSettings).where(and(

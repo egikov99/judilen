@@ -219,10 +219,12 @@ export function verifyCommunicationWebhook(
   if (channel.provider === "telegram" || channel.provider === "telegram_group") {
     return secureEquals(headers.get("x-telegram-bot-api-secret-token") ?? "", channel.webhookSecret);
   }
-  if (channel.provider === "vk" && channel.secretConfig.callbackSecret) {
-    return secureEquals(text(payload.secret), channel.secretConfig.callbackSecret);
+  if (channel.provider === "vk") {
+    return Boolean(channel.secretConfig.callbackSecret)
+      && secureEquals(text(payload.secret), channel.secretConfig.callbackSecret);
   }
-  if ((channel.provider === "instagram" || channel.provider === "whatsapp") && channel.secretConfig.appSecret) {
+  if (channel.provider === "instagram" || channel.provider === "whatsapp") {
+    if (!channel.secretConfig.appSecret) return false;
     const received = headers.get("x-hub-signature-256") ?? "";
     const expected = `sha256=${createHmac("sha256", channel.secretConfig.appSecret).update(rawBody).digest("hex")}`;
     return secureEquals(received, expected);
@@ -232,7 +234,7 @@ export function verifyCommunicationWebhook(
     const expected = createHmac("sha256", channel.secretConfig.authToken).update(rawBody).digest("hex");
     return secureEquals(received, expected);
   }
-  return true;
+  return false;
 }
 
 function telegramMessages(channel: CommunicationChannelConfig, payload: Record<string, unknown>) {

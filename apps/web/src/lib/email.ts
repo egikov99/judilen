@@ -2,12 +2,14 @@ import "server-only";
 
 import { db, emailLogs, emailTemplates, smtpSettings } from "@judilen/db";
 import { eq } from "drizzle-orm";
-import { lookup } from "node:dns/promises";
+import { createHash } from "node:crypto";
 import nodemailer from "nodemailer";
 import { decryptCredentials } from "./credential-cipher";
 import { DEFAULT_EMAIL_TEMPLATES, type EmailTemplateKey } from "./email-templates";
 import { getSiteTheme } from "./site-theme-db";
 import { classifySmtpError, type SmtpDiagnosticError } from "./smtp-diagnostics";
+import { assertSafeSmtpTarget } from "./network-security";
+import { redactSensitiveText, safeErrorForLog } from "./redaction";
 
 export const SMTP_SETTINGS_ID = "00000000-0000-0000-0000-000000000002";
 
@@ -59,14 +61,16 @@ async function createTransport() {
     error.code = "ECONFIG";
     throw error;
   }
+  const [validatedAddress] = await assertSafeSmtpTarget(settings.host, settings.port);
   const encrypted = settings.passwordEncrypted ? decryptCredentials(settings.passwordEncrypted) : {};
   const password = encrypted.password ?? process.env.SMTP_PASSWORD;
   const transport = nodemailer.createTransport({
-    host: settings.host,
+    host: validatedAddress,
     port: settings.port,
     secure: settings.encryption === "ssl",
     requireTLS: settings.encryption === "starttls",
     ignoreTLS: settings.encryption === "none",
+    tls: settings.encryption === "none" ? undefined : { servername: settings.host },
     auth: settings.username ? { user: settings.username, pass: password } : undefined,
     connectionTimeout: 12_000,
     greetingTimeout: 10_000,
@@ -85,7 +89,7 @@ export async function diagnoseSmtpConnection() {
   }
 
   try {
-    await lookup(settings.host);
+    await assertSafeSmtpTarget(settings.host, settings.port);
   } catch (error) {
     const diagnostic = classifySmtpError(error, "dns");
     logSmtpDiagnostic("SMTP DNS lookup failed", error, diagnostic);
@@ -177,7 +181,7 @@ export async function sendTemplatedEmail(options: {
     return { sent: true, duplicate: false };
   } catch (error) {
     const diagnostic = classifySmtpError(error, "send");
-    console.error("SMTP email delivery failed", { diagnostic, stack: error instanceof Error ? error.stack : undefined });
+    console.error("SMTP email delivery failed", { diagnostic, error: safeErrorForLog(error) });
     const message = diagnostic.details;
     await db.update(emailLogs).set({ status: "failed", errorMessage: message }).where(eq(emailLogs.id, log.id));
     return { sent: false, duplicate: false, error: diagnostic.message, diagnostic };
@@ -187,16 +191,20 @@ export async function sendTemplatedEmail(options: {
 export function logSmtpDiagnostic(context: string, error: unknown, diagnostic: SmtpDiagnosticError) {
   console.error(context, {
     diagnostic,
-    stack: error instanceof Error ? error.stack : undefined,
-    cause: error instanceof Error && "cause" in error ? error.cause : undefined
+    stack: error instanceof Error ? redactSensitiveText(error.stack) : undefined
   });
 }
 
 export function sendPasswordResetEmail(to: string, resetUrl: string) {
+  const url = new URL(resetUrl);
+  const token = url.searchParams.get("token")
+    ?? new URLSearchParams(url.hash.replace(/^#/, "")).get("token")
+    ?? "";
+  const dedupeHash = createHash("sha256").update(`${to}:${token}`).digest("hex");
   return sendTemplatedEmail({
     to,
     templateKey: "password_reset",
     variables: { resetPasswordUrl: resetUrl },
-    dedupeKey: `password-reset:${to}:${new URL(resetUrl).searchParams.get("token")}`
+    dedupeKey: `password-reset:${dedupeHash}`
   });
 }

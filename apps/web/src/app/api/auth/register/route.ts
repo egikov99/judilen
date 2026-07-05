@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const registrationSchema = z.object({
   email: z.email().max(254).transform((value) => value.toLowerCase().trim()),
@@ -17,6 +18,13 @@ const registrationSchema = z.object({
 
 export async function POST(request: Request) {
   const parsed = registrationSchema.safeParse(await request.json().catch(() => null));
+  const rate = await checkRateLimit(request, {
+    scope: "auth.register",
+    limit: 5,
+    windowMs: 60 * 60_000,
+    identifier: parsed.success ? parsed.data.email : null
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
   const [clientRole] = await db.select({ id: roles.id }).from(roles).where(eq(roles.name, "client")).limit(1);
   if (!clientRole) return problem(503, "Сервис регистрации временно недоступен");

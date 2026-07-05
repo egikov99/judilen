@@ -14,7 +14,7 @@ export default async function PaymentInformationPage({ searchParams }: {
   const session = await getSession();
   const { bookingId } = await searchParams;
   const conditions = bookingId ? [eq(bookings.id, bookingId)] : [];
-  if (session?.role === "client") conditions.push(eq(customers.userId, session.userId));
+  if (session) conditions.push(eq(customers.userId, session.userId));
   const [booking] = bookingId && session ? await db.select({
     publicNumber: bookings.publicNumber,
     checkIn: bookings.checkIn,

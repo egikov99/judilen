@@ -35,7 +35,7 @@ describe("SMTP diagnostics", () => {
     const email = readFileSync(resolve(process.cwd(), "src/lib/email.ts"), "utf8");
     const testRoute = readFileSync(resolve(process.cwd(), "src/app/api/admin/smtp-settings/test/route.ts"), "utf8");
     const saveRoute = readFileSync(resolve(process.cwd(), "src/app/api/admin/smtp-settings/route.ts"), "utf8");
-    expect(email).toContain("await lookup(settings.host)");
+    expect(email).toContain("await assertSafeSmtpTarget(settings.host, settings.port)");
     expect(email).toContain("await transport.verify()");
     expect(email).toContain("connectionTimeout");
     expect(email).toContain('status: "passed"');

@@ -17,7 +17,7 @@ export function channelConfig(row: CommunicationChannelRow): CommunicationChanne
   };
 }
 
-export function communicationWebhookUrl(row: Pick<CommunicationChannelRow, "provider" | "webhookSecret">) {
+export function communicationWebhookUrl(row: Pick<CommunicationChannelRow, "id" | "provider">) {
   const origin = (process.env.APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-  return `${origin}/api/webhooks/communications/${row.provider}/${row.webhookSecret}`;
+  return `${origin}/api/webhooks/communications/${row.provider}/${row.id}`;
 }

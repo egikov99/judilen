@@ -17,7 +17,17 @@ export async function GET() {
   const auth = await requirePermission("integrations.read");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
-  return Response.json({ items: await db.select().from(integrations).orderBy(desc(integrations.createdAt)) });
+  const items = await db.select().from(integrations).orderBy(desc(integrations.createdAt));
+  return Response.json({ items: items.map((item) => ({
+    id: item.id,
+    houseId: item.houseId,
+    kind: item.kind,
+    name: item.name,
+    isEnabled: item.isEnabled,
+    lastSyncedAt: item.lastSyncedAt,
+    importedCount: item.importedCount,
+    errorCount: item.errorCount
+  })) });
 }
 
 export async function POST(request: Request) {
@@ -28,5 +38,10 @@ export async function POST(request: Request) {
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
   const [integration] = await db.insert(integrations).values(parsed.data).returning();
   await writeAudit({ session: auth.session, request, action: "integration.create", entityType: "integration", entityId: integration.id, after: integration });
-  return Response.json({ item: integration }, { status: 201 });
+  return Response.json({ item: {
+    id: integration.id,
+    kind: integration.kind,
+    name: integration.name,
+    isEnabled: integration.isEnabled
+  } }, { status: 201 });
 }

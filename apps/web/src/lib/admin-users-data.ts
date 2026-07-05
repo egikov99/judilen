@@ -40,7 +40,13 @@ export async function getAdminUsersData() {
     }),
     roles: roleRows.map((role) => ({ ...role, permissions: [...(roleKeys.get(role.id) ?? [])] as Permission[] })),
     permissions: permissionRows.map((item) => ({ key: item.key as Permission, description: item.description })),
-    auditLogs: auditRows
+    auditLogs: auditRows.map((row) => ({
+      id: row.id,
+      actorId: row.actorId,
+      action: row.action,
+      entityId: row.entityId,
+      createdAt: row.createdAt
+    }))
   };
 }
 

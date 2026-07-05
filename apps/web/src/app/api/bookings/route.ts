@@ -7,6 +7,8 @@ import { getPublishedHouses } from "@/lib/houses";
 import { getActiveServicesByIds } from "@/lib/services";
 import { sendNewBookingEmails } from "@/lib/booking-emails";
 import { calculateStayTotal, roundMoney } from "@/lib/weekday-prices";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
+import { safeErrorForLog } from "@/lib/redaction";
 
 function bookingNumber() {
   const date = new Date().toISOString().slice(2, 10).replaceAll("-", "");
@@ -16,6 +18,13 @@ function bookingNumber() {
 
 export async function POST(request: Request) {
   const parsed = bookingSchema.safeParse(await request.json().catch(() => null));
+  const rate = await checkRateLimit(request, {
+    scope: "booking.create",
+    limit: 8,
+    windowMs: 60 * 60_000,
+    identifier: parsed.success ? parsed.data.email : null
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   if (!parsed.success) return problem(422, "Некорректные данные бронирования", parsed.error.flatten());
   const house = (await getPublishedHouses()).find((item) => item.id === parsed.data.houseId);
   if (!house) return problem(404, "Домик не найден");
@@ -118,7 +127,7 @@ export async function POST(request: Request) {
     if (hasDatabaseErrorCode(error, "23P01")) {
       return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
     }
-    console.error("booking_create_failed", { publicNumber, error });
+    console.error("booking_create_failed", { publicNumber, error: safeErrorForLog(error) });
     return problem(500, "Не удалось создать бронирование");
   }
 }

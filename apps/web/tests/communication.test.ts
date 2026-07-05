@@ -297,7 +297,8 @@ describe("communication inbox", () => {
     );
     expect(proxy).toContain('startsWith("/api/webhooks/communications/")');
     expect(webhook).toContain("verifyCommunicationWebhook");
-    expect(webhook).toContain("communicationChannels.webhookSecret");
+    expect(webhook).toContain("eq(communicationChannels.id, secret)");
+    expect(webhook).not.toContain("eq(communicationChannels.webhookSecret, secret)");
 
     const vkCallback = readFileSync(
       resolve(process.cwd(), "src/app/api/integrations/vk/callback/route.ts"),
@@ -314,7 +315,8 @@ describe("communication inbox", () => {
     expect(vkCallback).toContain("vkEventsLog.eventId");
 
     const compose = readFileSync(resolve(process.cwd(), "../../docker-compose.yml"), "utf8");
-    expect(compose).toContain("VK_GROUP_ID: ${VK_GROUP_ID:-229727757}");
-    expect(compose).toContain("VK_CONFIRMATION_TOKEN: ${VK_CONFIRMATION_TOKEN:-a7ef0db2}");
+    expect(compose).toContain("VK_GROUP_ID: ${VK_GROUP_ID:-}");
+    expect(compose).toContain("VK_CONFIRMATION_TOKEN: ${VK_CONFIRMATION_TOKEN:-}");
+    expect(compose).not.toContain("a7ef0db2");
   });
 });

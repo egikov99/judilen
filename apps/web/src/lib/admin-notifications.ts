@@ -11,6 +11,7 @@ import { and, eq, inArray, ne } from "drizzle-orm";
 import webpush from "web-push";
 import { notificationEventTypes, type NotificationEventType } from "./notification-types";
 import { ensureVapidConfiguration } from "./vapid";
+import { safeErrorForLog } from "./redaction";
 
 type NotificationInput = {
   eventType: NotificationEventType;
@@ -41,7 +42,7 @@ async function deliverPush(userId: string, payload: string) {
   try {
     await configureWebPush();
   } catch (error) {
-    console.error("vapid_configuration_failed", error);
+    console.error("vapid_configuration_failed", safeErrorForLog(error));
     return {
       status: "disabled",
       error: error instanceof Error ? error.message : "VAPID keys are not configured"
@@ -113,6 +114,6 @@ export async function createAdminNotification(input: NotificationInput) {
       }).onConflictDoNothing();
     }
   } catch (error) {
-    console.error("admin_notification_failed", { eventType: input.eventType, error });
+    console.error("admin_notification_failed", { eventType: input.eventType, error: safeErrorForLog(error) });
   }
 }

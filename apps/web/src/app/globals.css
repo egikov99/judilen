@@ -649,6 +649,9 @@ img { display: block; max-width: 100%; }
 .website-chat-input-row .button { width: 46px; min-width: 46px; height: 46px; padding: 0; border-radius: 50%; }
 .website-chat-sending { color: var(--muted); }
 .website-chat-error { margin: 0; }
+.website-chat-consent { display: flex; align-items: flex-start; gap: 7px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.website-chat-consent input { margin-top: 2px; }
+.website-chat-consent a { color: var(--color-primary); text-decoration: underline; }
 .account-chat-card > h2 { margin-bottom: 6px; font: 700 30px var(--serif); }
 .account-chat-card > p { margin-top: 0; color: var(--muted); }
 .contact-widget-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; }

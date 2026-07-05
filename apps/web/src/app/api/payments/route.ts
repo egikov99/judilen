@@ -6,6 +6,8 @@ import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
 import { onlinePaymentsEnabled } from "@/lib/payments";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
+import { safeErrorForLog } from "@/lib/redaction";
 
 const schema = z.object({ bookingId: z.uuid() });
 
@@ -15,17 +17,25 @@ export async function POST(request: Request) {
   }
   const session = await getSession();
   if (!session) return problem(401, "Требуется авторизация");
+  const rate = await checkRateLimit(request, {
+    scope: "payment.create",
+    limit: 10,
+    windowMs: 15 * 60_000,
+    identifier: session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректный bookingId");
-  const conditions = [eq(bookings.id, parsed.data.bookingId)];
-  if (session.role === "client") conditions.push(eq(customers.userId, session.userId));
   const [booking] = await db.select({
     id: bookings.id,
     publicNumber: bookings.publicNumber,
     totalAmount: bookings.totalAmount,
     paidAmount: bookings.paidAmount,
     status: bookings.status
-  }).from(bookings).innerJoin(customers, eq(bookings.customerId, customers.id)).where(and(...conditions)).limit(1);
+  }).from(bookings).innerJoin(customers, eq(bookings.customerId, customers.id)).where(and(
+    eq(bookings.id, parsed.data.bookingId),
+    eq(customers.userId, session.userId)
+  )).limit(1);
   if (!booking) return problem(404, "Бронирование не найдено");
   const amount = Math.max(0, Number(booking.totalAmount) - Number(booking.paidAmount));
   if (!amount) return problem(409, "Бронирование уже оплачено");
@@ -81,6 +91,7 @@ export async function POST(request: Request) {
     return Response.json({ confirmationUrl: created.confirmationUrl });
   } catch (error) {
     await db.update(payments).set({ status: "failed", updatedAt: new Date() }).where(eq(payments.id, payment.id));
-    return problem(503, "Платежный сервис недоступен", error instanceof Error ? error.message : undefined);
+    console.error("payment_provider_failed", { paymentId: payment.id, error: safeErrorForLog(error) });
+    return problem(503, "Платежный сервис временно недоступен");
   }
 }

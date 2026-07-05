@@ -2,18 +2,27 @@ import { bookings, customers, db, reviews } from "@judilen/db";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getPublishedReviews } from "@/lib/reviews";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const reviewSchema = z.object({
   name: z.string().min(2).max(80),
   bookingNumber: z.string().min(5).max(40),
   email: z.email().max(254).transform((value) => value.toLowerCase().trim()),
   rating: z.coerce.number().int().min(1).max(5),
-  text: z.string().min(20).max(2000)
+  text: z.string().min(20).max(2000),
+  consent: z.literal("on")
 });
 
 export async function POST(request: Request) {
   const form = Object.fromEntries(await request.formData());
   const parsed = reviewSchema.safeParse(form);
+  const rate = await checkRateLimit(request, {
+    scope: "review.create",
+    limit: 5,
+    windowMs: 60 * 60_000,
+    identifier: parsed.success ? parsed.data.email : null
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   if (!parsed.success) return Response.json({ error: "Некорректные данные", details: parsed.error.flatten() }, { status: 422 });
   const [booking] = await db
     .select({ bookingId: bookings.id, houseId: bookings.houseId, status: bookings.status, checkOut: bookings.checkOut, userId: customers.userId })

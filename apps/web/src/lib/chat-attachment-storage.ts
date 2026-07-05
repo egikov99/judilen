@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { resolve, sep } from "node:path";
 import { detectImageType } from "./uploads";
 import type { IncomingChannelAttachment } from "./communication-adapters";
 
@@ -129,7 +130,8 @@ export async function downloadVkAttachment(channelId: string, attachment: Incomi
 }
 
 export async function readStoredChatAttachment(storagePath: string) {
-  const root = chatAttachmentRoot();
-  if (!storagePath.startsWith(`${root}/`)) throw new Error("Invalid attachment path");
-  return readFile(storagePath);
+  const root = resolve(chatAttachmentRoot());
+  const path = resolve(storagePath);
+  if (!path.startsWith(`${root}${sep}`)) throw new Error("Invalid attachment path");
+  return readFile(path);
 }

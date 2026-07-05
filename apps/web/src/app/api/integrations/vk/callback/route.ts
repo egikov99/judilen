@@ -14,6 +14,8 @@ import {
   vkEventId,
   vkEventTypes
 } from "@/lib/vk-integration";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
+import { readRequestTextLimited, RequestBodyTooLargeError } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 
@@ -78,7 +80,21 @@ async function persistConfiguredConfirmation(
 }
 
 export async function POST(request: Request) {
-  const rawBody = await request.text();
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 1_048_576) return plain("payload too large", 413, "", "");
+  const rate = await checkRateLimit(request, {
+    scope: "webhook.vk-callback",
+    limit: 600,
+    windowMs: 60_000
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
+  let rawBody: string;
+  try {
+    rawBody = await readRequestTextLimited(request, 1_048_576);
+  } catch (error) {
+    if (error instanceof RequestBodyTooLargeError) return plain("payload too large", 413, "", "");
+    throw error;
+  }
   let payload: Record<string, unknown>;
   try {
     payload = JSON.parse(rawBody) as Record<string, unknown>;
@@ -94,10 +110,13 @@ export async function POST(request: Request) {
 
   const configuredGroupId = process.env.VK_GROUP_ID?.trim();
   const configuredConfirmationToken = process.env.VK_CONFIRMATION_TOKEN?.trim();
+  const configuredSecretKey = process.env.VK_SECRET_KEY?.trim();
   if (
     eventType === "confirmation"
     && configuredGroupId === groupId
     && configuredConfirmationToken
+    && configuredSecretKey
+    && secureEquals(text(payload.secret), configuredSecretKey)
   ) {
     void persistConfiguredConfirmation(groupId, safePayload, rawBody).catch((error) => {
       console.error("vk_callback_confirmation_persistence_failed", {
@@ -124,6 +143,9 @@ export async function POST(request: Request) {
 
   const now = new Date();
   if (eventType === "confirmation") {
+    if (!secureEquals(text(payload.secret), decryptVkSecret(integration.secretKey))) {
+      return plain("ok", 200, eventType, groupId);
+    }
     const confirmationToken = decryptVkSecret(integration.confirmationToken);
     if (!confirmationToken) return plain("ok", 200, eventType, groupId);
     try {

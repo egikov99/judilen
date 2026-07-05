@@ -33,13 +33,15 @@ export function classifySmtpError(error: unknown, fallbackStage: SmtpDiagnosticS
   }
   const value = error instanceof Error ? error as ErrorLike : new Error(String(error)) as ErrorLike;
   const rawCode = String(value.code ?? value.errno ?? "SMTP_ERROR").toUpperCase();
-  const technical = [value.message, value.response, value.command && `Command: ${value.command}`, value.syscall && `Syscall: ${value.syscall}`, value.address && `Address: ${value.address}`, value.port && `Port: ${value.port}`]
-    .filter(Boolean).join("\n");
+  const technical = redactSensitiveText(
+    [value.message, value.response, value.command && `Command: ${value.command}`, value.syscall && `Syscall: ${value.syscall}`, value.address && `Address: ${value.address}`, value.port && `Port: ${value.port}`]
+      .filter(Boolean).join("\n")
+  );
   const lower = technical.toLowerCase();
 
   let stage: SmtpDiagnosticStage = fallbackStage;
   let code = rawCode;
-  const message = value.message || "Неизвестная ошибка SMTP";
+  const message = redactSensitiveText(value.message || "Неизвестная ошибка SMTP");
   let description = "SMTP-сервер вернул ошибку.";
   let recommendations = ["Проверьте SMTP host, порт и параметры шифрования.", "Проверьте журнал SMTP-провайдера."];
 
@@ -83,3 +85,4 @@ export function classifySmtpError(error: unknown, fallbackStage: SmtpDiagnosticS
     recommendations
   };
 }
+import { redactSensitiveText } from "./redaction";

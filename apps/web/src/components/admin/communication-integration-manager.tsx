@@ -16,6 +16,7 @@ type ChannelItem = {
   publicConfig: Record<string, string>;
   secretKeys: string[];
   webhookUrl: string | null;
+  verifyToken: string | null;
   lastCheckedAt?: string | null;
   lastMessageAt?: string | null;
   lastError?: string | null;
@@ -170,7 +171,7 @@ export function CommunicationIntegrationManager({ canManage }: { canManage: bool
               {item?.webhookUrl && <div className="field">
                 <label>Webhook / Callback URL</label>
                 <div className="copy-field"><input value={item.webhookUrl} readOnly /><button className="icon-button" type="button" aria-label="Копировать webhook" onClick={() => navigator.clipboard.writeText(item.webhookUrl!)}><Copy size={18} /></button></div>
-                {(provider === "instagram" || provider === "whatsapp") && <small>Verify token: {item.webhookUrl.split("/").at(-1)}</small>}
+                {(provider === "instagram" || provider === "whatsapp") && item.verifyToken && <small>Verify token: {item.verifyToken}</small>}
               </div>}
               {provider === "telegram_group" && <p className="notice">Добавьте бота в группу и отключите Privacy Mode через BotFather, чтобы бот получал все сообщения.</p>}
               <div className="action-row">

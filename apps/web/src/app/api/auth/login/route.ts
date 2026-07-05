@@ -4,9 +4,19 @@ import { db, roles, users } from "@judilen/db";
 import { and, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { loginSchema, problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
+
+const dummyPasswordHash = "$argon2id$v=19$m=19456,t=2,p=1$CV8u3HtBGBBEO7YpMYRbtA$6dQFcxN6M8QgJSoRLcfIKv5UmqGd06t0yMJblk865MA";
 
 export async function POST(request: Request) {
   const parsed = loginSchema.safeParse(await request.json().catch(() => null));
+  const rate = await checkRateLimit(request, {
+    scope: "auth.login",
+    limit: 10,
+    windowMs: 15 * 60_000,
+    identifier: parsed.success ? parsed.data.email : null
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   if (!parsed.success) return problem(422, "Проверьте email и пароль", parsed.error.flatten());
   const [row] = await db
     .select({
@@ -22,7 +32,8 @@ export async function POST(request: Request) {
     .innerJoin(roles, eq(users.roleId, roles.id))
     .where(and(eq(users.email, parsed.data.email), eq(users.isActive, true)))
     .limit(1);
-  if (!row || !(await verify(row.passwordHash, parsed.data.password))) {
+  const passwordMatches = await verify(row?.passwordHash ?? dummyPasswordHash, parsed.data.password);
+  if (!row || !passwordMatches) {
     return problem(401, "Неверный email или пароль");
   }
   const token = await createSessionToken({

@@ -12,8 +12,6 @@ export default async function PaymentSuccessPage({ params }: { params: Promise<{
   const session = await getSession();
   if (!session) notFound();
   const { bookingId } = await params;
-  const conditions = [eq(bookings.id, bookingId)];
-  if (session.role === "client") conditions.push(eq(customers.userId, session.userId));
   const [row] = await db.select({
     publicNumber: bookings.publicNumber,
     totalAmount: bookings.totalAmount,
@@ -22,7 +20,10 @@ export default async function PaymentSuccessPage({ params }: { params: Promise<{
   }).from(bookings)
     .innerJoin(customers, eq(bookings.customerId, customers.id))
     .leftJoin(payments, eq(payments.bookingId, bookings.id))
-    .where(and(...conditions))
+    .where(and(
+      eq(bookings.id, bookingId),
+      eq(customers.userId, session.userId)
+    ))
     .orderBy(desc(payments.createdAt))
     .limit(1);
   if (!row) notFound();

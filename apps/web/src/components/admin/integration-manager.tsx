@@ -52,7 +52,8 @@ const emptyForm = (houseId: string, provider: Provider = "ical") => ({
   syncIntervalMinutes: 60
 });
 
-export function IntegrationManager({ houses, integrations, calendars, logs, conflicts }: {
+export function IntegrationManager({ canManage, houses, integrations, calendars, logs, conflicts }: {
+  canManage: boolean;
   houses: House[];
   integrations: Integration[];
   calendars: Calendar[];
@@ -154,12 +155,12 @@ export function IntegrationManager({ houses, integrations, calendars, logs, conf
             <div><dt>Ошибок</dt><dd>{integration?.errorCount ?? 0}</dd></div>
           </dl>
           <small>Последняя синхронизация: {integration?.lastSyncedAt ? new Date(integration.lastSyncedAt).toLocaleString("ru-RU") : "не запускалась"}</small>
-          <button className="button button-ghost" type="button" onClick={() => configure(provider.id)}>Настроить</button>
+          {canManage && <button className="button button-ghost" type="button" onClick={() => configure(provider.id)}>Настроить</button>}
         </article>;
       })}
     </div>
 
-    <section className="panel" id="calendar-settings">
+    {canManage && <section className="panel" id="calendar-settings">
       <h2>{editing.id ? "Настройка календаря" : "Новое iCal-подключение"}</h2>
       <form className="form-stack" onSubmit={save}>
         <div className="form-grid">
@@ -174,15 +175,15 @@ export function IntegrationManager({ houses, integrations, calendars, logs, conf
         <label><input type="checkbox" checked={editing.isActive} onChange={(event) => setEditing({ ...editing, isActive: event.target.checked })} /> Активно</label>
         <div className="action-row"><button className="button button-primary">Сохранить</button>{editing.id && <button className="button button-ghost" type="button" disabled={busyId === editing.id} onClick={() => sync(editing.id)}>Проверить ссылку</button>}</div>
       </form>
-    </section>
+    </section>}
 
     <section className="panel">
       <h2>Календари домиков</h2>
       {calendars.length ? <div className="calendar-connections">{calendars.map((calendar) => <article className="calendar-connection" key={calendar.id}>
         <div><strong>{calendar.name}</strong><div><span className="badge">{calendar.provider}</span> <span className={`badge ${calendar.isActive ? "" : "badge-warn"}`}>{calendar.isActive ? "Активен" : "Отключён"}</span></div></div>
         <p>{calendar.houseName}<br /><small>Последний успех: {calendar.lastSuccessAt ? new Date(calendar.lastSuccessAt).toLocaleString("ru-RU") : "ещё не было"}</small>{calendar.lastError && <><br /><span className="error-text">{calendar.lastError}</span></>}</p>
-        <div className="field"><label>Export iCal URL CRM</label><div className="copy-field"><input value={calendar.exportUrl} readOnly /><button className="button button-ghost" type="button" onClick={() => navigator.clipboard.writeText(calendar.exportUrl)}>Копировать</button></div></div>
-        <div className="action-row"><button className="button button-primary" type="button" disabled={busyId === calendar.id || !calendar.isActive} onClick={() => sync(calendar.id)}>Синхронизировать сейчас</button><button className="button button-ghost" type="button" onClick={() => edit(calendar)}>Настроить</button><button className="button button-ghost" type="button" onClick={() => toggle(calendar)}>{calendar.isActive ? "Отключить" : "Включить"}</button><button className="button button-ghost" type="button" onClick={() => remove(calendar.id)}>Удалить</button></div>
+        {canManage && <><div className="field"><label>Export iCal URL CRM</label><div className="copy-field"><input value={calendar.exportUrl} readOnly /><button className="button button-ghost" type="button" onClick={() => navigator.clipboard.writeText(calendar.exportUrl)}>Копировать</button></div></div>
+        <div className="action-row"><button className="button button-primary" type="button" disabled={busyId === calendar.id || !calendar.isActive} onClick={() => sync(calendar.id)}>Синхронизировать сейчас</button><button className="button button-ghost" type="button" onClick={() => edit(calendar)}>Настроить</button><button className="button button-ghost" type="button" onClick={() => toggle(calendar)}>{calendar.isActive ? "Отключить" : "Включить"}</button><button className="button button-ghost" type="button" onClick={() => remove(calendar.id)}>Удалить</button></div></>}
       </article>)}</div> : <p className="notice">Внешние календари ещё не подключены.</p>}
     </section>
 
@@ -190,7 +191,7 @@ export function IntegrationManager({ houses, integrations, calendars, logs, conf
       <h2>Конфликты</h2>
       {conflicts.filter((item) => item.status === "open").length ? <div className="form-stack">{conflicts.filter((item) => item.status === "open").map((conflict) => <article className="conflict-row" key={conflict.id}>
         <div><strong>{conflict.houseName}: {conflict.summary}</strong><p>{conflict.startDate} - {conflict.endDate} · {conflict.source} · UID {conflict.externalUid}</p></div>
-        <div className="action-row"><button className="button button-ghost" disabled={busyId === conflict.id} onClick={() => resolve(conflict.id, "keep_crm")}>Оставить CRM</button><button className="button button-secondary" disabled={busyId === conflict.id} onClick={() => resolve(conflict.id, "accept_external")}>Принять внешнее</button></div>
+        {canManage && <div className="action-row"><button className="button button-ghost" disabled={busyId === conflict.id} onClick={() => resolve(conflict.id, "keep_crm")}>Оставить CRM</button><button className="button button-secondary" disabled={busyId === conflict.id} onClick={() => resolve(conflict.id, "accept_external")}>Принять внешнее</button></div>}
       </article>)}</div> : <p className="notice">Открытых конфликтов нет.</p>}
     </section>
 

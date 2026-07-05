@@ -23,7 +23,11 @@ export function LoginForm() {
     setLoading(false);
     if (!response.ok) return setError(payload.title ?? "Не удалось войти");
     const fallback = payload.user.role === "client" ? "/cabinet/trips" : "/admin";
-    router.replace(searchParams.get("next") ?? fallback);
+    const requested = searchParams.get("next");
+    const destination = requested?.startsWith("/") && !requested.startsWith("//")
+      ? requested
+      : fallback;
+    router.replace(destination);
     router.refresh();
   }
   return (

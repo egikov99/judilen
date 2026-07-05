@@ -9,6 +9,7 @@ import { channelConfig, communicationWebhookUrl } from "@/lib/communication-chan
 import { communicationProviders } from "@/lib/communication-types";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { redactSensitiveText } from "@/lib/redaction";
 
 export async function GET() {
   const auth = await requirePermission("integrations.read");
@@ -16,10 +17,12 @@ export async function GET() {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const updateAccess = await requirePermission("integrations.update");
   const canManage = updateAccess.error === null;
+  const chatAccess = await requirePermission("chats.read");
+  const canReadChats = chatAccess.error === null;
 
   const rows = await db.select().from(communicationChannels).orderBy(communicationChannels.provider);
   const group = rows.find((item) => item.provider === "telegram_group");
-  const recentGroupMessages = group
+  const recentGroupMessages = group && canReadChats
     ? await db.select({
         id: chatMessages.id,
         body: chatMessages.body,
@@ -38,7 +41,7 @@ export async function GET() {
   return Response.json({
     items: communicationProviders.map((provider) => {
       const row = rows.find((item) => item.provider === provider);
-      if (!row) return { provider, status: "disconnected", isEnabled: false, publicConfig: {}, secretKeys: [], webhookUrl: null };
+      if (!row) return { provider, status: "disconnected", isEnabled: false, publicConfig: {}, secretKeys: [], webhookUrl: null, verifyToken: null };
       return {
         provider,
         status: row.status,
@@ -46,9 +49,10 @@ export async function GET() {
         publicConfig: row.publicConfig,
         secretKeys: canManage ? Object.keys(channelConfig(row).secretConfig) : [],
         webhookUrl: canManage ? communicationWebhookUrl(row) : null,
+        verifyToken: canManage && (provider === "instagram" || provider === "whatsapp") ? row.id : null,
         lastCheckedAt: row.lastCheckedAt?.toISOString() ?? null,
         lastMessageAt: row.lastMessageAt?.toISOString() ?? null,
-        lastError: row.lastError
+        lastError: row.lastError ? redactSensitiveText(row.lastError) : null
       };
     }),
     recentGroupMessages: recentGroupMessages.map((item) => ({

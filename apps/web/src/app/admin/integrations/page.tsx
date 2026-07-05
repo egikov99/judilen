@@ -5,9 +5,11 @@ import { CommunicationIntegrationManager } from "@/components/admin/communicatio
 import { SmtpSettings } from "@/components/admin/smtp-settings";
 import { buildCalendarExportUrl } from "@/lib/calendar-links";
 import { requirePageAccess } from "@/lib/session";
+import { redactSensitiveText } from "@/lib/redaction";
 
 export default async function IntegrationsPage() {
   const access = await requirePageAccess("external_calendars.read");
+  const canManageCalendars = access.permissions.includes("external_calendars.update");
   const [integrationRows, calendarRows, houseRows, logRows, conflictRows] = await Promise.all([
     db.select().from(integrations).orderBy(desc(integrations.createdAt)),
     db.select({ calendar: externalCalendars, houseName: houses.name }).from(externalCalendars).innerJoin(houses, eq(externalCalendars.houseId, houses.id)).orderBy(desc(externalCalendars.createdAt)),
@@ -31,23 +33,48 @@ export default async function IntegrationsPage() {
     <CommunicationIntegrationManager canManage={access.permissions.includes("integrations.update")} />
     <IntegrationManager
       houses={houseRows}
-      integrations={integrationRows.map((item) => ({ ...item, lastSyncedAt: item.lastSyncedAt?.toISOString() ?? null }))}
+      canManage={canManageCalendars}
+      integrations={integrationRows.map((item) => ({
+        id: item.id,
+        kind: item.kind,
+        name: item.name,
+        isEnabled: item.isEnabled,
+        lastSyncedAt: item.lastSyncedAt?.toISOString() ?? null,
+        importedCount: item.importedCount,
+        errorCount: item.errorCount
+      }))}
       calendars={calendarRows.map(({ calendar, houseName }) => ({
-        ...calendar,
+        id: calendar.id,
+        integrationId: calendar.integrationId,
+        houseId: calendar.houseId,
         houseName,
-        exportUrl: buildCalendarExportUrl(origin, calendar.houseId, calendar.exportToken),
+        provider: calendar.provider,
+        name: calendar.name,
+        importUrl: canManageCalendars ? calendar.importUrl : null,
+        exportUrl: canManageCalendars ? buildCalendarExportUrl(origin, calendar.houseId, calendar.exportToken) : "",
+        isActive: calendar.isActive,
+        syncIntervalMinutes: calendar.syncIntervalMinutes,
         lastSyncAt: calendar.lastSyncAt?.toISOString() ?? null,
         lastSuccessAt: calendar.lastSuccessAt?.toISOString() ?? null,
-        createdAt: calendar.createdAt.toISOString(),
-        updatedAt: calendar.updatedAt.toISOString()
+        lastError: calendar.lastError ? redactSensitiveText(calendar.lastError) : null
       }))}
-      logs={logRows.map((item) => ({ ...item, createdAt: item.createdAt.toISOString() }))}
+      logs={logRows.map((item) => ({
+        id: item.id,
+        integrationId: item.integrationId,
+        level: item.level,
+        message: redactSensitiveText(item.message),
+        context: item.context,
+        createdAt: item.createdAt.toISOString()
+      }))}
       conflicts={conflictRows.map(({ conflict, ...relations }) => ({
-        ...conflict,
+        id: conflict.id,
         ...relations,
-        resolvedAt: conflict.resolvedAt?.toISOString() ?? null,
-        createdAt: conflict.createdAt.toISOString(),
-        updatedAt: conflict.updatedAt.toISOString()
+        source: conflict.source,
+        externalUid: conflict.externalUid,
+        startDate: conflict.startDate,
+        endDate: conflict.endDate,
+        summary: conflict.summary,
+        status: conflict.status
       }))}
     />
   </main>;

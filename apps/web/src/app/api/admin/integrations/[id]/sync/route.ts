@@ -2,6 +2,7 @@ import { writeAudit } from "@/lib/audit";
 import { syncIcalIntegration } from "@/lib/integration-sync";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { safeErrorForLog } from "@/lib/redaction";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requirePermission("external_calendars.sync");
@@ -13,7 +14,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await writeAudit({ session: auth.session, request, action: "integration.sync", entityType: "integration", entityId: id, after: result });
     return Response.json(result);
   } catch (error) {
-    console.error("integration_sync_failed", { id, error });
-    return problem(502, "Синхронизация не выполнена", error instanceof Error ? error.message : undefined);
+    console.error("integration_sync_failed", { id, error: safeErrorForLog(error) });
+    return problem(502, "Синхронизация не выполнена");
   }
 }

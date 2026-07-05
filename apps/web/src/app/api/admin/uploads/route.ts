@@ -5,6 +5,7 @@ import { writeAudit } from "@/lib/audit";
 import { requireAllPermissions, requirePermission } from "@/lib/session";
 import { removeUploadedFile, saveImageFile } from "@/lib/uploads";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,13 @@ export async function POST(request: Request) {
   let auth = await requirePermission("uploads.create");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const rate = await checkRateLimit(request, {
+    scope: "admin.upload",
+    limit: 60,
+    windowMs: 60 * 60_000,
+    identifier: auth.session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const form = await request.formData();
   const scope = String(form.get("scope") ?? "houses");
   const file = form.get("file");
@@ -24,7 +32,7 @@ export async function POST(request: Request) {
     if (scope !== "content") return problem(422, "Неизвестная область загрузки");
     const result = await saveImageFile(file, scope);
     if (!result.ok) {
-      console.warn("Image upload rejected", { scope, name: file.name, size: file.size, reason: result.error });
+      console.warn("Image upload rejected", { scope, size: file.size, reason: result.error });
       return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
     }
     return Response.json({ url: result.url }, { status: 201 });
@@ -48,7 +56,7 @@ export async function POST(request: Request) {
 
   const result = await saveImageFile(file, "houses", houseId);
   if (!result.ok) {
-    console.warn("House image upload rejected", { houseId, name: file.name, size: file.size, reason: result.error });
+    console.warn("House image upload rejected", { houseId, size: file.size, reason: result.error });
     return problem(result.error === "size" ? 413 : 415, result.error === "size" ? "Файл превышает допустимый размер" : "Допустимы JPEG, PNG и WebP с корректным расширением");
   }
   let image: typeof houseImages.$inferSelect;

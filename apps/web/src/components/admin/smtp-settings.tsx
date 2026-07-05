@@ -31,7 +31,7 @@ const stageLabels: Record<string, string> = {
 const empty = {
   host: "", port: 587, username: "", password: "", encryption: "starttls",
   fromEmail: "", fromName: "Усадьба «Юдилен»", replyToEmail: "", testRecipient: "",
-  hasPassword: false, status: "not_configured", lastError: ""
+  hasUsername: false, usernamePreview: "", hasPassword: false, status: "not_configured", lastError: ""
 };
 
 function normalizeResponse(response: Response, body: Record<string, unknown>): DiagnosticResult {
@@ -125,7 +125,7 @@ export function SmtpSettings() {
     <div className="settings-heading"><div><h2>Почта / SMTP</h2><p>Настройки исходящих писем клиентам и администраторам.</p></div><span className={`badge ${form.status === "connected" ? "" : "badge-warn"}`}>{form.status === "connected" ? "Подключено" : form.status === "error" ? "Ошибка" : "Не проверено"}</span></div>
     <form className="form-stack" onSubmit={save}>
       <div className="form-grid"><div className="field"><label>SMTP host</label><input value={form.host} onChange={(e) => setForm({ ...form, host: e.target.value })} required /></div><div className="field"><label>SMTP port</label><input type="number" min="1" max="65535" value={form.port} onChange={(e) => setForm({ ...form, port: Number(e.target.value) })} required /></div></div>
-      <div className="form-grid"><div className="field"><label>SMTP username</label><input autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></div><div className="field"><label>SMTP password</label><input type="password" autoComplete="new-password" placeholder={form.hasPassword ? "Сохранён — оставьте пустым без изменений" : ""} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div></div>
+      <div className="form-grid"><div className="field"><label>SMTP username</label><input autoComplete="off" placeholder={form.hasUsername ? `${form.usernamePreview} — оставьте пустым без изменений` : ""} value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></div><div className="field"><label>SMTP password</label><input type="password" autoComplete="new-password" placeholder={form.hasPassword ? "Сохранён — оставьте пустым без изменений" : ""} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div></div>
       <div className="field"><label>Шифрование</label><select value={form.encryption} onChange={(e) => setForm({ ...form, encryption: e.target.value })}><option value="none">none</option><option value="ssl">SSL</option><option value="starttls">TLS / STARTTLS</option></select></div>
       <div className="form-grid"><div className="field"><label>From email</label><input type="email" value={form.fromEmail} onChange={(e) => setForm({ ...form, fromEmail: e.target.value })} required /></div><div className="field"><label>From name</label><input value={form.fromName} onChange={(e) => setForm({ ...form, fromName: e.target.value })} required /></div></div>
       <div className="field"><label>Reply-to email</label><input type="email" value={form.replyToEmail} onChange={(e) => setForm({ ...form, replyToEmail: e.target.value })} /></div>

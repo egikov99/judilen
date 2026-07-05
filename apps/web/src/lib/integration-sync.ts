@@ -1,5 +1,5 @@
 import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import { request as httpsRequest } from "node:https";
 import {
   bookingExternalRefs,
   bookings,
@@ -14,37 +14,65 @@ import { IcalAdapter, reconcileExternalEvents, type ExternalBooking } from "@jud
 import { and, desc, eq, gt, inArray, lt, ne, sql } from "drizzle-orm";
 import { blockingBookingStatuses } from "./booking-availability";
 import { createAdminNotification } from "./admin-notifications";
-
-function isPrivateAddress(address: string) {
-  const normalized = address.replace(/^::ffff:/, "");
-  if (isIP(normalized) === 4) {
-    const [a, b] = normalized.split(".").map(Number);
-    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
-  }
-  const lower = normalized.toLowerCase();
-  return lower === "::1" || lower === "::" || lower.startsWith("fc") || lower.startsWith("fd") || /^fe[89ab]/.test(lower);
-}
+import { isPrivateOrReservedIp } from "./network-security";
 
 export async function assertSafeCalendarUrl(value: unknown) {
   if (typeof value !== "string") throw new Error("Import iCal URL is required");
   const url = new URL(value);
   if (url.protocol !== "https:" || url.username || url.password) throw new Error("Only credential-free HTTPS URLs are allowed");
-  const addresses = await lookup(url.hostname, { all: true });
-  if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) throw new Error("Private network destinations are not allowed");
-  return url;
+  const host = url.hostname.toLowerCase();
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") || !host.includes(".")) {
+    throw new Error("Private network destinations are not allowed");
+  }
+  const addresses = await lookup(host, { all: true, verbatim: true });
+  if (!addresses.length || addresses.some(({ address }) => isPrivateOrReservedIp(address))) throw new Error("Private network destinations are not allowed");
+  return { url, address: addresses[0].address };
 }
 
 async function fetchCalendar(importUrl: string) {
-  const url = await assertSafeCalendarUrl(importUrl);
-  const response = await fetch(url, {
-    headers: { Accept: "text/calendar" },
-    redirect: "error",
-    signal: AbortSignal.timeout(15_000),
-    cache: "no-store"
+  const { url, address } = await assertSafeCalendarUrl(importUrl);
+  const body = await new Promise<string>((resolve, reject) => {
+    const request = httpsRequest({
+      protocol: "https:",
+      hostname: address,
+      port: url.port || 443,
+      path: `${url.pathname}${url.search}`,
+      method: "GET",
+      servername: url.hostname,
+      headers: {
+        Accept: "text/calendar",
+        Host: url.host
+      },
+      timeout: 15_000
+    }, (response) => {
+      if (!response.statusCode || response.statusCode < 200 || response.statusCode >= 300) {
+        response.resume();
+        reject(new Error(`Calendar returned HTTP ${response.statusCode ?? 0}`));
+        return;
+      }
+      const advertisedLength = Number(response.headers["content-length"] ?? 0);
+      if (advertisedLength > 5_000_000) {
+        response.destroy();
+        reject(new Error("Calendar exceeds 5 MB"));
+        return;
+      }
+      const chunks: Buffer[] = [];
+      let size = 0;
+      response.on("data", (chunk: Buffer) => {
+        size += chunk.length;
+        if (size > 5_000_000) {
+          response.destroy(new Error("Calendar exceeds 5 MB"));
+          return;
+        }
+        chunks.push(chunk);
+      });
+      response.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+      response.on("error", reject);
+    });
+    request.on("timeout", () => request.destroy(new Error("Calendar request timed out")));
+    request.on("error", reject);
+    request.end();
   });
-  if (!response.ok) throw new Error(`Calendar returned HTTP ${response.status}`);
-  const body = await response.text();
-  if (body.length > 5_000_000) throw new Error("Calendar exceeds 5 MB");
   return { body, events: await new IcalAdapter().importCalendar(body) };
 }
 

@@ -8,6 +8,7 @@ import { communicationProviderDefinitions, isCommunicationProvider } from "@/lib
 import { encryptCredentials, decryptCredentials } from "@/lib/credential-cipher";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { writeAudit } from "@/lib/audit";
 
 const valuesSchema = z.record(z.string(), z.string().trim().max(4000)).default({});
 const channelSchema = z.object({
@@ -58,6 +59,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ prov
         ...values,
         webhookSecret: randomBytes(24).toString("base64url")
       }).returning();
+  await writeAudit({
+    session: auth.session,
+    request,
+    action: "communication_channel.update",
+    entityType: "communication_channel",
+    entityId: channel.id,
+    after: {
+      provider,
+      publicConfig,
+      changedSecretKeys: Object.keys(parsed.data.secretConfig).filter((key) => parsed.data.secretConfig[key])
+    }
+  });
   return Response.json({ item: {
     provider,
     status: channel.status,
@@ -67,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ prov
   } });
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ provider: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   const auth = await requirePermission("integrations.update");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
@@ -87,5 +100,14 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     status: "disconnected",
     updatedAt: new Date()
   }).where(eq(communicationChannels.id, channel.id));
+  await writeAudit({
+    session: auth.session,
+    request,
+    action: "communication_channel.disable",
+    entityType: "communication_channel",
+    entityId: channel.id,
+    before: { provider, isEnabled: channel.isEnabled, status: channel.status },
+    after: { provider, isEnabled: false, status: "disconnected" }
+  });
   return Response.json({ ok: true });
 }

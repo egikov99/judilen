@@ -1,5 +1,5 @@
 import { hash } from "@node-rs/argon2";
-import { db, users } from "@judilen/db";
+import { db, roles, users } from "@judilen/db";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
@@ -20,8 +20,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!parsed.success) return problem(422, "Некорректный пароль", parsed.error.flatten());
   const { id } = await params;
   if (id === auth.session.userId) return problem(409, "Для собственного аккаунта используйте смену пароля в профиле");
-  const [before] = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, id)).limit(1);
+  const [before] = await db.select({
+    id: users.id,
+    email: users.email,
+    role: roles.name
+  }).from(users).innerJoin(roles, eq(users.roleId, roles.id)).where(eq(users.id, id)).limit(1);
   if (!before) return problem(404, "Пользователь не найден");
+  if (before.role === "super_admin" && auth.session.role !== "super_admin") {
+    return problem(403, "Только Super Admin может сбросить пароль Super Admin");
+  }
   const password = parsed.data.password || temporaryPassword();
   await db.update(users).set({
     passwordHash: await hash(password),
@@ -29,5 +36,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     updatedAt: new Date()
   }).where(eq(users.id, id));
   await writeAudit({ session: auth.session, request, action: "user.password_reset", entityType: "user", entityId: id, before, after: { passwordReset: true, sessionsInvalidated: true } });
-  return Response.json({ temporaryPassword: password });
+  return Response.json({ temporaryPassword: parsed.data.password ? null : password, sessionsInvalidated: true });
 }

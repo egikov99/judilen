@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { weekdays } from "@/lib/weekday-prices";
+import { normalizeImageUrl } from "@/lib/image-urls";
 
 export const loginSchema = z.object({
   email: z.email().max(254).transform((value) => value.toLowerCase().trim()),
@@ -42,7 +43,7 @@ export const weekdayPricesSchema = z.object(Object.fromEntries(
 
 export const entityImageInputSchema = z.object({
   id: z.uuid().optional(),
-  url: z.string().trim().min(1).max(1000),
+  url: z.string().trim().min(1).max(1000).refine((value) => normalizeImageUrl(value) !== null, "Недопустимый публичный URL изображения"),
   alt: z.string().trim().min(2).max(250),
   sortOrder: z.coerce.number().int().min(0).optional()
 });
@@ -97,7 +98,7 @@ export const adminReviewSchema = z.object({
 });
 
 export const houseImageSchema = z.object({
-  url: z.string().trim().min(1).max(1000).optional(),
+  url: z.string().trim().min(1).max(1000).refine((value) => normalizeImageUrl(value) !== null, "Недопустимый публичный URL изображения").optional(),
   alt: z.string().trim().min(2).max(250).optional(),
   caption: z.string().trim().max(500).nullable().optional(),
   position: z.coerce.number().int().min(0).max(100_000).optional(),

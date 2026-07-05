@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 
 export function RegisterForm() {
@@ -26,8 +27,7 @@ export function RegisterForm() {
     <div className="field"><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" required /></div>
     <div className="field"><label htmlFor="phone">Телефон</label><input id="phone" name="phone" type="tel" autoComplete="tel" required /></div>
     <div className="field"><label htmlFor="password">Пароль</label><input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required /><small>Минимум 10 символов, буквы и цифры.</small></div>
-    <label style={{ display: "flex", gap: 8, fontSize: 12 }}><input name="consent" type="checkbox" required /> Согласен с политикой конфиденциальности</label>
+    <label style={{ display: "flex", gap: 8, fontSize: 12 }}><input name="consent" type="checkbox" required /> <span>Согласен с <Link href="/privacy" target="_blank">политикой конфиденциальности</Link></span></label>
     <button className="button button-primary" disabled={status === "loading"}>{status === "loading" ? "Создаем…" : "Создать аккаунт"}</button>
   </form>;
 }
-

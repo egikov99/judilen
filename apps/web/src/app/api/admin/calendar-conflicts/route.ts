@@ -15,5 +15,17 @@ export async function GET() {
     .innerJoin(houses, eq(calendarConflicts.houseId, houses.id))
     .innerJoin(externalCalendars, eq(calendarConflicts.externalCalendarId, externalCalendars.id))
     .orderBy(desc(calendarConflicts.createdAt));
-  return Response.json({ items: items.map(({ conflict, ...relations }) => ({ ...conflict, ...relations })) });
+  return Response.json({ items: items.map(({ conflict, ...relations }) => ({
+    id: conflict.id,
+    ...relations,
+    source: conflict.source,
+    externalUid: conflict.externalUid,
+    startDate: conflict.startDate,
+    endDate: conflict.endDate,
+    summary: conflict.summary,
+    status: conflict.status,
+    resolvedAt: conflict.resolvedAt,
+    resolutionNote: conflict.resolutionNote,
+    createdAt: conflict.createdAt
+  })) });
 }

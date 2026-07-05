@@ -127,6 +127,13 @@
       "when": 1784073600000,
       "tag": "0017_website_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1784160000000,
+      "tag": "0018_security_hardening",
+      "breakpoints": true
     }
   ]
 }

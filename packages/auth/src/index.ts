@@ -65,7 +65,9 @@ export interface Session {
   sessionVersion: number;
 }
 
-export const SESSION_COOKIE = "judilen_session";
+export const SESSION_COOKIE = process.env.NODE_ENV === "production"
+  ? "__Host-judilen_session"
+  : "judilen_session";
 
 const rolePermissions: Record<Role, readonly Permission[]> = {
   client: [],

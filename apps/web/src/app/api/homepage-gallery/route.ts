@@ -21,7 +21,13 @@ export async function GET(request: Request) {
         console.error("Public homepage gallery image has an invalid URL", { imageId: row.id, imageUrl: row.imageUrl });
         return [];
       }
-      return [{ ...row, imageUrl }];
+      return [{
+        id: row.id,
+        sectionKey: row.sectionKey,
+        imageUrl,
+        alt: row.alt,
+        sortOrder: row.sortOrder
+      }];
     })
   });
 }

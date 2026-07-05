@@ -4,10 +4,9 @@ export default function robots(): MetadataRoute.Robots {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: ["/admin/", "/cabinet/", "/api/", "/oplata/"] }
+      { userAgent: "*", allow: "/", disallow: ["/admin", "/account", "/cabinet", "/api", "/oplata"] }
     ],
     sitemap: `${base}/sitemap.xml`,
     host: base
   };
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 type WebsiteMessage = {
@@ -58,6 +59,7 @@ export function WebsiteChat({
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [body, setBody] = useState("");
+  const [consent, setConsent] = useState(false);
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -127,7 +129,7 @@ export function WebsiteChat({
           "Content-Type": "application/json",
           "X-Chat-Visitor": visitorRef.current
         },
-        body: JSON.stringify({ name: name || undefined, contact: contact || undefined, message: body, website: "" })
+        body: JSON.stringify({ name: name || undefined, contact: contact || undefined, message: body, consent, website: "" })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -167,6 +169,7 @@ export function WebsiteChat({
         <textarea id={`website-chat-message-${variant}`} value={body} onChange={(event) => setBody(event.target.value)} maxLength={4000} rows={2} placeholder="Напишите сообщение…" required />
         <button className="button button-primary" type="submit" disabled={sending || !body.trim()} aria-label="Отправить сообщение"><Send size={19} /></button>
       </div>
+      {!authenticated && <label className="website-chat-consent"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required /> <span>Согласен с <Link href="/privacy" target="_blank">политикой конфиденциальности</Link></span></label>}
       {sending && <small className="website-chat-sending">Отправляется…</small>}
       {error && <p className="notice error website-chat-error" role="alert">{error}</p>}
     </form>

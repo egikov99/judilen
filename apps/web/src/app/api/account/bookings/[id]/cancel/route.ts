@@ -4,12 +4,20 @@ import { z } from "zod";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const schema = z.object({ reason: z.string().trim().min(3).max(1000) });
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) return problem(401, "Требуется авторизация");
+  const rate = await checkRateLimit(request, {
+    scope: "account.booking-cancel",
+    limit: 10,
+    windowMs: 24 * 60 * 60_000,
+    identifier: session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Укажите причину отмены");
   const { id } = await params;

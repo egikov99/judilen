@@ -5,6 +5,7 @@ export async function register() {
     const configuration = await ensureVapidConfiguration();
     console.info("vapid_configuration_ready", { source: configuration.source });
   } catch (error) {
-    console.error("vapid_configuration_initialization_failed", error);
+    const { safeErrorForLog } = await import("./lib/redaction");
+    console.error("vapid_configuration_initialization_failed", safeErrorForLog(error));
   }
 }

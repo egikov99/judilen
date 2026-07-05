@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { requirePermission } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
 
 const subscriptionSchema = z.object({
   endpoint: z.url().max(4000),
@@ -16,6 +17,13 @@ export async function POST(request: Request) {
   const auth = await requirePermission("dashboard.read");
   if (auth.error === "unauthorized") return problem(401, "Требуется авторизация");
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
+  const rate = await checkRateLimit(request, {
+    scope: "push.subscription",
+    limit: 20,
+    windowMs: 60 * 60_000,
+    identifier: auth.session.userId
+  });
+  if (!rate.allowed) return rateLimitProblem(rate.retryAfter);
   const parsed = subscriptionSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректная push-подписка", parsed.error.flatten());
   const [subscription] = await db.insert(pushSubscriptions).values({
@@ -40,7 +48,7 @@ export async function POST(request: Request) {
     target: notificationPreferences.userId,
     set: { pushEnabled: true, updatedAt: new Date() }
   });
-  return Response.json({ subscription }, { status: 201 });
+  return Response.json({ subscription: { id: subscription.id, active: true } }, { status: 201 });
 }
 
 export async function DELETE(request: Request) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { formatCurrency } from "@/components/currency";
 import { formatPrice, type House } from "@/lib/catalog";
 import { priceUnitLabels, type PublicService } from "@/lib/service-types";
@@ -101,7 +102,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
         </div>}
         {!!stay.breakdown.length && <details className="booking-price-breakdown"><summary>{stay.breakdown.length} ноч. · проживание {formatCurrency(stay.total)}</summary>{stay.breakdown.map((night) => <div className="summary-row" key={night.date}><span>{night.date} · {weekdayLabels[night.weekday].toLowerCase()}</span><strong>{formatCurrency(night.price)}</strong></div>)}</details>}
         <div className="summary-row"><span>Итого</span><strong>{total > 0 ? formatCurrency(total) : "Выберите даты"}</strong></div>
-        <label style={{ display: "flex", gap: 9, marginTop: 16, fontSize: 12 }}><input name="consent" type="checkbox" required /> Согласен с политикой конфиденциальности</label>
+        <label style={{ display: "flex", gap: 9, marginTop: 16, fontSize: 12 }}><input name="consent" type="checkbox" required /> <span>Согласен с <Link href="/privacy" target="_blank">политикой конфиденциальности</Link></span></label>
         <button className="button button-primary" disabled={state === "loading"}>{state === "loading" ? "Отправляем…" : "Отправить заявку"}</button>
       </form>
       {message && <p className={`notice ${state === "error" ? "error" : ""}`} role="status">{message}</p>}

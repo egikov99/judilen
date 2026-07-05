@@ -16,8 +16,6 @@ export default async function PaymentPage({ params }: { params: Promise<{ bookin
   if (!session) notFound();
   const { bookingId } = await params;
   if (!onlinePaymentsEnabled()) redirect(`/oplata?bookingId=${encodeURIComponent(bookingId)}`);
-  const conditions = [eq(bookings.id, bookingId)];
-  if (session.role === "client") conditions.push(eq(customers.userId, session.userId));
   const [booking] = await db.select({
     id: bookings.id,
     publicNumber: bookings.publicNumber,
@@ -32,7 +30,10 @@ export default async function PaymentPage({ params }: { params: Promise<{ bookin
   }).from(bookings)
     .innerJoin(customers, eq(bookings.customerId, customers.id))
     .innerJoin(houses, eq(bookings.houseId, houses.id))
-    .where(and(...conditions))
+    .where(and(
+      eq(bookings.id, bookingId),
+      eq(customers.userId, session.userId)
+    ))
     .limit(1);
   if (!booking) notFound();
   const due = Math.max(0, Number(booking.totalAmount) - Number(booking.paidAmount));

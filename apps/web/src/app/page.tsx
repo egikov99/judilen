@@ -10,6 +10,7 @@ import { DEFAULT_IMAGE_URL } from "@/lib/image-urls";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
 import { getPublicServices, priceUnitLabels } from "@/lib/services";
+import { safeJsonForHtml } from "@/lib/safe-json";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,7 @@ export default async function HomePage() {
   };
   return (
     <PublicShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonForHtml(organizationSchema) }} />
       <section className="hero">
         <div className="hero-content">
           <div className="kicker">Озеро. Природа. Семейный отдых.</div>

@@ -18,11 +18,11 @@ Production-oriented веб-платформа для аренды домиков
 
 ```bash
 cp .env.example .env
-# Задайте AUTH_SECRET длиной не менее 32 символов
+# Задайте POSTGRES_PASSWORD, AUTH_SECRET, NOTIFICATION_CRON_SECRET и сильный SEED_ADMIN_PASSWORD
 docker compose up -d db
 pnpm install
 pnpm db:migrate
-SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD='ChangeMe123!' pnpm db:seed
+SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD='replace-with-a-unique-strong-password-1' pnpm db:seed
 pnpm dev
 ```
 

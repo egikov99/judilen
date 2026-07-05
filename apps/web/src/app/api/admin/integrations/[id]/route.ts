@@ -22,7 +22,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!before) return problem(404, "Интеграция не найдена");
   const [after] = await db.update(integrations).set({ ...parsed.data, updatedAt: new Date() }).where(eq(integrations.id, id)).returning();
   await writeAudit({ session: auth.session, request, action: "integration.update", entityType: "integration", entityId: id, before, after });
-  return Response.json({ item: after });
+  return Response.json({ item: {
+    id: after.id,
+    kind: after.kind,
+    name: after.name,
+    isEnabled: after.isEnabled
+  } });
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
