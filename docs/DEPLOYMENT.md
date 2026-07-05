@@ -20,9 +20,23 @@ Compose запускает `migrate` как one-shot service, применяет
 5. Защитите ветки `dev` и `main`.
 
 Portainer не должен создавать или монтировать `.env`: Compose явно передает
-переменные Stack в контейнер `app`. Как минимум настройте `POSTGRES_PASSWORD`,
-`AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_SITE_URL`, `SEED_ADMIN_EMAIL` и
-`SEED_ADMIN_PASSWORD` в Environment variables Stack.
+переменные Stack в контейнеры. До первого deploy добавьте в **Environment
+variables** конкретного Stack:
+
+| Переменная | Требование |
+|---|---|
+| `POSTGRES_PASSWORD` | Уникальный URL-safe пароль PostgreSQL, например результат `openssl rand -hex 32` |
+| `AUTH_SECRET` | Случайный секрет длиной не менее 32 символов |
+| `NOTIFICATION_CRON_SECRET` | Отдельный случайный секрет для фонового worker |
+| `SEED_ADMIN_EMAIL` | Email первого администратора |
+| `SEED_ADMIN_PASSWORD` | Не менее 12 символов, обязательно буквы и цифры |
+| `SEED_ADMIN_RESET_PASSWORD` | `false` при обычном deploy |
+| `APP_URL` | Публичный HTTPS URL приложения |
+| `NEXT_PUBLIC_SITE_URL` | Тот же публичный HTTPS URL |
+
+Значения из GitHub Actions не передаются webhook-запросом в Portainer. Они
+должны храниться в настройках Stack. Не добавляйте production-секреты в
+`docker-compose.yml` и не используйте значения из `.env.example`.
 
 One-shot service `migrate` последовательно применяет миграции и запускает
 идемпотентный seed. При первом deploy он создаёт администратора из

@@ -61,10 +61,13 @@ docs/                     архитектура, API и деплой
 |---|---|
 | `APP_URL` / `NEXT_PUBLIC_SITE_URL` | Канонический URL приложения |
 | `DATABASE_URL` | PostgreSQL connection string |
+| `POSTGRES_PASSWORD` | Обязательный пароль PostgreSQL для Docker Compose / Portainer |
 | `AUTH_SECRET` | Ключ подписи сессии, минимум 32 символа |
+| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Данные первого администратора; пароль — минимум 12 символов, буквы и цифры |
 | `SESSION_TTL_SECONDS` | Срок жизни сессии |
 | `UPLOAD_DIR` / `MAX_UPLOAD_BYTES` | Persistent-каталог загрузок (в Docker `/app/storage/uploads`) и лимит размера |
 | `ICAL_SYNC_CRON_SECRET` | Авторизация плановой iCal-синхронизации |
+| `NOTIFICATION_CRON_SECRET` | Обязательная авторизация worker уведомлений |
 | `PAYMENT_PROVIDER` | Выбранный платежный адаптер |
 | `PAYMENT_WEBHOOK_SECRET` | Проверка webhook платежного провайдера |
 | `SMTP_*` | Транзакционные письма |
