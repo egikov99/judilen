@@ -18,7 +18,7 @@ Production-oriented веб-платформа для аренды домиков
 
 ```bash
 cp .env.example .env
-# Задайте POSTGRES_PASSWORD, AUTH_SECRET, NOTIFICATION_CRON_SECRET и сильный SEED_ADMIN_PASSWORD
+# При Docker-запуске runtime-секреты автоматически создаются в persistent volume
 docker compose up -d db
 pnpm install
 pnpm db:migrate
@@ -61,13 +61,13 @@ docs/                     архитектура, API и деплой
 |---|---|
 | `APP_URL` / `NEXT_PUBLIC_SITE_URL` | Канонический URL приложения |
 | `DATABASE_URL` | PostgreSQL connection string |
-| `POSTGRES_PASSWORD` | Обязательный пароль PostgreSQL для Docker Compose / Portainer |
+| `POSTGRES_PASSWORD` | Необязательное ручное значение; Docker автоматически создаёт persistent-пароль |
 | `AUTH_SECRET` | Ключ подписи сессии, минимум 32 символа |
-| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Данные первого администратора; пароль — минимум 12 символов, буквы и цифры |
+| `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Данные первого администратора; в Docker пароль может генерироваться автоматически |
 | `SESSION_TTL_SECONDS` | Срок жизни сессии |
 | `UPLOAD_DIR` / `MAX_UPLOAD_BYTES` | Persistent-каталог загрузок (в Docker `/app/storage/uploads`) и лимит размера |
 | `ICAL_SYNC_CRON_SECRET` | Авторизация плановой iCal-синхронизации |
-| `NOTIFICATION_CRON_SECRET` | Обязательная авторизация worker уведомлений |
+| `NOTIFICATION_CRON_SECRET` | Авторизация worker; в Docker генерируется автоматически |
 | `PAYMENT_PROVIDER` | Выбранный платежный адаптер |
 | `PAYMENT_WEBHOOK_SECRET` | Проверка webhook платежного провайдера |
 | `SMTP_*` | Транзакционные письма |

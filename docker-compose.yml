@@ -1,13 +1,31 @@
 services:
+  secret-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: secret-init
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+    volumes:
+      - runtime_secrets:/run/runtime-secrets
+    restart: "no"
+
   db:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: judilen
       POSTGRES_USER: judilen
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_PASSWORD_FILE: /run/runtime-secrets/postgres_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - runtime_secrets:/run/runtime-secrets:ro
+    depends_on:
+      secret-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U judilen -d judilen"]
       interval: 5s
@@ -21,10 +39,11 @@ services:
       target: migrator
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgres://judilen:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/judilen
+      RUNTIME_SECRET_PROFILE: migrator
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@judilen.local}
-      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required}
       SEED_ADMIN_RESET_PASSWORD: ${SEED_ADMIN_RESET_PASSWORD:-false}
+    volumes:
+      - runtime_secrets:/run/runtime-secrets:ro
     depends_on:
       db:
         condition: service_healthy
@@ -40,11 +59,9 @@ services:
         PUBLIC_IMAGE_HOSTS: ${PUBLIC_IMAGE_HOSTS:-}
     restart: unless-stopped
     environment:
-    
       NODE_ENV: production
-      DATABASE_URL: postgres://judilen:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/judilen
+      RUNTIME_SECRET_PROFILE: app
       APP_URL: ${APP_URL:-https://judilen.digitaleasyup.com}
-      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       COMMUNICATION_ENCRYPTION_KEY: ${COMMUNICATION_ENCRYPTION_KEY:-}
       META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v25.0}
       VK_GROUP_ID: ${VK_GROUP_ID:-}
@@ -57,7 +74,6 @@ services:
       PUBLIC_IMAGE_HOSTS: ${PUBLIC_IMAGE_HOSTS:-}
       CHAT_ATTACHMENT_DIR: ${CHAT_ATTACHMENT_DIR:-/app/storage/chat-attachments}
       ICAL_SYNC_CRON_SECRET: ${ICAL_SYNC_CRON_SECRET:-}
-      NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:?NOTIFICATION_CRON_SECRET is required}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-}
@@ -76,6 +92,7 @@ services:
     volumes:
       - uploads:${UPLOAD_DIR:-/app/storage/uploads}
       - chat_attachments:/app/storage/chat-attachments
+      - runtime_secrets:/run/runtime-secrets:ro
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -92,7 +109,9 @@ services:
       target: runner
     restart: unless-stopped
     environment:
-      NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:?NOTIFICATION_CRON_SECRET is required}
+      RUNTIME_SECRET_PROFILE: notification-worker
+    volumes:
+      - runtime_secrets:/run/runtime-secrets:ro
     command:
       - sh
       - -c
@@ -112,6 +131,7 @@ volumes:
   postgres_data:
   uploads:
   chat_attachments:
+  runtime_secrets:
 
 networks:
   proxy:

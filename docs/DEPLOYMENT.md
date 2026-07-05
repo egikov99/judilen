@@ -19,24 +19,35 @@ Compose запускает `migrate` как one-shot service, применяет
 4. В GitHub repository settings добавьте Actions secret `PORTAINER_WEBHOOK_URL`.
 5. Защитите ветки `dev` и `main`.
 
-Portainer не должен создавать или монтировать `.env`: Compose явно передает
-переменные Stack в контейнеры. До первого deploy добавьте в **Environment
-variables** конкретного Stack:
+Portainer не должен создавать или монтировать `.env`. Перед первым запуском
+one-shot сервис `secret-init` автоматически создаёт следующие значения в
+persistent volume `runtime_secrets`:
 
-| Переменная | Требование |
+| Секрет | Назначение |
 |---|---|
-| `POSTGRES_PASSWORD` | Уникальный URL-safe пароль PostgreSQL, например результат `openssl rand -hex 32` |
-| `AUTH_SECRET` | Случайный секрет длиной не менее 32 символов |
-| `NOTIFICATION_CRON_SECRET` | Отдельный случайный секрет для фонового worker |
-| `SEED_ADMIN_EMAIL` | Email первого администратора |
-| `SEED_ADMIN_PASSWORD` | Не менее 12 символов, обязательно буквы и цифры |
-| `SEED_ADMIN_RESET_PASSWORD` | `false` при обычном deploy |
-| `APP_URL` | Публичный HTTPS URL приложения |
-| `NEXT_PUBLIC_SITE_URL` | Тот же публичный HTTPS URL |
+| PostgreSQL password | Подключение `db`, `migrate` и `app` |
+| Auth secret | Подпись пользовательских сессий и шифрование настроек |
+| Notification cron secret | Авторизация фонового worker |
+| Seed admin password | Пароль первого администратора |
 
-Значения из GitHub Actions не передаются webhook-запросом в Portainer. Они
-должны храниться в настройках Stack. Не добавляйте production-секреты в
-`docker-compose.yml` и не используйте значения из `.env.example`.
+Секреты создаются только при отсутствии соответствующего файла и не меняются
+при restart/redeploy. Не удаляйте volume `runtime_secrets`: без сохранённого
+пароля приложение потеряет доступ к существующему PostgreSQL volume.
+
+Сгенерированный пароль администратора выводится один раз в логах контейнера
+`secret-init`. Скопируйте его после первого deploy и смените после входа.
+
+Ручные `POSTGRES_PASSWORD`, `AUTH_SECRET`, `NOTIFICATION_CRON_SECRET` и
+`SEED_ADMIN_PASSWORD` в Environment variables Stack по-прежнему поддерживаются:
+при первом запуске пустого `runtime_secrets` они сохраняются вместо
+автоматически сгенерированных значений. Это также нужно при подключении уже
+существующего PostgreSQL volume — перед первым запуском новой схемы передайте
+его текущий пароль через `POSTGRES_PASSWORD`.
+
+Для обычного Portainer Stack достаточно указать публичные настройки:
+`APP_URL`, `NEXT_PUBLIC_SITE_URL`, `SEED_ADMIN_EMAIL` и
+`SEED_ADMIN_RESET_PASSWORD=false`. Значения из GitHub Actions не передаются
+webhook-запросом в Portainer.
 
 One-shot service `migrate` последовательно применяет миграции и запускает
 идемпотентный seed. При первом deploy он создаёт администратора из
