@@ -48,6 +48,9 @@ jobs:
     env:
       DATABASE_URL: postgresql://judilen:judilen@localhost:5432/judilen_test
       AUTH_SECRET: ci-only-secret-at-least-32-characters-long
+      SEED_ADMIN_EMAIL: admin@judilen.local
+      SEED_ADMIN_PASSWORD: ci-only-admin-password-1
+      SEED_ADMIN_RESET_PASSWORD: "false"
       RUN_DB_INTEGRATION_TESTS: "true"
       APP_URL: http://localhost:3000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
