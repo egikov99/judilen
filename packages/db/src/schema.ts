@@ -166,6 +166,7 @@ export const houses = pgTable(
     description: text("description").notNull(),
     guests: integer("guests").notNull(),
     rooms: integer("rooms").notNull(),
+    badgeText: text("badge_text"),
     amenities: jsonb("amenities").$type<string[]>().notNull().default([]),
     rules: text("rules").notNull().default(""),
     basePrice: numeric("base_price", { precision: 12, scale: 2 }).notNull(),

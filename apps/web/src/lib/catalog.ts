@@ -2,7 +2,7 @@ export interface House {
   id: string;
   slug: string;
   name: string;
-  eyebrow: string;
+  badgeText: string | null;
   description: string;
   longDescription: string;
   guests: number;
@@ -24,7 +24,7 @@ export const houses: House[] = [
     id: "8fc5f68a-330f-4f50-b6e4-dcb260b12301",
     slug: "kedr",
     name: "Люкс «Кедр»",
-    eyebrow: "Флагманский дом",
+    badgeText: null,
     description: "Панорамные окна, личная сауна и тишина хвойного леса.",
     longDescription: "Дом для тех, кто ценит пространство и естественный свет. Внутри — гостиная с камином, полностью оборудованная кухня, две спальни и приватная сауна. На террасе приятно встречать рассветы и слушать лес.",
     guests: 4,
@@ -40,7 +40,7 @@ export const houses: House[] = [
     id: "8fc5f68a-330f-4f50-b6e4-dcb260b12302",
     slug: "sosna",
     name: "Дом «Сосна»",
-    eyebrow: "Для семьи",
+    badgeText: null,
     description: "Светлый семейный дом рядом с озером и прогулочными тропами.",
     longDescription: "Продуманный дом для семейного отдыха: большая общая зона, три спальни, безопасная терраса и все необходимое для отдыха с детьми.",
     guests: 6,
@@ -56,7 +56,7 @@ export const houses: House[] = [
     id: "8fc5f68a-330f-4f50-b6e4-dcb260b12303",
     slug: "bereza",
     name: "Студия «Берёза»",
-    eyebrow: "Для двоих",
+    badgeText: null,
     description: "Камерный дом с видом на лес для спокойных выходных.",
     longDescription: "Минималистичная студия с большой кроватью, небольшой кухней и террасой. Подходит для короткого перерыва от города.",
     guests: 2,

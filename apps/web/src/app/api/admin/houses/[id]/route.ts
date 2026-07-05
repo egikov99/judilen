@@ -32,11 +32,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const [before] = await db.select().from(houses).where(eq(houses.id, id)).limit(1);
   if (!before) return problem(404, "Домик не найден");
-  const { basePrice, weekdayPrices: submittedWeekdayPrices, images: submittedImages, ...data } = parsed.data;
+  const { basePrice, badgeText, weekdayPrices: submittedWeekdayPrices, images: submittedImages, ...data } = parsed.data;
   const weekdayPrices = submittedWeekdayPrices ?? (basePrice === undefined ? null : uniformWeekdayPrices(basePrice));
   const priceRange = weekdayPrices ? weekdayPriceRange(weekdayPrices) : null;
   const values = {
     ...data,
+    ...(badgeText !== undefined ? { badgeText: badgeText?.trim() || null } : {}),
     ...(priceRange ? { basePrice: String(priceRange.minPrice) } : {}),
     updatedAt: new Date()
   };

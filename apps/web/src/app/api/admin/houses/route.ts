@@ -46,11 +46,12 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = houseSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
-  const { weekdayPrices, images = [], ...data } = parsed.data;
+  const { weekdayPrices, images = [], badgeText, ...data } = parsed.data;
   const minimumPrice = Math.min(...weekdays.map((weekday) => weekdayPrices[weekday]));
   const house = await db.transaction(async (tx) => {
     const [created] = await tx.insert(houses).values({
       ...data,
+      badgeText: badgeText?.trim() || null,
       basePrice: String(minimumPrice),
       rules: ""
     }).returning();

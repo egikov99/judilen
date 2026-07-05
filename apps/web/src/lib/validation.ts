@@ -55,6 +55,7 @@ export const houseSchema = z.object({
   description: z.string().trim().min(30).max(20_000),
   guests: z.coerce.number().int().min(1).max(30),
   rooms: z.coerce.number().int().min(1).max(20),
+  badgeText: z.string().trim().max(80).nullable().optional(),
   amenities: z.array(z.string().trim().min(1).max(80)).max(50),
   basePrice: positiveHousePrice.optional(),
   weekdayPrices: weekdayPricesSchema,

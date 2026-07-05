@@ -16,7 +16,7 @@ export function HouseCard({ house }: { house: House }) {
     <article className="house-card">
       <div className="house-image">
         <PublicImage src={house.images[0]} context={`house-card:${house.id}`} alt={`${house.name} в усадьбе «Юдилен»`} fill sizes="(max-width: 650px) 100vw, (max-width: 950px) 50vw, 33vw" />
-        <span className="house-tag">{house.eyebrow}</span>
+        {house.badgeText && <span className="house-tag">{house.badgeText}</span>}
       </div>
       <div className="house-copy">
         <h3>{house.name}</h3>

@@ -16,12 +16,6 @@ function fallbackAllowed() {
   return process.env.ALLOW_STATIC_FALLBACK === "true" || process.env.NODE_ENV === "development";
 }
 
-function eyebrow(guests: number) {
-  if (guests <= 2) return "Для двоих";
-  if (guests >= 6) return "Для семьи";
-  return "Флагманский дом";
-}
-
 async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise<House[]> {
   try {
     const hasOverlappingBooking = availability
@@ -52,7 +46,7 @@ async function loadPublishedHouses(availability?: AvailabilityCriteria): Promise
         id: house.id,
         slug: house.slug,
         name: house.name,
-        eyebrow: eyebrow(house.guests),
+        badgeText: house.badgeText,
         description: house.shortDescription,
         longDescription: house.description,
         guests: house.guests,

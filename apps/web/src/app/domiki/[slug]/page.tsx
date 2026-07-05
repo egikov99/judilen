@@ -39,7 +39,7 @@ export default async function HousePage({ params }: { params: Promise<{ slug: st
   return (
     <PublicShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonForHtml(schema) }} />
-      <section className="page-hero"><div className="container"><div className="breadcrumbs">Главная / Домики / {house.name}</div><span className="eyebrow">{house.eyebrow}</span><h1 className="page-title">{house.name}</h1><p className="page-intro">{house.description}</p></div></section>
+      <section className="page-hero"><div className="container"><div className="breadcrumbs">Главная / Домики / {house.name}</div>{house.badgeText && <span className="eyebrow">{house.badgeText}</span>}<h1 className="page-title">{house.name}</h1><p className="page-intro">{house.description}</p></div></section>
       <section className="section" style={{ paddingTop: 45 }}><div className="container">
         <HouseGallery houseId={house.id} houseName={house.name} images={house.images} />
         <div className="detail-layout" style={{ marginTop: 60 }}>
