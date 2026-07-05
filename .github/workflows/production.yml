@@ -88,6 +88,9 @@ jobs:
 
       - name: Validate Docker Compose
         run: docker compose config
+        env:
+          POSTGRES_PASSWORD: ci-only-postgres-password-1
+          NOTIFICATION_CRON_SECRET: ci-only-notification-secret-at-least-32-characters
 
       # A successful image build validates the Dockerfile and the final image.
       - name: Build Docker image
