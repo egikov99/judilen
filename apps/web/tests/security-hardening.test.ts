@@ -88,6 +88,9 @@ describe("security hardening", () => {
     expect(config).toContain("Strict-Transport-Security");
     expect(config).toContain("frame-ancestors 'none'");
     expect(login).toContain('!requested.startsWith("//")');
+    expect(login).toContain("new AbortController()");
+    expect(login).toContain("finally");
+    expect(login).toContain("setLoading(false)");
   });
 
   it("uses persistent rate limiting for sensitive endpoints", () => {

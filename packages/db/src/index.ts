@@ -11,7 +11,8 @@ function createClient() {
   if (!url) throw new Error("DATABASE_URL is required");
   return postgres(url, {
     max: process.env.NODE_ENV === "production" ? 10 : 3,
-    prepare: false
+    prepare: false,
+    connect_timeout: 10
   });
 }
 
@@ -19,4 +20,3 @@ export const sqlClient = globalForDb.sqlClient ?? createClient();
 if (process.env.NODE_ENV !== "production") globalForDb.sqlClient = sqlClient;
 export const db = drizzle(sqlClient, { schema });
 export * from "./schema";
-

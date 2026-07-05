@@ -14,21 +14,45 @@ export function LoginForm() {
     setLoading(true);
     setError("");
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const payload = await response.json();
-    setLoading(false);
-    if (!response.ok) return setError(payload.title ?? "Не удалось войти");
-    const fallback = payload.user.role === "client" ? "/cabinet/trips" : "/admin";
-    const requested = searchParams.get("next");
-    const destination = requested?.startsWith("/") && !requested.startsWith("//")
-      ? requested
-      : fallback;
-    router.replace(destination);
-    router.refresh();
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      });
+      const payload = await response.json().catch(() => null) as {
+        title?: string;
+        user?: { role?: string };
+      } | null;
+      if (!response.ok) {
+        setError(payload?.title ?? `Сервер не смог выполнить вход (HTTP ${response.status})`);
+        return;
+      }
+      if (!payload?.user?.role) {
+        setError("Сервер вернул некорректный ответ. Попробуйте ещё раз.");
+        return;
+      }
+      const fallback = payload.user.role === "client" ? "/cabinet/trips" : "/admin";
+      const requested = searchParams.get("next");
+      const destination = requested?.startsWith("/") && !requested.startsWith("//")
+        ? requested
+        : fallback;
+      router.replace(destination);
+      router.refresh();
+    } catch (requestError) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Login request failed", requestError);
+      }
+      setError(controller.signal.aborted
+        ? "Сервер не ответил за 15 секунд. Проверьте состояние приложения и базы данных."
+        : "Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.");
+    } finally {
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
   }
   return (
     <form className="form-stack" onSubmit={submit}>
