@@ -42,7 +42,8 @@ describe("Docker runtime secret initialization", () => {
         POSTGRES_PASSWORD: "must-not-replace-existing-value",
         AUTH_SECRET: "must-not-replace-existing-value",
         NOTIFICATION_CRON_SECRET: "must-not-replace-existing-value",
-        SEED_ADMIN_PASSWORD: "must-not-replace-existing-value-1"
+        SEED_ADMIN_PASSWORD: "must-not-replace-existing-value-1",
+        SEED_ADMIN_RESET_PASSWORD: "false"
       }
     });
 
@@ -50,6 +51,19 @@ describe("Docker runtime secret initialization", () => {
     expect(readSecret(directory, "auth_secret")).toBe(initial.auth);
     expect(readSecret(directory, "notification_cron_secret")).toBe(initial.notifications);
     expect(readSecret(directory, "seed_admin_password")).toBe(initial.admin);
+
+    execFileSync("sh", [initScript], {
+      env: {
+        ...baseEnvironment,
+        SEED_ADMIN_PASSWORD: "new-administrator-password-1",
+        SEED_ADMIN_RESET_PASSWORD: "true"
+      }
+    });
+
+    expect(readSecret(directory, "postgres_password")).toBe(initial.postgres);
+    expect(readSecret(directory, "auth_secret")).toBe(initial.auth);
+    expect(readSecret(directory, "notification_cron_secret")).toBe(initial.notifications);
+    expect(readSecret(directory, "seed_admin_password")).toBe("new-administrator-password-1");
   });
 
   it("does not require Portainer secrets during Compose interpolation", () => {

@@ -9,6 +9,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-}
       NOTIFICATION_CRON_SECRET: ${NOTIFICATION_CRON_SECRET:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_ADMIN_RESET_PASSWORD: ${SEED_ADMIN_RESET_PASSWORD:-false}
     volumes:
       - runtime_secrets:/run/runtime-secrets
     restart: "no"
