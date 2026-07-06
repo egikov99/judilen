@@ -78,7 +78,7 @@ export default async function BookingSuccessPage({ searchParams }: { searchParam
                   Если письмо не появилось в течение нескольких минут, пожалуйста, проверьте папку «Спам».
                 </p>
                 {booking?.email || session?.email ? (
-                  <p className="notice">Отправлено на: <strong>{booking?.email ?? session.email}</strong></p>
+                  <p className="notice">Отправлено на: <strong>{booking?.email ?? session?.email}</strong></p>
                 ) : null}
               </article>
 
