@@ -56,6 +56,11 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
       setMessage(payload.detail ?? payload.title ?? "Не удалось отправить заявку");
       return;
     }
+    // Перенаправляем на страницу успеха с bookingId чтобы избежать повторной отправки при перезагрузке
+    if (payload?.bookingId) {
+      window.location.assign(`/booking/success?bookingId=${payload.bookingId}`);
+      return;
+    }
     setState("success");
     setMessage(`Заявка ${payload.publicNumber} создана. Оплата производится по приезду; мы свяжемся с вами для подтверждения.`);
     event.currentTarget.reset();

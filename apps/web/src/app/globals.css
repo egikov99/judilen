@@ -103,6 +103,21 @@ img { display: block; max-width: 100%; }
 .nav-links a:hover { color: var(--forest-900); }
 .nav-actions { display: flex; align-items: center; gap: 12px; }
 .mobile-nav { display: none; }
+
+/* Booking success page styles */
+.booking-success-section .video-wrap { display: grid; place-items: center; margin: 0 auto 18px; }
+.booking-success-video { width: 100%; max-width: 720px; height: auto; border-radius: 16px; box-shadow: var(--shadow); object-fit: cover; display: block; }
+.timeline-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.timeline-list li { display: flex; gap: 12px; align-items: flex-start; }
+.timeline-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: var(--cream); color: var(--forest-900); font-size: 20px; }
+.timeline .muted { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr !important; }
+  .booking-success-video { max-width: 100%; border-radius: 12px; }
+  .action-row .button { width: 100%; }
+}
+
 .mobile-menu-scrim, .mobile-menu-panel { display: none; }
 
 .button {
