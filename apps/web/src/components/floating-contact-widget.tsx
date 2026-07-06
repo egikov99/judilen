@@ -72,6 +72,20 @@ export function FloatingContactWidget() {
     };
   }, [open, chatOpen]);
 
+  useEffect(() => {
+    const handler = () => {
+      if (website) {
+        setOpen(false);
+        setChatOpen(true);
+      } else {
+        setOpen(true);
+      }
+    };
+
+    window.addEventListener("judilen:open-contact-chat", handler);
+    return () => window.removeEventListener("judilen:open-contact-chat", handler);
+  }, [website]);
+
   if (!channels.length) return null;
   const website = channels.find((channel) => channel.type === "website");
 

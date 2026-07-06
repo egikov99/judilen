@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicShell } from "@/components/public-shell";
+import { ContactChatButton } from "@/components/contact-chat-button";
 import { bookings, customers, db, houses } from "@judilen/db";
 import { eq } from "drizzle-orm";
 import { formatCurrency } from "@/components/currency";
@@ -117,7 +118,7 @@ export default async function BookingSuccessPage({ searchParams }: { searchParam
                 <p>Позвоните нам или напишите через онлайн-чат.</p>
                 <div className="action-row" style={{ marginTop: 12 }}>
                   <a className="button button-ghost" href="tel:+375296733546">Позвонить</a>
-                  <button className="button button-primary" type="button" onClick={() => window?.postMessage?.({ type: "open-chat" }, "*")}>Написать в чат</button>
+                  <ContactChatButton className="button button-primary">Написать в чат</ContactChatButton>
                 </div>
               </div>
 
