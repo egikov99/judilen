@@ -66,6 +66,8 @@ docs/                     архитектура, API и деплой
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Данные первого администратора; в Docker пароль может генерироваться автоматически |
 | `SESSION_TTL_SECONDS` | Срок жизни сессии |
 | `UPLOAD_DIR` / `MAX_UPLOAD_BYTES` | Persistent-каталог загрузок (в Docker `/app/storage/uploads`) и лимит размера |
+| `EXPENSE_RECEIPT_DIR` | Закрытый persistent-каталог чеков; файлы выдаются только авторизованным сотрудникам |
+| `BOOKING_DOCUMENT_DIR` | Закрытый persistent-каталог документов бронирований |
 | `ICAL_SYNC_CRON_SECRET` | Авторизация плановой iCal-синхронизации |
 | `NOTIFICATION_CRON_SECRET` | Авторизация worker; в Docker генерируется автоматически |
 | `PAYMENT_PROVIDER` | Выбранный платежный адаптер |

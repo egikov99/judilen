@@ -8,7 +8,8 @@ import {
   db,
   externalCalendars,
   integrationLogs,
-  integrations
+  integrations,
+  salesChannels
 } from "@judilen/db";
 import { IcalAdapter, reconcileExternalEvents, type ExternalBooking } from "@judilen/integrations";
 import { and, desc, eq, gt, inArray, lt, ne, sql } from "drizzle-orm";
@@ -197,6 +198,8 @@ export async function syncExternalCalendar(calendarId: string) {
       }
 
       const importedBookingId = await db.transaction(async (tx) => {
+        const [salesChannel] = await tx.select({ id: salesChannels.id }).from(salesChannels)
+          .where(eq(salesChannels.slug, calendar.provider)).limit(1);
         const externalEmail = `calendar-${calendar.id}@external.invalid`;
         const [customer] = await tx.insert(customers).values({
           firstName: "Внешнее бронирование",
@@ -217,6 +220,7 @@ export async function syncExternalCalendar(calendarId: string) {
           guests: 1,
           status: "external",
           source: calendar.provider,
+          salesChannelId: salesChannel?.id,
           totalAmount: "0",
           externalId: event.externalId,
           externalSource: calendar.provider,

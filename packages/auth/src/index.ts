@@ -55,6 +55,13 @@ export type Permission =
   | "calendar_conflicts.update"
   | "chats.read"
   | "chats.write"
+  | "sales_channels.manage"
+  | "expense_categories.manage"
+  | "expenses.read"
+  | "expenses.write"
+  | "client_notes.read"
+  | "client_notes.write"
+  | "exports.read"
   | "settings.manage";
 
 export interface Session {
@@ -80,7 +87,9 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "users.reset_password", "integrations.manage", "integrations.read", "integrations.create",
     "integrations.update", "integrations.delete", "external_calendars.read", "external_calendars.create",
     "external_calendars.update", "external_calendars.delete", "external_calendars.sync",
-    "calendar_conflicts.read", "calendar_conflicts.update", "chats.read", "chats.write", "settings.manage"
+    "calendar_conflicts.read", "calendar_conflicts.update", "chats.read", "chats.write",
+    "sales_channels.manage", "expense_categories.manage", "expenses.read", "expenses.write",
+    "client_notes.read", "client_notes.write", "exports.read", "settings.manage"
   ],
   admin: [
     "dashboard.read",
@@ -127,6 +136,13 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "calendar_conflicts.update",
     "chats.read",
     "chats.write",
+    "sales_channels.manage",
+    "expense_categories.manage",
+    "expenses.read",
+    "expenses.write",
+    "client_notes.read",
+    "client_notes.write",
+    "exports.read",
     "settings.manage"
   ],
   content_manager: [
@@ -151,8 +167,8 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "reviews.update",
     "content.write"
   ],
-  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write"],
-  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read"]
+  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write", "expenses.read", "expenses.write", "client_notes.read", "client_notes.write", "exports.read"],
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read", "expenses.read", "client_notes.read", "exports.read"]
 };
 
 export function can(role: Role, permission: Permission) {
@@ -202,6 +218,7 @@ export function adminNavigation(role: Role) {
     { href: "/admin/calendar", label: "Календарь", permission: "calendar.read" },
     { href: "/admin/chats", label: "Чаты", permission: "chats.read" },
     { href: "/admin/customers", label: "Клиенты", permission: "customers.read" },
+    { href: "/admin/expenses", label: "Расходы", permission: "expenses.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
     { href: "/admin/services", label: "Услуги", permission: "services.read" },
     { href: "/admin/reviews", label: "Отзывы", permission: "reviews.read" },

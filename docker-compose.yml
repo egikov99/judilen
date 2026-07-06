@@ -74,6 +74,8 @@ services:
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-10485760}
       PUBLIC_IMAGE_HOSTS: ${PUBLIC_IMAGE_HOSTS:-}
       CHAT_ATTACHMENT_DIR: ${CHAT_ATTACHMENT_DIR:-/app/storage/chat-attachments}
+      EXPENSE_RECEIPT_DIR: ${EXPENSE_RECEIPT_DIR:-/app/storage/expense-receipts}
+      BOOKING_DOCUMENT_DIR: ${BOOKING_DOCUMENT_DIR:-/app/storage/booking-documents}
       ICAL_SYNC_CRON_SECRET: ${ICAL_SYNC_CRON_SECRET:-}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
@@ -93,6 +95,8 @@ services:
     volumes:
       - uploads:${UPLOAD_DIR:-/app/storage/uploads}
       - chat_attachments:/app/storage/chat-attachments
+      - expense_receipts:/app/storage/expense-receipts
+      - booking_documents:/app/storage/booking-documents
       - runtime_secrets:/run/runtime-secrets:ro
     depends_on:
       migrate:
@@ -132,6 +136,8 @@ volumes:
   postgres_data:
   uploads:
   chat_attachments:
+  expense_receipts:
+  booking_documents:
   runtime_secrets:
 
 networks:

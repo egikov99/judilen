@@ -129,6 +129,7 @@ export const bookingStatusSchema = z.enum([
 
 export const bookingUpdateSchema = z.object({
   status: bookingStatusSchema.optional(),
+  salesChannelId: z.uuid().nullable().optional(),
   managerComment: z.string().trim().max(5000).nullable().optional(),
   cancellationReason: z.string().trim().max(1000).nullable().optional(),
   paidAmount: z.coerce.number().nonnegative().optional()

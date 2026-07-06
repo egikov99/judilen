@@ -1,4 +1,4 @@
-import { bookingNightlyPrices, bookingStatusHistory, bookings, customers, db, houses, houseWeekdayPrices } from "@judilen/db";
+import { bookingNightlyPrices, bookingStatusHistory, bookings, customers, db, houses, houseWeekdayPrices, salesChannels } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
@@ -21,6 +21,7 @@ const manualBookingSchema = z.object({
   guests: z.coerce.number().int().min(1).max(30),
   totalAmount: z.coerce.number().nonnegative(),
   status: z.enum(["confirmed", "blocked"]).default("confirmed"),
+  salesChannelId: z.uuid().nullable().optional(),
   managerComment: z.string().trim().max(5000).optional()
 }).refine((value) => value.checkOut > value.checkIn, { message: "Некорректный период" })
   .refine((value) => value.customerId || (value.firstName && value.email && value.phone), {
@@ -49,11 +50,14 @@ export async function GET() {
       customerName: customers.firstName,
       customerLastName: customers.lastName,
       customerEmail: customers.email,
-      houseName: houses.name
+      houseName: houses.name,
+      salesChannelId: bookings.salesChannelId,
+      salesChannelName: salesChannels.name
     })
     .from(bookings)
     .innerJoin(customers, eq(bookings.customerId, customers.id))
     .innerJoin(houses, eq(bookings.houseId, houses.id))
+    .leftJoin(salesChannels, eq(bookings.salesChannelId, salesChannels.id))
     .orderBy(desc(bookings.createdAt))
     .limit(200);
   return Response.json({ items });
@@ -69,6 +73,11 @@ export async function POST(request: Request) {
   if (!house) return problem(404, "Домик не найден");
   if (parsed.data.guests > house.guests) {
     return problem(422, "Количество гостей превышает вместимость домика");
+  }
+  if (parsed.data.salesChannelId) {
+    const [channel] = await db.select({ id: salesChannels.id }).from(salesChannels)
+      .where(eq(salesChannels.id, parsed.data.salesChannelId)).limit(1);
+    if (!channel) return problem(422, "Канал продаж не найден");
   }
   if (await findOverlappingBooking(parsed.data.houseId, parsed.data.checkIn, parsed.data.checkOut)) {
     return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
@@ -110,7 +119,8 @@ export async function POST(request: Request) {
         totalAmount: String(parsed.data.totalAmount),
         status: parsed.data.status,
         source: "crm_manual",
-        managerComment: parsed.data.managerComment
+        managerComment: parsed.data.managerComment,
+        salesChannelId: parsed.data.salesChannelId
       }).returning();
       await tx.insert(bookingNightlyPrices).values(nightlyPrices.map((night) => ({
         bookingId: booking.id,

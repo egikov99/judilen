@@ -141,6 +141,13 @@
       "when": 1784246400000,
       "tag": "0019_house_badge",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1784332800000,
+      "tag": "0020_crm_finance_sales",
+      "breakpoints": true
     }
   ]
 }

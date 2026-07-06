@@ -56,6 +56,13 @@ const permissionRows = [
   ["calendar_conflicts.update", "Разрешение конфликтов календаря"],
   ["chats.read", "Просмотр чатов"],
   ["chats.write", "Ответы в чатах"],
+  ["sales_channels.manage", "Управление каналами продаж"],
+  ["expense_categories.manage", "Управление статьями расходов"],
+  ["expenses.read", "Просмотр расходов"],
+  ["expenses.write", "Изменение расходов"],
+  ["client_notes.read", "Просмотр внутренних заметок клиентов"],
+  ["client_notes.write", "Изменение внутренних заметок клиентов"],
+  ["exports.read", "Экспорт данных CRM"],
   ["settings.manage", "Системные настройки"]
 ] as const;
 
@@ -73,8 +80,8 @@ const grants: Record<keyof typeof roleLabels, string[]> = {
   super_admin: permissionRows.map(([key]) => key),
   admin: permissionRows.map(([key]) => key).filter((key) => !key.startsWith("users.") && !["users.manage", "integrations.manage", "integrations.delete", "external_calendars.delete"].includes(key)),
   content_manager: ["dashboard.read", "houses.read", "houses.write", "houses.create", "houses.update", "house_images.read", "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "services.read", "services.create", "services.update", "service_options.read", "service_options.create", "service_options.update", "reviews.read", "reviews.create", "reviews.update", "content.write"],
-  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write"],
-  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read"]
+  manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write", "expenses.read", "expenses.write", "client_notes.read", "client_notes.write", "exports.read"],
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read", "expenses.read", "client_notes.read", "exports.read"]
 };
 
 for (const [name, label] of Object.entries(roleLabels)) {

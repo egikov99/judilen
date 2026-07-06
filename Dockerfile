@@ -55,7 +55,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 COPY docker/runtime-entrypoint.sh /usr/local/bin/runtime-entrypoint
-RUN mkdir -p /app/storage/uploads /app/storage/chat-attachments /app/apps/web/public/uploads \
+RUN mkdir -p /app/storage/uploads /app/storage/chat-attachments /app/storage/expense-receipts /app/storage/booking-documents /app/apps/web/public/uploads \
   && chown -R nextjs:nodejs /app/storage /app/apps/web/public/uploads \
   && chmod 755 /usr/local/bin/runtime-entrypoint
 USER nextjs

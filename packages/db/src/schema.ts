@@ -156,6 +156,24 @@ export const customers = pgTable(
   (table) => [uniqueIndex("customers_email_unique").on(table.email)]
 );
 
+export const salesChannels = pgTable(
+  "sales_channels",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    color: text("color").notNull().default("#2d5a27"),
+    icon: text("icon").notNull().default("circle"),
+    isActive: boolean("is_active").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("sales_channels_slug_unique").on(table.slug),
+    index("sales_channels_active_order_idx").on(table.isActive, table.sortOrder)
+  ]
+);
+
 export const houses = pgTable(
   "houses",
   {
@@ -291,6 +309,7 @@ export const bookings = pgTable(
     publicNumber: text("public_number").notNull(),
     houseId: uuid("house_id").references(() => houses.id).notNull(),
     customerId: uuid("customer_id").references(() => customers.id).notNull(),
+    salesChannelId: uuid("sales_channel_id").references(() => salesChannels.id, { onDelete: "set null" }),
     checkIn: date("check_in").notNull(),
     checkOut: date("check_out").notNull(),
     guests: integer("guests").notNull(),
@@ -306,7 +325,79 @@ export const bookings = pgTable(
     cancellationReason: text("cancellation_reason"),
     ...timestamps
   },
-  (table) => [uniqueIndex("bookings_public_number_unique").on(table.publicNumber)]
+  (table) => [
+    uniqueIndex("bookings_public_number_unique").on(table.publicNumber),
+    index("bookings_sales_channel_idx").on(table.salesChannelId),
+    index("bookings_house_idx").on(table.houseId),
+    index("bookings_check_in_idx").on(table.checkIn),
+    index("bookings_created_at_idx").on(table.createdAt),
+    index("bookings_payment_status_idx").on(table.paymentStatus)
+  ]
+);
+
+export const expenseCategories = pgTable(
+  "expense_categories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    color: text("color").notNull().default("#9b4a32"),
+    icon: text("icon").notNull().default("receipt"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("expense_categories_name_unique").on(table.name),
+    index("expense_categories_active_order_idx").on(table.isActive, table.sortOrder)
+  ]
+);
+
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    expenseDate: date("expense_date").notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    expenseCategoryId: uuid("expense_category_id").references(() => expenseCategories.id).notNull(),
+    houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
+    comment: text("comment"),
+    receiptFile: text("receipt_file"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    ...timestamps
+  },
+  (table) => [
+    index("expenses_date_idx").on(table.expenseDate),
+    index("expenses_house_idx").on(table.houseId),
+    index("expenses_category_idx").on(table.expenseCategoryId),
+    index("expenses_created_by_idx").on(table.createdBy)
+  ]
+);
+
+export const clientNotes = pgTable(
+  "client_notes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    clientId: uuid("client_id").references(() => customers.id, { onDelete: "cascade" }).notNull(),
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+    text: text("text").notNull(),
+    ...timestamps
+  },
+  (table) => [
+    index("client_notes_client_idx").on(table.clientId),
+    index("client_notes_author_idx").on(table.authorId)
+  ]
+);
+
+export const clientNoteRevisions = pgTable(
+  "client_note_revisions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    noteId: uuid("note_id").references(() => clientNotes.id, { onDelete: "cascade" }).notNull(),
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+    text: text("text").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [index("client_note_revisions_note_idx").on(table.noteId)]
 );
 
 export const bookingStatusHistory = pgTable("booking_status_history", {
@@ -332,6 +423,23 @@ export const bookingNightlyPrices = pgTable(
   (table) => [
     uniqueIndex("booking_nightly_prices_booking_date_unique").on(table.bookingId, table.nightDate),
     index("booking_nightly_prices_booking_idx").on(table.bookingId)
+  ]
+);
+
+export const bookingDocuments = pgTable(
+  "booking_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
+    title: text("title").notNull(),
+    fileName: text("file_name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    index("booking_documents_booking_idx").on(table.bookingId),
+    uniqueIndex("booking_documents_file_name_unique").on(table.fileName)
   ]
 );
 
@@ -520,16 +628,23 @@ export const reviews = pgTable(
   ]
 );
 
-export const bookingServices = pgTable("booking_services", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
-  serviceId: uuid("service_id").references(() => services.id, { onDelete: "restrict" }).notNull(),
-  serviceOptionId: uuid("service_option_id").references(() => serviceOptions.id, { onDelete: "restrict" }),
-  quantity: integer("quantity").notNull().default(1),
-  unitPrice: numeric("unit_price", { precision: 12, scale: 2 }).notNull(),
-  totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
-  ...timestamps
-});
+export const bookingServices = pgTable(
+  "booking_services",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }).notNull(),
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "restrict" }).notNull(),
+    serviceOptionId: uuid("service_option_id").references(() => serviceOptions.id, { onDelete: "restrict" }),
+    quantity: integer("quantity").notNull().default(1),
+    unitPrice: numeric("unit_price", { precision: 12, scale: 2 }).notNull(),
+    totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),
+    ...timestamps
+  },
+  (table) => [
+    index("booking_services_booking_idx").on(table.bookingId),
+    index("booking_services_service_idx").on(table.serviceId)
+  ]
+);
 
 export const customerMessages = pgTable("customer_messages", {
   id: uuid("id").defaultRandom().primaryKey(),

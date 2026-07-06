@@ -1,4 +1,5 @@
-import { bookingNightlyPrices, bookingServices, bookingStatusHistory, bookings, customers, db } from "@judilen/db";
+import { bookingNightlyPrices, bookingServices, bookingStatusHistory, bookings, customers, db, salesChannels } from "@judilen/db";
+import { eq } from "drizzle-orm";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { createAdminNotification } from "@/lib/admin-notifications";
@@ -57,6 +58,8 @@ export async function POST(request: Request) {
   const servicesTotal = roundMoney(serviceLines.reduce((sum, line) => sum + line.totalPrice, 0));
   const totalAmount = roundMoney(stay.total + servicesTotal);
   const publicNumber = bookingNumber();
+  const [siteChannel] = await db.select({ id: salesChannels.id }).from(salesChannels)
+    .where(eq(salesChannels.slug, "site")).limit(1);
   try {
     const bookingId = await db.transaction(async (tx) => {
       const [customer] = await tx.insert(customers).values({
@@ -81,6 +84,7 @@ export async function POST(request: Request) {
         checkOut: parsed.data.checkOut,
         guests: parsed.data.guests,
         status: "awaiting_confirmation",
+        salesChannelId: siteChannel?.id,
         totalAmount: String(totalAmount)
       }).returning({ id: bookings.id });
       await tx.insert(bookingNightlyPrices).values(stay.breakdown.map((night) => ({

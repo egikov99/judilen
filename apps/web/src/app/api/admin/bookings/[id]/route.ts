@@ -1,4 +1,4 @@
-import { bookingStatusHistory, bookings, db } from "@judilen/db";
+import { bookingStatusHistory, bookings, db, salesChannels } from "@judilen/db";
 import { eq } from "drizzle-orm";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { writeAudit } from "@/lib/audit";
@@ -15,6 +15,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const [before] = await db.select().from(bookings).where(eq(bookings.id, id)).limit(1);
   if (!before) return problem(404, "Бронирование не найдено");
+  if (parsed.data.salesChannelId) {
+    const [channel] = await db.select({ id: salesChannels.id }).from(salesChannels)
+      .where(eq(salesChannels.id, parsed.data.salesChannelId)).limit(1);
+    if (!channel) return problem(422, "Канал продаж не найден");
+  }
   const { paidAmount, ...data } = parsed.data;
   const [after] = await db.transaction(async (tx) => {
     const [updated] = await tx.update(bookings).set({
