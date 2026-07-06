@@ -72,6 +72,8 @@ export function FloatingContactWidget() {
     };
   }, [open, chatOpen]);
 
+  const website = channels.find((channel) => channel.type === "website");
+
   useEffect(() => {
     const handler = () => {
       if (website) {
@@ -87,7 +89,6 @@ export function FloatingContactWidget() {
   }, [website]);
 
   if (!channels.length) return null;
-  const website = channels.find((channel) => channel.type === "website");
 
   return <div className="floating-contact-widget" ref={rootRef}>
     {open && <div className="contact-widget-menu" role="menu" aria-label="Каналы связи">
