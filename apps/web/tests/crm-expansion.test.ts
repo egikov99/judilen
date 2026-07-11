@@ -66,4 +66,18 @@ describe("CRM sales, finance, and customer privacy", () => {
     expect(reports).toContain("Прибыль");
     expect(reports).toContain("Продажи по каналам");
   });
+
+  it("keeps expense and report filters responsive on narrow admin screens", () => {
+    const styles = source("src/app/globals.css");
+    expect(source("src/app/admin/expenses/page.tsx")).toContain('className="panel report-filters"');
+    expect(source("src/app/admin/reports/page.tsx")).toContain('className="panel report-filters"');
+    expect(styles).toContain(".report-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));");
+    expect(styles).toContain(".report-filters > *, .report-filters .field { min-width: 0; }");
+    expect(styles).toContain('.report-filters .field input, .report-filters .field select, .report-filters .field textarea, .report-filters input[type="date"]');
+    expect(styles).toContain("width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;");
+    expect(styles).toContain(".report-filters select { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }");
+    expect(styles).toContain("@media (max-width: 650px)");
+    expect(styles).toContain(".report-filters { grid-template-columns: 1fr; }");
+    expect(styles).toContain(".report-filters > *, .report-filters .button { width: 100%; }");
+  });
 });
