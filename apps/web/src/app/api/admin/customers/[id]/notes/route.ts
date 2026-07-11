@@ -37,5 +37,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return [note];
   });
   await writeAudit({ session: auth.session, request, action: "client_note.create", entityType: "client_note", entityId: item.id, after: item });
-  return Response.json({ item }, { status: 201 });
+  return Response.json({ item: { ...item, authorName: auth.session.name } }, { status: 201 });
 }

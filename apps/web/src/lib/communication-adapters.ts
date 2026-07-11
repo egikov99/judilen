@@ -23,11 +23,16 @@ export type IncomingChannelMessage = {
 
 export type IncomingChannelAttachment = {
   externalFileId: string;
-  kind: "image" | "file";
-  fileName: string;
-  mimeType: string;
-  sizeBytes: number | null;
+  kind: "image" | "file" | "market";
+  fileName?: string;
+  mimeType?: string;
+  sizeBytes?: number | null;
   sourceUrl?: string;
+  title?: string;
+  description?: string;
+  externalUrl?: string;
+  previewUrl?: string;
+  metadata?: Record<string, unknown>;
 };
 
 const metaGraphVersion = process.env.META_GRAPH_VERSION ?? "v25.0";
@@ -44,6 +49,34 @@ function text(value: unknown) {
 
 function list(value: unknown) {
   return Array.isArray(value) ? value : [];
+}
+
+function firstText(...values: unknown[]) {
+  for (const value of values) {
+    const candidate = text(value);
+    if (candidate) return candidate;
+  }
+  return "";
+}
+
+function vkMarketPreviewUrl(entity: Record<string, unknown>) {
+  const photo = record(entity.photo);
+  const size = list(photo.sizes)
+    .map(record)
+    .filter((item) => text(item.url))
+    .sort((left, right) => (
+      Number(left.width ?? 0) * Number(left.height ?? 0)
+      - Number(right.width ?? 0) * Number(right.height ?? 0)
+    ))
+    .at(-1);
+  return firstText(entity.thumb_photo, size?.url, photo.photo_807, photo.photo_604, photo.photo_130, photo.photo_75);
+}
+
+function vkMarketExternalUrl(ownerId: string, id: string, accessKey: string) {
+  if (!ownerId || !id) return "";
+  const params = new URLSearchParams({ w: `product${ownerId}_${id}` });
+  if (accessKey) params.set("access_key", accessKey);
+  return `https://vk.com/market${ownerId}?${params}`;
 }
 
 async function requestJson(url: string, init?: RequestInit) {
@@ -334,6 +367,33 @@ function vkMessages(payload: Record<string, unknown>) {
         sizeBytes: null,
         sourceUrl: text(entity.url)
       });
+    } else if (type === "market") {
+      const ownerId = text(entity.owner_id);
+      const id = text(entity.id);
+      if (ownerId && id) {
+        const price = record(entity.price);
+        const currency = record(price.currency);
+        const priceText = firstText(price.text, price.amount);
+        const accessKey = text(entity.access_key);
+        attachments.push({
+          externalFileId: `market${ownerId}_${id}`,
+          kind: "market",
+          title: text(entity.title),
+          description: text(entity.description),
+          externalUrl: vkMarketExternalUrl(ownerId, id, accessKey),
+          previewUrl: vkMarketPreviewUrl(entity),
+          metadata: {
+            ownerId,
+            id,
+            accessKey: accessKey || undefined,
+            price: price.amount ?? null,
+            currency: firstText(currency.name, currency.title, currency.id) || null,
+            priceText: priceText || null,
+            thumbPhoto: text(entity.thumb_photo) || null,
+            raw: entity
+          }
+        });
+      }
     }
   }
   const body = text(message.text) || (attachments.length ? "" : "[Вложение]");

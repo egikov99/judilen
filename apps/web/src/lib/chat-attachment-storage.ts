@@ -79,7 +79,7 @@ async function storeAttachment(
     extension = "pdf";
     mimeType = "application/pdf";
   } else {
-    const candidate = attachment.fileName.split(".").at(-1)?.toLowerCase() ?? "";
+    const candidate = attachment.fileName?.split(".").at(-1)?.toLowerCase() ?? "";
     extension = /^[a-z0-9]{1,8}$/.test(candidate) ? candidate : "bin";
   }
 
@@ -90,7 +90,7 @@ async function storeAttachment(
   await writeFile(storagePath, bytes, { flag: "wx", mode: 0o640 });
   return {
     kind,
-    fileName: safeDisplayName(attachment.fileName),
+    fileName: safeDisplayName(attachment.fileName ?? "attachment"),
     mimeType,
     sizeBytes: bytes.length,
     storagePath,

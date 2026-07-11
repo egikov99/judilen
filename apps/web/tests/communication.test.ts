@@ -21,6 +21,44 @@ function channel(overrides: Partial<CommunicationChannelConfig> = {}): Communica
   };
 }
 
+function vkChannel() {
+  return channel({
+    provider: "vk",
+    publicConfig: { groupId: "229727757", apiVersion: "5.199" },
+    secretConfig: { accessToken: "token" }
+  });
+}
+
+function vkPayload(message: Record<string, unknown>) {
+  return {
+    type: "message_new",
+    group_id: 229727757,
+    event_id: "event-1",
+    object: {
+      message: {
+        id: 55,
+        peer_id: 123,
+        from_id: 123,
+        ...message
+      }
+    }
+  };
+}
+
+const vkMarketAttachment = {
+  type: "market",
+  market: {
+    owner_id: -123,
+    id: 456,
+    title: "Дом №10",
+    description: "Комфортный дом",
+    price: {
+      text: "500–1 000 бел. руб."
+    },
+    thumb_photo: "https://sun9-1.vkuserphoto.ru/preview.jpg"
+  }
+};
+
 describe("communication inbox", () => {
   it("defines every requested communication channel", () => {
     expect(communicationProviders).toEqual([
@@ -164,47 +202,33 @@ describe("communication inbox", () => {
   });
 
   it("extracts VK photos and documents instead of a placeholder", () => {
-    const messages = parseIncomingCommunicationMessages(channel({
-      provider: "vk",
-      publicConfig: { groupId: "229727757", apiVersion: "5.199" },
-      secretConfig: { accessToken: "token" }
-    }), {
-      type: "message_new",
-      group_id: 229727757,
-      event_id: "event-1",
-      object: {
-        message: {
-          id: 55,
-          peer_id: 123,
-          from_id: 123,
-          text: "",
-          attachments: [
-            {
-              type: "photo",
-              photo: {
-                owner_id: 123,
-                id: 7,
-                sizes: [
-                  { width: 100, height: 100, url: "https://sun9-1.userapi.com/small.jpg" },
-                  { width: 1200, height: 800, url: "https://sun9-1.userapi.com/large.jpg" }
-                ]
-              }
-            },
-            {
-              type: "doc",
-              doc: {
-                owner_id: 123,
-                id: 8,
-                title: "Правила.pdf",
-                ext: "pdf",
-                size: 4096,
-                url: "https://vk.com/doc-file.pdf"
-              }
-            }
-          ]
+    const messages = parseIncomingCommunicationMessages(vkChannel(), vkPayload({
+      text: "",
+      attachments: [
+        {
+          type: "photo",
+          photo: {
+            owner_id: 123,
+            id: 7,
+            sizes: [
+              { width: 100, height: 100, url: "https://sun9-1.userapi.com/small.jpg" },
+              { width: 1200, height: 800, url: "https://sun9-1.userapi.com/large.jpg" }
+            ]
+          }
+        },
+        {
+          type: "doc",
+          doc: {
+            owner_id: 123,
+            id: 8,
+            title: "Правила.pdf",
+            ext: "pdf",
+            size: 4096,
+            url: "https://vk.com/doc-file.pdf"
+          }
         }
-      }
-    });
+      ]
+    }));
     expect(messages[0].body).toBe("");
     expect(messages[0].attachments).toEqual([
       expect.objectContaining({
@@ -217,6 +241,81 @@ describe("communication inbox", () => {
         mimeType: "application/pdf",
         sizeBytes: 4096
       })
+    ]);
+  });
+
+  it("extracts VK market cards with text and structured metadata", () => {
+    const messages = parseIncomingCommunicationMessages(vkChannel(), vkPayload({
+      text: "Здравствуйте!\nМеня заинтересовала эта услуга.",
+      attachments: [vkMarketAttachment]
+    }));
+    expect(messages[0].body).toBe("Здравствуйте!\nМеня заинтересовала эта услуга.");
+    expect(messages[0].attachments?.[0]).toMatchObject({
+      externalFileId: "market-123_456",
+      kind: "market",
+      title: "Дом №10",
+      description: "Комфортный дом",
+      previewUrl: "https://sun9-1.vkuserphoto.ru/preview.jpg",
+      externalUrl: "https://vk.com/market-123?w=product-123_456",
+      metadata: expect.objectContaining({
+        ownerId: "-123",
+        id: "456",
+        priceText: "500–1 000 бел. руб.",
+        thumbPhoto: "https://sun9-1.vkuserphoto.ru/preview.jpg"
+      })
+    });
+  });
+
+  it("keeps VK market-only messages as attachment messages", () => {
+    const messages = parseIncomingCommunicationMessages(vkChannel(), vkPayload({
+      text: "",
+      attachments: [vkMarketAttachment]
+    }));
+    expect(messages[0].body).toBe("");
+    expect(messages[0].attachments?.[0]?.kind).toBe("market");
+  });
+
+  it("accepts VK market cards without preview or price", () => {
+    const messages = parseIncomingCommunicationMessages(vkChannel(), vkPayload({
+      text: "Интересно",
+      attachments: [{
+        type: "market",
+        market: {
+          owner_id: -123,
+          id: 457,
+          title: "Дом без цены",
+          description: "Описание без картинки"
+        }
+      }]
+    }));
+    expect(messages[0].attachments?.[0]).toMatchObject({
+      kind: "market",
+      title: "Дом без цены",
+      description: "Описание без картинки",
+      externalUrl: "https://vk.com/market-123?w=product-123_457"
+    });
+    expect(messages[0].attachments?.[0]?.previewUrl).toBe("");
+    expect(messages[0].attachments?.[0]?.metadata).toMatchObject({ priceText: null });
+  });
+
+  it("keeps VK photo and market attachments in the same message", () => {
+    const messages = parseIncomingCommunicationMessages(vkChannel(), vkPayload({
+      text: "",
+      attachments: [
+        {
+          type: "photo",
+          photo: {
+            owner_id: 123,
+            id: 7,
+            sizes: [{ width: 1200, height: 800, url: "https://sun9-1.userapi.com/large.jpg" }]
+          }
+        },
+        vkMarketAttachment
+      ]
+    }));
+    expect(messages[0].attachments).toEqual([
+      expect.objectContaining({ kind: "image", sourceUrl: "https://sun9-1.userapi.com/large.jpg" }),
+      expect.objectContaining({ kind: "market", externalFileId: "market-123_456" })
     ]);
   });
 
@@ -258,6 +357,14 @@ describe("communication inbox", () => {
     expect(attachmentMigration).toContain('"chat_attachments_message_external_unique"');
     expect(attachmentMigration).toContain('"storage_path" text NOT NULL');
 
+    const marketAttachmentMigration = readFileSync(
+      resolve(process.cwd(), "../../packages/db/migrations/0021_chat_market_attachments.sql"),
+      "utf8"
+    );
+    expect(marketAttachmentMigration).toContain('ADD COLUMN "metadata" jsonb');
+    expect(marketAttachmentMigration).toContain('DROP NOT NULL');
+    expect(marketAttachmentMigration).toContain("('image', 'file', 'market')");
+
     const vkMigration = readFileSync(
       resolve(process.cwd(), "../../packages/db/migrations/0009_vk_callback.sql"),
       "utf8"
@@ -287,6 +394,33 @@ describe("communication inbox", () => {
     );
     expect(attachmentRoute).toContain('requirePermission("chats.read")');
     expect(attachmentRoute).toContain('"Cache-Control": "private, no-store"');
+    expect(attachmentRoute).toContain('attachment.kind !== "image" && attachment.kind !== "file"');
+  });
+
+  it("keeps market attachments durable through inbox storage, API and UI contracts", () => {
+    const inbox = readFileSync(resolve(process.cwd(), "src/lib/communication-inbox.ts"), "utf8");
+    expect(inbox).toContain('attachment.kind === "market"');
+    expect(inbox).toContain("storagePath: null");
+    expect(inbox).toContain(".onConflictDoNothing()");
+    expect(inbox).not.toContain("Boolean(existingAttachment)");
+
+    const chatRoute = readFileSync(resolve(process.cwd(), "src/app/api/admin/chats/[id]/route.ts"), "utf8");
+    expect(chatRoute).toContain("title: attachment.title");
+    expect(chatRoute).toContain("previewUrl: attachment.previewUrl");
+    expect(chatRoute).toContain("metadata: attachment.metadata");
+    expect(chatRoute).toContain('attachment.kind === "image" || attachment.kind === "file"');
+
+    const inboxComponent = readFileSync(resolve(process.cwd(), "src/components/admin/chat-inbox.tsx"), "utf8");
+    expect(inboxComponent).toContain('kind: "image" | "file" | "market"');
+    expect(inboxComponent).toContain('attachment.kind === "market"');
+    expect(inboxComponent).toContain("chat-market-card");
+    expect(inboxComponent).toContain("Открыть в VK");
+    expect(inboxComponent).toContain("setLightbox(attachment)");
+
+    const styles = readFileSync(resolve(process.cwd(), "src/app/globals.css"), "utf8");
+    expect(styles).toContain(".chat-market-card");
+    expect(styles).toContain(".chat-market-preview");
+    expect(styles).toContain("-webkit-line-clamp: 3");
   });
 
   it("allows signed provider webhooks through the browser-origin guard", () => {

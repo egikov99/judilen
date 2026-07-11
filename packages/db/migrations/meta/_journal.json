@@ -148,6 +148,13 @@
       "when": 1784332800000,
       "tag": "0020_crm_finance_sales",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1784419200000,
+      "tag": "0021_chat_market_attachments",
+      "breakpoints": true
     }
   ]
 }

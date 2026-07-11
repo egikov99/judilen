@@ -589,6 +589,14 @@ img { display: block; max-width: 100%; }
 .chat-file-card > span { min-width: 0; display: grid; gap: 3px; }
 .chat-file-card strong { overflow-wrap: anywhere; }
 .chat-file-card small { color: var(--muted); overflow-wrap: anywhere; }
+.chat-market-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); width: min(440px, 100%); overflow: hidden; border: 1px solid var(--line); border-radius: 7px; background: white; }
+.chat-market-preview { display: grid; width: 96px; min-height: 96px; place-items: center; overflow: hidden; background: #eef1eb; color: var(--muted); }
+.chat-market-preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.chat-market-content { min-width: 0; display: grid; align-content: center; gap: 5px; padding: 10px 12px; }
+.chat-market-title { overflow-wrap: anywhere; line-height: 1.25; }
+.chat-market-price { color: var(--forest-800); font-size: 13px; font-weight: 800; }
+.chat-market-description { display: -webkit-box; overflow: hidden; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.chat-market-link { display: inline-flex; width: fit-content; align-items: center; gap: 5px; color: var(--forest-800); font-size: 12px; font-weight: 800; }
 .chat-message footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 5px; color: var(--muted); font-size: 10px; }
 .chat-message footer span { color: #a33d27; }
 .chat-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px; border-top: 1px solid var(--line); background: white; }
@@ -893,8 +901,10 @@ img { display: block; max-width: 100%; }
   .chat-inbox { height: calc(100dvh - 150px); border-radius: 0; }
   .chat-messages { padding: 12px; }
   .chat-message { max-width: 88%; }
-  .chat-message:has(.chat-image-preview), .chat-message:has(.chat-file-card) { width: min(88%, 380px); }
-  .chat-file-card { min-width: 0; }
+  .chat-message:has(.chat-image-preview), .chat-message:has(.chat-file-card), .chat-message:has(.chat-market-card) { width: min(88%, 380px); }
+  .chat-file-card, .chat-market-card { min-width: 0; }
+  .chat-market-card { grid-template-columns: 82px minmax(0, 1fr); }
+  .chat-market-preview { width: 82px; min-height: 82px; }
   .chat-composer { grid-template-columns: minmax(0, 1fr) 48px; padding: 8px; }
   .chat-composer .button { width: 48px; min-width: 48px; padding: 0; }
   .chat-composer .button span { display: none; }

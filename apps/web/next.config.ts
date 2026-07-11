@@ -1,11 +1,21 @@
 import type { NextConfig } from "next";
 
 const production = process.env.NODE_ENV === "production";
-const publicImageSources = (process.env.PUBLIC_IMAGE_HOSTS ?? "")
-  .split(",")
-  .map((host) => host.trim())
-  .filter((host) => /^[a-z0-9.-]+$/i.test(host))
-  .map((host) => `https://${host}`);
+const defaultPublicImageSources = [
+  "https://vk.com",
+  "https://*.userapi.com",
+  "https://*.vk-cdn.net",
+  "https://*.vkuser.net",
+  "https://*.vkuserphoto.ru"
+];
+const publicImageSources = Array.from(new Set([
+  ...defaultPublicImageSources,
+  ...(process.env.PUBLIC_IMAGE_HOSTS ?? "")
+    .split(",")
+    .map((host) => host.trim())
+    .filter((host) => /^[a-z0-9.-]+$/i.test(host))
+    .map((host) => `https://${host}`)
+]));
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${production ? "" : " 'unsafe-eval'"}`,

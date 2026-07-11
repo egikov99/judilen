@@ -44,7 +44,14 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         fileName: attachment.fileName,
         mimeType: attachment.mimeType,
         sizeBytes: attachment.sizeBytes,
-        url: `/api/admin/chat-attachments/${attachment.id}`
+        title: attachment.title,
+        description: attachment.description,
+        externalUrl: attachment.externalUrl,
+        previewUrl: attachment.previewUrl,
+        metadata: attachment.metadata,
+        url: attachment.storagePath && (attachment.kind === "image" || attachment.kind === "file")
+          ? `/api/admin/chat-attachments/${attachment.id}`
+          : null
       }))
     }))
   });

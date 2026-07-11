@@ -20,6 +20,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     .where(eq(chatAttachments.id, id))
     .limit(1);
   if (!attachment) return problem(404, "Вложение не найдено");
+  if ((attachment.kind !== "image" && attachment.kind !== "file") || !attachment.storagePath || !attachment.fileName || !attachment.mimeType) {
+    return problem(404, "Файл вложения недоступен");
+  }
   try {
     const bytes = await readStoredChatAttachment(attachment.storagePath);
     return new Response(bytes, {

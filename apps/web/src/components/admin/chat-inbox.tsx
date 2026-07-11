@@ -30,11 +30,16 @@ type Message = {
 
 type ChatAttachment = {
   id: string;
-  kind: "image" | "file";
-  fileName: string;
-  mimeType: string;
+  kind: "image" | "file" | "market";
+  fileName: string | null;
+  mimeType: string | null;
   sizeBytes: number | null;
-  url: string;
+  url: string | null;
+  title: string | null;
+  description: string | null;
+  externalUrl: string | null;
+  previewUrl: string | null;
+  metadata: Record<string, unknown> | null;
 };
 
 type SelectedChat = {
@@ -66,6 +71,11 @@ function formatFileSize(value: number | null) {
   if (value < 1024) return `${value} Б`;
   if (value < 1024 * 1024) return `${Math.round(value / 1024)} КБ`;
   return `${(value / (1024 * 1024)).toFixed(1)} МБ`;
+}
+
+function marketPrice(attachment: ChatAttachment) {
+  const value = attachment.metadata?.priceText;
+  return typeof value === "string" || typeof value === "number" ? String(value) : "";
 }
 
 export function ChatInbox({ initialConversationId, canWrite }: {
@@ -238,13 +248,30 @@ export function ChatInbox({ initialConversationId, canWrite }: {
             {message.senderName && message.direction === "inbound" && <small>{message.senderName}</small>}
             {message.body && <p>{message.body}</p>}
             {message.attachments?.length > 0 && <div className="chat-attachments">
-              {message.attachments.map((attachment) => attachment.kind === "image"
-                ? <button className="chat-image-preview" type="button" key={attachment.id} aria-label={`Открыть изображение ${attachment.fileName}`} onClick={() => setLightbox(attachment)}>
-                    <Image src={attachment.url} alt={attachment.fileName} width={360} height={240} unoptimized />
+              {message.attachments.map((attachment) => attachment.kind === "market"
+                ? <div className="chat-market-card" key={attachment.id}>
+                    {attachment.previewUrl
+                      ? <div className="chat-market-preview">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={attachment.previewUrl} alt={attachment.title || "VK market"} loading="lazy" referrerPolicy="no-referrer" />
+                        </div>
+                      : <div className="chat-market-preview" aria-hidden="true"><FileText size={28} /></div>}
+                    <div className="chat-market-content">
+                      {attachment.title && <strong className="chat-market-title">{attachment.title}</strong>}
+                      {marketPrice(attachment) && <span className="chat-market-price">{marketPrice(attachment)}</span>}
+                      {attachment.description && <span className="chat-market-description">{attachment.description}</span>}
+                      {attachment.externalUrl && <a className="chat-market-link" href={attachment.externalUrl} target="_blank" rel="noreferrer">
+                        Открыть в VK <ExternalLink size={15} aria-hidden="true" />
+                      </a>}
+                    </div>
+                  </div>
+                : attachment.kind === "image" && attachment.url
+                ? <button className="chat-image-preview" type="button" key={attachment.id} aria-label={`Открыть изображение ${attachment.fileName || "из чата"}`} onClick={() => setLightbox(attachment)}>
+                    <Image src={attachment.url} alt={attachment.fileName || "Изображение"} width={360} height={240} unoptimized />
                   </button>
-                : <a className="chat-file-card" href={attachment.url} target="_blank" rel="noreferrer" key={attachment.id}>
+                : attachment.url && <a className="chat-file-card" href={attachment.url} target="_blank" rel="noreferrer" key={attachment.id}>
                     <FileText size={25} aria-hidden="true" />
-                    <span><strong>{attachment.fileName}</strong><small>{attachment.mimeType}{attachment.sizeBytes ? ` · ${formatFileSize(attachment.sizeBytes)}` : ""}</small></span>
+                    <span><strong>{attachment.fileName || "Файл"}</strong><small>{attachment.mimeType || "application/octet-stream"}{attachment.sizeBytes ? ` · ${formatFileSize(attachment.sizeBytes)}` : ""}</small></span>
                     <ExternalLink size={18} aria-hidden="true" />
                   </a>)}
             </div>}
@@ -262,9 +289,9 @@ export function ChatInbox({ initialConversationId, canWrite }: {
       </> : <div className="chat-empty chat-dialog-empty"><strong>Выберите чат</strong><span>Переписка откроется здесь.</span></div>}
     </div>
   </section>
-  {lightbox && <AdminModal title={lightbox.fileName} onClose={() => setLightbox(null)}>
+  {lightbox?.url && <AdminModal title={lightbox.fileName || "Изображение"} onClose={() => setLightbox(null)}>
     <div className="chat-lightbox">
-      <Image src={lightbox.url} alt={lightbox.fileName} width={1200} height={900} unoptimized priority />
+      <Image src={lightbox.url} alt={lightbox.fileName || "Изображение"} width={1200} height={900} unoptimized priority />
       <a className="button button-primary" href={lightbox.url} target="_blank" rel="noreferrer"><ExternalLink size={18} /> Открыть оригинал</a>
     </div>
   </AdminModal>}

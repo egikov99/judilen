@@ -24,7 +24,7 @@ export async function ingestCommunicationMessage(
     .digest("hex");
   const receivedAt = new Date();
   const preview = input.body
-    || (input.attachments?.[0]?.kind === "image" ? "Фото" : input.attachments?.[0]?.fileName)
+    || (input.attachments?.[0]?.kind === "image" ? "Фото" : input.attachments?.[0]?.title || input.attachments?.[0]?.fileName)
     || "[Вложение]";
 
   const result = await db.transaction(async (tx) => {
@@ -91,16 +91,27 @@ export async function ingestCommunicationMessage(
     || channel.provider === "telegram_group"
     || channel.provider === "vk"
   )) {
-    const [existingAttachment] = await db.select({ id: chatAttachments.id }).from(chatAttachments)
-      .where(eq(chatAttachments.messageId, result.messageId))
-      .limit(1);
-    let saved = Boolean(existingAttachment);
-    if (!saved && (channel.provider === "vk" || channel.secretConfig?.botToken)) {
+    let saved = false;
+    if (channel.provider === "vk" || channel.secretConfig?.botToken) {
       for (const attachment of input.attachments) {
         try {
-          const stored = channel.provider === "vk"
-            ? await downloadVkAttachment(channel.id, attachment)
-            : await downloadTelegramAttachment(channel.secretConfig?.botToken ?? "", channel.id, attachment);
+          const stored = attachment.kind === "market"
+            ? {
+                kind: attachment.kind,
+                fileName: attachment.fileName ?? null,
+                mimeType: attachment.mimeType ?? null,
+                sizeBytes: attachment.sizeBytes ?? null,
+                storagePath: null,
+                externalFileId: attachment.externalFileId,
+                title: attachment.title || null,
+                description: attachment.description || null,
+                externalUrl: attachment.externalUrl || null,
+                previewUrl: attachment.previewUrl || null,
+                metadata: attachment.metadata ?? null
+              }
+            : channel.provider === "vk"
+              ? await downloadVkAttachment(channel.id, attachment)
+              : await downloadTelegramAttachment(channel.secretConfig?.botToken ?? "", channel.id, attachment);
           await db.insert(chatAttachments).values({
             messageId: result.messageId,
             ...stored
