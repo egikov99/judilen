@@ -16,14 +16,25 @@ const publicImageSources = Array.from(new Set([
     .filter((host) => /^[a-z0-9.-]+$/i.test(host))
     .map((host) => `https://${host}`)
 ]));
+const tagManagerScriptSources = [
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com"
+];
+const tagManagerConnectSources = [
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+  "https://region1.google-analytics.com"
+];
+const tagManagerFrameSources = ["https://www.googletagmanager.com"];
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${production ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' ${tagManagerScriptSources.join(" ")}${production ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob:${publicImageSources.length ? ` ${publicImageSources.join(" ")}` : ""}`,
+  `img-src 'self' data: blob:${publicImageSources.length ? ` ${publicImageSources.join(" ")}` : ""} ${tagManagerConnectSources.join(" ")}`,
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self' ${tagManagerConnectSources.join(" ")}`,
   "media-src 'self' blob:",
+  `frame-src 'self' ${tagManagerFrameSources.join(" ")}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

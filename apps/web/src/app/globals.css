@@ -342,6 +342,7 @@ img { display: block; max-width: 100%; }
 .form-stack { display: grid; gap: 18px; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .notice { padding: 14px 16px; border-radius: 10px; background: var(--sage-100); color: var(--forest-900); font-size: 14px; }
+.notice.warning { background: #fff7e6; color: #744600; }
 .error { background: #ffdad6; color: #93000a; }
 .trip-card { display: grid; grid-template-columns: minmax(230px,.7fr) 1.3fr; max-width: 900px; }
 
@@ -620,6 +621,10 @@ img { display: block; max-width: 100%; }
 .settings-navigation { display: flex; gap: 8px; margin: -12px 0 24px; overflow-x: auto; border-bottom: 1px solid var(--line); }
 .settings-navigation a, .settings-navigation button { flex: 0 0 auto; padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: transparent; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .settings-navigation a:hover, .settings-navigation a.is-active, .settings-navigation button:hover, .settings-navigation button.is-active { border-bottom-color: var(--forest-900); color: var(--forest-900); }
+.tag-manager-settings { margin-bottom: 18px; }
+.tag-manager-settings textarea { min-height: 170px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.45; }
+.toggle-row { display: flex; align-items: center; gap: 10px; font-weight: 750; }
+.toggle-row input { width: 18px; height: 18px; accent-color: var(--forest-700); }
 .theme-editor { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); gap: 20px; align-items: start; }
 .theme-fields { overflow: visible; }
 .theme-help { margin: -10px 0 20px; color: var(--muted); font-size: 14px; }
