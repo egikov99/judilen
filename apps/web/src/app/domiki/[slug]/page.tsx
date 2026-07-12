@@ -44,7 +44,7 @@ export default async function HousePage({ params }: { params: Promise<{ slug: st
       <section className="section" style={{ paddingTop: 45 }}><div className="container">
         <HouseGallery houseId={house.id} houseName={house.name} images={house.images} />
         <div className="detail-layout" style={{ marginTop: 60 }}>
-          <article className="prose"><span className="eyebrow">О доме</span><h2>Тишина с продуманным комфортом</h2><p>{house.longDescription}</p><h2>В доме есть</h2><ul className="amenities">{house.amenities.map((item) => <li key={item}>✓ {item}</li>)}</ul><h2>Правила</h2><p>Заезд после 15:00, выезд до 12:00. В домах не курят. Тихие часы — с 22:00 до 09:00. Размещение с питомцами согласовывается заранее.</p>{priceRange && <div className="house-detail-price"><span>Стоимость проживания</span><strong><HousePriceRangeText range={priceRange} /></strong></div>}</article>
+          <article className="prose"><span className="eyebrow">О доме</span><h2>Тишина с продуманным комфортом</h2><p>{house.longDescription}</p><h2>В доме есть</h2><ul className="amenities">{house.amenities.map((item) => <li key={item}>✓ {item}</li>)}</ul><h2>Правила</h2><p>Заезд после 14:00, выезд до 12:00. В домах не курят. Тихие часы — с 22:00 до 09:00. Размещение с питомцами согласовывается заранее.</p>{priceRange && <div className="house-detail-price"><span>Стоимость проживания</span><strong><HousePriceRangeText range={priceRange} /></strong></div>}</article>
           <HouseBookingCard house={house} services={services} />
         </div>
       </div></section>
