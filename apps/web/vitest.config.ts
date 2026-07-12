@@ -2,6 +2,9 @@ import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
 export default defineConfig({
+  oxc: {
+    jsx: "react-jsx"
+  },
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
