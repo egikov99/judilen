@@ -79,9 +79,9 @@ describe("house weekday prices", () => {
 
   it("renders one price or a range in house cards", () => {
     const card = readFileSync(resolve(process.cwd(), "src/components/house-card.tsx"), "utf8");
-    expect(card).toContain("house.minPrice === house.maxPrice");
-    expect(card).toContain("до");
-    expect(card).toContain("/ ночь");
+    expect(card).toContain("HousePriceRangeText");
+    expect(card).toContain("normalizeHousePriceRange");
+    expect(card).not.toContain("house.minPrice === house.maxPrice");
   });
 
   it("keeps booking totals but removes public weekday price listing from house details", () => {
@@ -90,6 +90,7 @@ describe("house weekday prices", () => {
     expect(details).not.toContain("public-weekday-prices");
     expect(details).not.toContain("Цены по дням недели");
     expect(details).toContain("house-detail-price");
+    expect(details).toContain("HousePriceRangeText");
     expect(bookingCard).toContain("calculateStayTotal");
     expect(bookingCard).toContain("booking-price-breakdown");
   });

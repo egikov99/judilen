@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { House } from "@/lib/catalog";
-import { formatCurrency } from "@/components/currency";
+import { HousePriceRangeText } from "@/components/house-price-range";
 import { PublicImage } from "@/components/public-image";
+import { normalizeHousePriceRange } from "@/lib/house-price-range";
 
 function roomLabel(count: number) {
   const remainder = count % 100;
@@ -12,6 +13,7 @@ function roomLabel(count: number) {
 }
 
 export function HouseCard({ house }: { house: House }) {
+  const priceRange = normalizeHousePriceRange(house);
   return (
     <article className="house-card">
       <div className="house-image">
@@ -25,7 +27,7 @@ export function HouseCard({ house }: { house: House }) {
           <span>Максимум {house.guests} человек</span>
           <span>{house.rooms} {roomLabel(house.rooms)}</span>
         </div>
-        <div className="house-footer"><span className={`price ${house.minPrice !== house.maxPrice ? "house-price-range" : ""}`}>{house.minPrice === house.maxPrice ? <><strong>{formatCurrency(house.minPrice)}</strong> / ночь</> : <>от <strong>{formatCurrency(house.minPrice)}</strong> до <strong>{formatCurrency(house.maxPrice)}</strong> / ночь</>}</span><Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
+        <div className="house-footer">{priceRange && <span className={`price ${priceRange.maxPrice && priceRange.minPrice !== priceRange.maxPrice ? "house-price-range" : ""}`}><HousePriceRangeText range={priceRange} /></span>}<Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
       </div>
     </article>
   );

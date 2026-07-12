@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/components/currency";
+import { HousePriceRangeText } from "@/components/house-price-range";
 import { formatPrice, type House } from "@/lib/catalog";
+import { normalizeHousePriceRange } from "@/lib/house-price-range";
 import { priceUnitLabels, type PublicService } from "@/lib/service-types";
 import { calculateStayTotal, roundMoney, weekdayLabels } from "@/lib/weekday-prices";
 
@@ -28,6 +30,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
     return sum + (option?.price ?? service.basePrice) * state.quantity;
   }, 0));
   const total = roundMoney(stay.total + servicesTotal);
+  const priceRange = normalizeHousePriceRange(house);
 
   function serviceSelection(service: PublicService) {
     return selected[service.id] ?? {
@@ -69,7 +72,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
   }
   return (
     <aside className="booking-card">
-      <span className="eyebrow">{house.minPrice === house.maxPrice ? <>{formatCurrency(house.minPrice)} / ночь</> : <>от {formatCurrency(house.minPrice)} до {formatCurrency(house.maxPrice)} / ночь</>}</span>
+      {priceRange && <span className="eyebrow"><HousePriceRangeText range={priceRange} /></span>}
       <h2 style={{ fontFamily: "var(--serif)", marginBottom: 4 }}>Запросить бронирование</h2>
       <form onSubmit={submit}>
         <div className="form-grid">
