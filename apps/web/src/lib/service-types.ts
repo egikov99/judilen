@@ -14,6 +14,8 @@ export interface PublicService {
   description: string;
   images: string[];
   basePrice: number;
+  minRentalHours: number | null;
+  extensionPrice: number | null;
   priceUnit: "hour" | "three_hours" | "day" | "booking" | "person" | "item";
   sortOrder: number;
   houseIds: string[];

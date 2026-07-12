@@ -31,7 +31,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const [before] = await db.select().from(services).where(eq(services.id, id)).limit(1);
   if (!before) return problem(404, "Услуга не найдена");
-  const { houseIds, basePrice, images: submittedImages, ...data } = parsed.data;
+  const { houseIds, basePrice, extensionPrice, images: submittedImages, ...data } = parsed.data;
   const previousImages = submittedImages
     ? await db.select().from(serviceImages).where(eq(serviceImages.serviceId, id))
     : [];
@@ -44,6 +44,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const [updated] = await tx.update(services).set({
       ...data,
       ...(basePrice === undefined ? {} : { basePrice: String(basePrice) }),
+      ...(extensionPrice === undefined ? {} : { extensionPrice: extensionPrice === null ? null : String(extensionPrice) }),
       updatedAt: new Date()
     }).where(eq(services.id, id)).returning();
     if (houseIds) {

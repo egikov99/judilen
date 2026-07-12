@@ -6,6 +6,7 @@ describe("RBAC", () => {
   it("does not expose finance and integration sections to a content manager", () => {
     expect(can("content_manager", "houses.write")).toBe(true);
     expect(can("content_manager", "services.update")).toBe(true);
+    expect(can("content_manager", "gazebos.update")).toBe(true);
     expect(can("content_manager", "reviews.update")).toBe(true);
     expect(can("content_manager", "users.manage")).toBe(false);
     expect(can("content_manager", "reports.read")).toBe(false);
@@ -16,7 +17,7 @@ describe("RBAC", () => {
     expect(can("content_manager", "uploads.create")).toBe(true);
     expect(can("admin", "external_calendars.create")).toBe(true);
     expect(can("admin", "calendar_conflicts.update")).toBe(true);
-    expect(adminNavigation("content_manager").map((item) => item.href)).toEqual(["/admin", "/admin/houses", "/admin/services", "/admin/reviews", "/admin/content"]);
+    expect(adminNavigation("content_manager").map((item) => item.href)).toEqual(["/admin", "/admin/houses", "/admin/services", "/admin/gazebos", "/admin/reviews", "/admin/content"]);
   });
 
   it("round-trips a signed session", async () => {

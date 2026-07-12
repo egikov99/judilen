@@ -8,6 +8,7 @@ import { SiteBrand } from "@/components/site-brand";
 const navigation = [
   { href: "/", label: "Главная" },
   { href: "/domiki", label: "Домики" },
+  { href: "/besedki", label: "Беседки" },
   { href: "/uslugi", label: "Услуги" },
   { href: "/otzyvy", label: "Отзывы" },
   { href: "/kontakty", label: "Контакты" }

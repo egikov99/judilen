@@ -239,6 +239,8 @@ export const services = pgTable(
     description: text("description").notNull(),
     basePrice: numeric("base_price", { precision: 12, scale: 2 }).notNull().default("0"),
     priceUnit: servicePriceUnit("price_unit").notNull().default("booking"),
+    minRentalHours: integer("min_rental_hours"),
+    extensionPrice: numeric("extension_price", { precision: 12, scale: 2 }),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps
@@ -262,6 +264,42 @@ export const serviceImages = pgTable(
   (table) => [
     uniqueIndex("service_images_service_order_unique").on(table.serviceId, table.sortOrder),
     index("service_images_service_idx").on(table.serviceId)
+  ]
+);
+
+export const gazebos = pgTable(
+  "gazebos",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    shortDescription: text("short_description").notNull(),
+    description: text("description").notNull(),
+    amenities: jsonb("amenities").$type<string[]>().notNull().default([]),
+    sortOrder: integer("sort_order").notNull().default(0),
+    isPublished: boolean("is_published").notNull().default(false),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("gazebos_slug_unique").on(table.slug),
+    uniqueIndex("gazebos_title_unique").on(table.title),
+    index("gazebos_published_order_idx").on(table.isPublished, table.sortOrder)
+  ]
+);
+
+export const gazeboImages = pgTable(
+  "gazebo_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    gazeboId: uuid("gazebo_id").references(() => gazebos.id, { onDelete: "cascade" }).notNull(),
+    url: text("url").notNull(),
+    alt: text("alt").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("gazebo_images_gazebo_order_unique").on(table.gazeboId, table.sortOrder),
+    index("gazebo_images_gazebo_idx").on(table.gazeboId)
   ]
 );
 

@@ -1,6 +1,6 @@
 export function createEntityImageUploadForm(
   files: File[],
-  entity: { key: "houseId" | "serviceId"; id: string },
+  entity: { key: "houseId" | "serviceId" | "gazeboId"; id: string },
   metadata: { alt?: string; caption?: string } = {}
 ) {
   const form = new FormData();

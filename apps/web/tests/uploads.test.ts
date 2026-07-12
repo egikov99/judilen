@@ -97,4 +97,19 @@ describe("image uploads", () => {
       expect(response.status).toBe(200);
     }
   });
+
+  it("stores and serves gazebo images through the shared upload pipeline", async () => {
+    const directory = mkdtempSync(resolve(tmpdir(), "judilen-gazebo-uploads-"));
+    temporaryDirectories.push(directory);
+    process.env.UPLOAD_DIR = directory;
+    const saved = await saveImageFile(new File([samples[2].bytes], "gazebo.webp", { type: "image/webp" }), "gazebos", "gazebo-id");
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+    expect(saved.url).toMatch(/^\/uploads\/gazebos\/gazebo-id\//);
+    const response = await serveUploadedImage(new Request(`http://localhost${saved.url}`), {
+      params: Promise.resolve({ path: saved.url.split("/").slice(2) })
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/webp");
+  });
 });

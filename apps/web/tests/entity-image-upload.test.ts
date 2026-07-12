@@ -27,4 +27,10 @@ describe("entity image upload form", () => {
     expect(form.get("serviceId")).toBe("service-id");
     expect(form.getAll("files")).toHaveLength(4);
   });
+
+  it("uses the gazebo entity field expected by the backend", () => {
+    const form = createEntityImageUploadForm(imageFiles(3), { key: "gazeboId", id: "gazebo-id" });
+    expect(form.get("gazeboId")).toBe("gazebo-id");
+    expect(form.getAll("files")).toHaveLength(3);
+  });
 });

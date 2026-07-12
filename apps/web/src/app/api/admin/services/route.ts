@@ -31,13 +31,14 @@ export async function POST(request: Request) {
   if (auth.error === "forbidden") return problem(403, "Недостаточно прав");
   const parsed = serviceSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return problem(422, "Некорректные данные", parsed.error.flatten());
-  const { houseIds, basePrice, images = [], ...data } = parsed.data;
+  const { houseIds, basePrice, extensionPrice, images = [], ...data } = parsed.data;
   let service: typeof services.$inferSelect;
   try {
     [service] = await db.transaction(async (tx) => {
       const [created] = await tx.insert(services).values({
         ...data,
-        basePrice: String(basePrice)
+        basePrice: String(basePrice),
+        extensionPrice: extensionPrice === undefined || extensionPrice === null ? null : String(extensionPrice)
       }).returning();
       if (houseIds.length) await tx.insert(serviceHouses).values(houseIds.map((houseId) => ({ serviceId: created.id, houseId })));
       if (images.length) await tx.insert(serviceImages).values(images.map((image, index) => ({

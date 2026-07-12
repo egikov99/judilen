@@ -20,6 +20,10 @@ export type Permission =
   | "services.create"
   | "services.update"
   | "services.delete"
+  | "gazebos.read"
+  | "gazebos.create"
+  | "gazebos.update"
+  | "gazebos.delete"
   | "service_options.read"
   | "service_options.create"
   | "service_options.update"
@@ -80,7 +84,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
   client: [],
   super_admin: [
     "dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "bookings.delete", "calendar.read", "customers.read", "customers.write",
-    "houses.read", "houses.write", "houses.create", "houses.update", "houses.delete", "services.read", "services.create", "services.update", "services.delete", "service_options.read", "service_options.create", "service_options.update", "service_options.delete",
+    "houses.read", "houses.write", "houses.create", "houses.update", "houses.delete", "services.read", "services.create", "services.update", "services.delete", "gazebos.read", "gazebos.create", "gazebos.update", "gazebos.delete", "service_options.read", "service_options.create", "service_options.update", "service_options.delete",
     "reviews.read", "reviews.create", "reviews.update", "reviews.delete", "house_images.read",
     "house_images.create", "house_images.update", "house_images.delete", "uploads.create", "content.write",
     "reports.read", "users.manage", "users.read", "users.create", "users.update", "users.delete",
@@ -110,6 +114,10 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "services.create",
     "services.update",
     "services.delete",
+    "gazebos.read",
+    "gazebos.create",
+    "gazebos.update",
+    "gazebos.delete",
     "service_options.read",
     "service_options.create",
     "service_options.update",
@@ -159,6 +167,9 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "services.read",
     "services.create",
     "services.update",
+    "gazebos.read",
+    "gazebos.create",
+    "gazebos.update",
     "service_options.read",
     "service_options.create",
     "service_options.update",
@@ -168,7 +179,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "content.write"
   ],
   manager: ["dashboard.read", "bookings.read", "bookings.write", "bookings.create", "bookings.update", "calendar.read", "customers.read", "customers.write", "chats.read", "chats.write", "expenses.read", "expenses.write", "client_notes.read", "client_notes.write", "exports.read"],
-  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read", "expenses.read", "client_notes.read", "exports.read"]
+  viewer: ["dashboard.read", "bookings.read", "calendar.read", "customers.read", "houses.read", "services.read", "gazebos.read", "reviews.read", "house_images.read", "reports.read", "integrations.read", "external_calendars.read", "calendar_conflicts.read", "chats.read", "expenses.read", "client_notes.read", "exports.read"]
 };
 
 export function can(role: Role, permission: Permission) {
@@ -221,6 +232,7 @@ export function adminNavigation(role: Role) {
     { href: "/admin/expenses", label: "Расходы", permission: "expenses.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
     { href: "/admin/services", label: "Услуги", permission: "services.read" },
+    { href: "/admin/gazebos", label: "Беседки", permission: "gazebos.read" },
     { href: "/admin/reviews", label: "Отзывы", permission: "reviews.read" },
     { href: "/admin/content", label: "Контент", permission: "content.write" },
     { href: "/admin/reports", label: "Отчеты", permission: "reports.read" },

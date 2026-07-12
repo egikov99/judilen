@@ -155,6 +155,13 @@
       "when": 1784419200000,
       "tag": "0021_chat_market_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1784505600000,
+      "tag": "0022_gazebos_service_rental_fields",
+      "breakpoints": true
     }
   ]
 }

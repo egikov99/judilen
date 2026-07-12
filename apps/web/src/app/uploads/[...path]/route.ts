@@ -16,7 +16,7 @@ const contentTypes: Record<string, string> = {
 function uploadedImagePath(segments: string[]) {
   if (segments.length !== 3) return null;
   const [scope, entityId, filename] = segments;
-  if (!["houses", "services", "content"].includes(scope)) return null;
+  if (!["houses", "services", "content", "gazebos"].includes(scope)) return null;
   if (!/^[a-z0-9-]+$/i.test(entityId)) return null;
   const match = filename.match(/^[a-z0-9-]+\.(jpg|png|webp)$/i);
   if (!match) return null;

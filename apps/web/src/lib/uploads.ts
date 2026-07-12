@@ -121,7 +121,7 @@ export function uploadRoot() {
   return resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR ?? "storage/uploads");
 }
 
-export async function saveImageFile(file: File, scope: "houses" | "services" | "content", entityId = "shared") {
+export async function saveImageFile(file: File, scope: "houses" | "services" | "content" | "gazebos", entityId = "shared") {
   const bytes = new Uint8Array(await file.arrayBuffer());
   const checked = validateImageUpload(file, bytes, Number(process.env.MAX_UPLOAD_BYTES ?? 10 * 1024 * 1024));
   if (!checked.ok) return checked;
@@ -141,7 +141,7 @@ export async function saveImageFile(file: File, scope: "houses" | "services" | "
 
 export async function removeUploadedFile(url: string) {
   if (!url.startsWith("/uploads/")) return;
-  if (!/^\/uploads\/(houses|services|content)\/[a-z0-9-]+\/[a-z0-9-]+\.(jpg|png|webp)$/i.test(url)) return;
+  if (!/^\/uploads\/(houses|services|content|gazebos)\/[a-z0-9-]+\/[a-z0-9-]+\.(jpg|png|webp)$/i.test(url)) return;
   const path = resolve(uploadRoot(), url.slice("/uploads/".length));
   await unlink(path).catch((error: NodeJS.ErrnoException) => {
     if (error.code !== "ENOENT") {

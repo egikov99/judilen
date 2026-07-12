@@ -37,6 +37,14 @@ export const availabilitySearchSchema = z.object({
 });
 
 const positiveHousePrice = z.coerce.number().positive().max(10_000_000);
+const optionalPositiveNumber = z.preprocess(
+  (value) => value === "" ? undefined : value,
+  z.union([z.coerce.number().positive().max(10_000_000), z.null()]).optional()
+);
+const optionalPositiveInt = z.preprocess(
+  (value) => value === "" ? undefined : value,
+  z.union([z.coerce.number().int().positive().max(100_000), z.null()]).optional()
+);
 export const weekdayPricesSchema = z.object(Object.fromEntries(
   weekdays.map((weekday) => [weekday, positiveHousePrice])
 ) as Record<(typeof weekdays)[number], typeof positiveHousePrice>);
@@ -72,9 +80,22 @@ export const serviceSchema = z.object({
   images: z.array(entityImageInputSchema).optional(),
   basePrice: z.coerce.number().nonnegative().max(10_000_000),
   priceUnit: z.enum(["hour", "day", "booking", "person", "item"]),
+  minRentalHours: optionalPositiveInt,
+  extensionPrice: optionalPositiveNumber,
   isActive: z.boolean(),
   sortOrder: z.coerce.number().int().min(0).max(100_000),
   houseIds: z.array(z.uuid()).max(100).default([])
+});
+
+export const gazeboSchema = z.object({
+  title: z.string().trim().min(2).max(140),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(120),
+  shortDescription: z.string().trim().min(10).max(500),
+  description: z.string().trim().min(20).max(20_000),
+  amenities: z.array(z.string().trim().min(1).max(80)).max(50).default([]),
+  images: z.array(entityImageInputSchema).optional(),
+  sortOrder: z.coerce.number().int().min(0).max(100_000),
+  isPublished: z.boolean()
 });
 
 export const serviceOptionSchema = z.object({
@@ -111,6 +132,8 @@ export const serviceImageSchema = z.object({
   alt: z.string().trim().min(2).max(250),
   sortOrder: z.coerce.number().int().min(0).optional()
 });
+
+export const gazeboImageSchema = serviceImageSchema;
 
 export const bookingStatusSchema = z.enum([
   "new",

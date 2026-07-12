@@ -83,4 +83,14 @@ describe("house weekday prices", () => {
     expect(card).toContain("до");
     expect(card).toContain("/ ночь");
   });
+
+  it("keeps booking totals but removes public weekday price listing from house details", () => {
+    const details = readFileSync(resolve(process.cwd(), "src/app/domiki/[slug]/page.tsx"), "utf8");
+    const bookingCard = readFileSync(resolve(process.cwd(), "src/components/house-booking-card.tsx"), "utf8");
+    expect(details).not.toContain("public-weekday-prices");
+    expect(details).not.toContain("Цены по дням недели");
+    expect(details).toContain("house-detail-price");
+    expect(bookingCard).toContain("calculateStayTotal");
+    expect(bookingCard).toContain("booking-price-breakdown");
+  });
 });

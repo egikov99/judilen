@@ -8,7 +8,7 @@ import { formatCurrency } from "@/components/currency";
 export type PriceUnit = "hour" | "day" | "booking" | "person" | "item";
 export interface ServiceRow {
   id: string; title: string; slug: string; description: string; images: ServiceImageRow[];
-  basePrice: string; priceUnit: PriceUnit; isActive: boolean; sortOrder: number;
+  basePrice: string; minRentalHours: number | null; extensionPrice: string | null; priceUnit: PriceUnit; isActive: boolean; sortOrder: number;
 }
 export interface OptionRow {
   id: string; serviceId: string; title: string; description: string | null; price: string;
@@ -18,6 +18,7 @@ export interface HouseRow { id: string; name: string; }
 
 const emptyService = {
   title: "", slug: "", description: "", images: [] as ServiceImageRow[], basePrice: "0",
+  minRentalHours: null as number | null, extensionPrice: null as string | null,
   priceUnit: "booking" as PriceUnit, isActive: true, sortOrder: 0, houseIds: [] as string[]
 };
 const emptyOption = {
@@ -47,7 +48,13 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
     const response = await fetch(serviceId ? `/api/admin/services/${serviceId}` : "/api/admin/services", {
       method: serviceId ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...draft, images: undefined, basePrice: Number(draft.basePrice) })
+      body: JSON.stringify({
+        ...draft,
+        images: undefined,
+        basePrice: Number(draft.basePrice),
+        minRentalHours: draft.minRentalHours || null,
+        extensionPrice: draft.extensionPrice ? Number(draft.extensionPrice) : null
+      })
     });
     const body = await response.json().catch(() => ({}));
     setSaving("");
@@ -107,6 +114,7 @@ export function ServiceEditorModal({ service, initialOptions, houses, houseIds, 
       <div className="form-grid"><div className="field"><label>Название</label><input autoFocus value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} minLength={2} maxLength={140} required /></div><div className="field"><label>Slug</label><input value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required /></div></div>
       <div className="field"><label>Описание</label><textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} minLength={5} required /></div>
       <div className="form-grid"><div className="field"><label>Базовая цена</label><input type="number" min="0" step="0.01" value={draft.basePrice} onChange={(event) => setDraft({ ...draft, basePrice: event.target.value })} required /></div><div className="field"><label>Единица</label><select value={draft.priceUnit} onChange={(event) => setDraft({ ...draft, priceUnit: event.target.value as PriceUnit })}><option value="hour">за час</option><option value="day">за день</option><option value="booking">за бронь</option><option value="person">за человека</option><option value="item">за штуку</option></select></div></div>
+      <div className="form-grid"><div className="field"><label>Минимальное количество часов аренды</label><input type="number" min="1" step="1" value={draft.minRentalHours ?? ""} onChange={(event) => setDraft({ ...draft, minRentalHours: event.target.value ? Number(event.target.value) : null })} /></div><div className="field"><label>Стоимость продления услуги</label><input type="number" min="0.01" step="0.01" value={draft.extensionPrice ?? ""} onChange={(event) => setDraft({ ...draft, extensionPrice: event.target.value || null })} /></div></div>
       <div className="field"><label>Порядок</label><input type="number" min="0" value={draft.sortOrder} onChange={(event) => setDraft({ ...draft, sortOrder: Number(event.target.value) })} /></div>
       <div className="field"><label>Домики</label><select multiple value={draft.houseIds} onChange={(event) => setDraft({ ...draft, houseIds: [...event.target.selectedOptions].map((item) => item.value) })}>{houses.map((house) => <option key={house.id} value={house.id}>{house.name}</option>)}</select><small>Если ничего не выбрано, услуга доступна для всех домиков.</small></div>
       <label><input type="checkbox" checked={draft.isActive} onChange={(event) => setDraft({ ...draft, isActive: event.target.checked })} /> Опубликована</label>

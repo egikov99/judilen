@@ -19,6 +19,8 @@ function mapRows(
       description: row.service.description,
       images: [],
       basePrice: Number(row.service.basePrice),
+      minRentalHours: row.service.minRentalHours,
+      extensionPrice: row.service.extensionPrice === null ? null : Number(row.service.extensionPrice),
       priceUnit: row.service.priceUnit,
       sortOrder: row.service.sortOrder,
       houseIds: [],
