@@ -19,6 +19,15 @@ function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLEle
   const template = document.createElement("template");
   template.innerHTML = html;
   const injected: Node[] = [];
+  const anchors = new Map<HTMLElement, Comment>();
+  const anchorFor = (destination: HTMLElement) => {
+    const existing = anchors.get(destination);
+    if (existing) return existing;
+    const anchor = document.createComment("judilen-tag-manager");
+    destination.insertBefore(anchor, destination.firstChild);
+    anchors.set(destination, anchor);
+    return anchor;
+  };
   for (const node of template.content.childNodes) {
     if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) continue;
     if (node.nodeType === Node.TEXT_NODE) continue;
@@ -30,10 +39,13 @@ function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLEle
     const destination = bodyFallback && clone instanceof HTMLElement && ["NOSCRIPT", "IFRAME", "IMG", "DIV"].includes(clone.tagName)
       ? bodyFallback
       : target;
-    destination.appendChild(clone);
+    destination.insertBefore(clone, anchorFor(destination));
     injected.push(clone);
   }
-  return () => injected.forEach((node) => node.parentNode?.removeChild(node));
+  return () => {
+    injected.forEach((node) => node.parentNode?.removeChild(node));
+    anchors.forEach((anchor) => anchor.parentNode?.removeChild(anchor));
+  };
 }
 
 export function TagManagerRuntime({ headCode, bodyCode }: { headCode: string; bodyCode: string }) {

@@ -15,7 +15,8 @@ describe("tag manager runtime", () => {
     }));
 
     await waitFor(() => expect(document.head.querySelector('meta[name="tag-manager-test"]')).toBeTruthy());
-    expect(document.body.querySelector('img[data-tag-manager-test="body"]')).toBeTruthy();
+    expect(document.head.firstElementChild).toBe(document.head.querySelector('meta[name="tag-manager-test"]'));
+    expect(document.body.firstElementChild).toBe(document.body.querySelector('img[data-tag-manager-test="body"]'));
     expect((document.body.querySelector('div[data-tag-manager-test="fallback"]') as HTMLDivElement).hidden).toBe(true);
     expect(view.container.innerHTML).toBe("");
 
@@ -31,8 +32,9 @@ describe("tag manager runtime", () => {
     }));
 
     await waitFor(() => expect(document.head.querySelector('meta[name="complete-snippet"]')).toBeTruthy());
+    expect(document.head.firstElementChild).toBe(document.head.querySelector('meta[name="complete-snippet"]'));
     expect(document.head.querySelector("noscript")).toBeNull();
-    expect(document.body.querySelector("noscript")).toBeTruthy();
+    expect(document.body.firstElementChild).toBe(document.body.querySelector("noscript"));
     view.unmount();
   });
 });
