@@ -85,6 +85,8 @@ async function updateBooking(request: Request, context: { params: Promise<{ id: 
         title: existing.title,
         optionTitle: existing.optionTitle,
         priceUnit: existing.priceUnit,
+        minRentalHours: existing.minRentalHours,
+        extensionPrice: existing.extensionPrice,
         unitPrice: existing.unitPrice,
         totalPrice: roundMoney(existing.unitPrice * line.quantity)
       } : line;
@@ -118,6 +120,8 @@ async function updateBooking(request: Request, context: { params: Promise<{ id: 
           serviceTitle: line.title,
           optionTitle: line.optionTitle,
           priceUnit: line.priceUnit,
+          minRentalHours: line.minRentalHours,
+          extensionPrice: line.extensionPrice === null ? null : String(line.extensionPrice),
           quantity: line.quantity,
           unitPrice: String(line.unitPrice),
           totalPrice: String(line.totalPrice)

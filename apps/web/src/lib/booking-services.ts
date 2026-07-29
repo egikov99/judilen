@@ -17,6 +17,8 @@ export type BookingServiceItem = {
   title: string;
   optionTitle: string | null;
   priceUnit: "hour" | "day" | "booking" | "person" | "item";
+  minRentalHours: number | null;
+  extensionPrice: number | null;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -57,6 +59,8 @@ export async function resolveBookingServiceLines(
         title: existing.title,
         optionTitle: existing.optionTitle,
         priceUnit: existing.priceUnit,
+        minRentalHours: existing.minRentalHours,
+        extensionPrice: existing.extensionPrice,
         quantity: selection.quantity,
         unitPrice: existing.unitPrice,
         totalPrice: roundMoney(existing.unitPrice * selection.quantity)
@@ -92,6 +96,8 @@ export async function resolveBookingServiceLines(
       title: service.title,
       optionTitle: option?.title ?? null,
       priceUnit: service.priceUnit as NewBookingServiceLine["priceUnit"],
+      minRentalHours: service.minRentalHours,
+      extensionPrice: service.extensionPrice,
       quantity: selection.quantity,
       unitPrice,
       totalPrice: roundMoney(unitPrice * selection.quantity)
@@ -113,6 +119,8 @@ export async function getBookingServicesMap(bookingIds: string[]) {
     snapshotOptionTitle: bookingServices.optionTitle,
     catalogOptionTitle: serviceOptions.title,
     priceUnit: bookingServices.priceUnit,
+    minRentalHours: bookingServices.minRentalHours,
+    extensionPrice: bookingServices.extensionPrice,
     quantity: bookingServices.quantity,
     unitPrice: bookingServices.unitPrice,
     totalPrice: bookingServices.totalPrice
@@ -131,6 +139,8 @@ export async function getBookingServicesMap(bookingIds: string[]) {
       title: row.snapshotTitle || row.catalogTitle,
       optionTitle: row.snapshotOptionTitle || row.catalogOptionTitle,
       priceUnit: row.priceUnit,
+      minRentalHours: row.minRentalHours,
+      extensionPrice: row.extensionPrice === null ? null : Number(row.extensionPrice),
       quantity: row.quantity,
       unitPrice: Number(row.unitPrice),
       totalPrice: Number(row.totalPrice)

@@ -552,6 +552,10 @@ img { display: block; max-width: 100%; }
 .booking-services-table { min-width: 720px; }
 .booking-services-table .field { display: grid; min-width: 220px; gap: 7px; }
 .booking-services-table input[type="number"] { width: 100px; }
+.booking-services-preview-button { height: auto; min-width: 180px; justify-content: flex-start; padding-block: 9px; text-align: left; white-space: normal; }
+.booking-services-preview { display: grid; gap: 3px; font-size: 12px; line-height: 1.35; }
+.booking-services-preview strong { color: var(--forest-700); }
+.booking-service-extension { display: block; margin-top: 4px; color: var(--muted); white-space: nowrap; }
 .booking-cost-summary { display: grid; gap: 4px; margin-left: auto; width: min(440px, 100%); padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--sage-100); }
 .booking-cost-summary input { width: 150px; text-align: right; }
 .booking-grand-total { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 16px; }
@@ -892,6 +896,8 @@ img { display: block; max-width: 100%; }
   .data-table td[data-label=""]::before { display: none; }
   .data-table td[data-label=""] { justify-content: flex-end; }
   .data-table .action-row { justify-content: flex-end; }
+  .booking-services-preview-button { min-width: 0; max-width: 62%; }
+  .booking-services-table .field { width: 62%; min-width: 0; }
   .button, .icon-button { min-height: 44px; }
   .period-toolbar { align-items: stretch; }
   .period-toolbar > * { flex: 1 1 140px; }

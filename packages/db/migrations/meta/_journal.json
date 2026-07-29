@@ -169,6 +169,13 @@
       "when": 1784592000000,
       "tag": "0023_booking_service_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784678400000,
+      "tag": "0024_booking_service_rental_snapshots",
+      "breakpoints": true
     }
   ]
 }

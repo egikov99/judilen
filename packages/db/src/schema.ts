@@ -677,6 +677,8 @@ export const bookingServices = pgTable(
     serviceTitle: text("service_title").notNull(),
     optionTitle: text("option_title"),
     priceUnit: servicePriceUnit("price_unit").notNull(),
+    minRentalHours: integer("min_rental_hours"),
+    extensionPrice: numeric("extension_price", { precision: 12, scale: 2 }),
     quantity: integer("quantity").notNull().default(1),
     unitPrice: numeric("unit_price", { precision: 12, scale: 2 }).notNull(),
     totalPrice: numeric("total_price", { precision: 12, scale: 2 }).notNull(),

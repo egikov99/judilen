@@ -83,6 +83,8 @@ export async function POST(request: Request) {
           serviceTitle: line.title,
           optionTitle: line.optionTitle,
           priceUnit: line.priceUnit,
+          minRentalHours: line.minRentalHours,
+          extensionPrice: line.extensionPrice === null ? null : String(line.extensionPrice),
           quantity: line.quantity,
           unitPrice: String(line.unitPrice),
           totalPrice: String(line.totalPrice)

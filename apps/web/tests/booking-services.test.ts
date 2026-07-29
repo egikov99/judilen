@@ -15,6 +15,10 @@ describe("booking-owned services", () => {
     expect(migration).toContain('ADD COLUMN "price_unit" "service_price_unit"');
     expect(migration).not.toContain('UPDATE "services"');
     expect(migration).not.toContain('DELETE FROM "services"');
+    const rentalSnapshots = source("../../packages/db/migrations/0024_booking_service_rental_snapshots.sql");
+    expect(rentalSnapshots).toContain('ADD COLUMN "min_rental_hours" integer');
+    expect(rentalSnapshots).toContain('ADD COLUMN "extension_price" numeric(12, 2)');
+    expect(rentalSnapshots).toContain('FROM "services" service');
   });
 
   it("stores immutable display and price snapshots on each booking line", () => {
@@ -23,6 +27,8 @@ describe("booking-owned services", () => {
     expect(schema).toContain('serviceTitle: text("service_title").notNull()');
     expect(schema).toContain('optionTitle: text("option_title")');
     expect(schema).toContain('priceUnit: servicePriceUnit("price_unit").notNull()');
+    expect(schema).toContain('minRentalHours: integer("min_rental_hours")');
+    expect(schema).toContain('extensionPrice: numeric("extension_price"');
     expect(schema).toContain('unitPrice: numeric("unit_price"');
     expect(schema).toContain('totalPrice: numeric("total_price"');
   });
@@ -51,6 +57,7 @@ describe("booking-owned services", () => {
     expect(detailRoute).toContain("export const PUT = updateBooking");
     expect(detailRoute).toContain("totalAmount: String(totalAmount)");
     expect(detailRoute).toContain("tx.delete(bookingServices)");
+    expect(detailRoute).toContain("extensionPrice: line.extensionPrice");
   });
 
   it("keeps service editing inside the booking and recalculates in the browser", () => {
@@ -59,6 +66,10 @@ describe("booking-owned services", () => {
     expect(editor).toContain("Стоимость проживания");
     expect(editor).toContain("Итог по услугам");
     expect(editor).toContain("Общая стоимость бронирования");
+    expect(editor).toContain("Не выбраны");
+    expect(editor).toContain("Ещё ");
+    expect(editor).toContain("Минимум:");
+    expect(editor).toContain("Продление:");
     expect(editor).toContain('method: "PUT"');
     expect(editor).toContain("accommodationAmount + servicesTotal");
     expect(editor).not.toContain("/api/admin/services/");
