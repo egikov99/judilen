@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { adminNavigation, can } from "@judilen/auth";
+import { normalizeImageUrl } from "@/lib/image-urls";
 
 describe("gazebos section", () => {
   it("adds production-safe database objects and permissions", () => {
@@ -45,5 +46,10 @@ describe("gazebos section", () => {
     expect(detailPage).toContain("getPublicGazeboBySlug");
     expect(detailPage).not.toContain("HouseBookingCard");
     expect(detailPage).not.toContain("formatCurrency");
+  });
+
+  it("allows uploaded gazebo photos on public pages", () => {
+    expect(normalizeImageUrl("/uploads/gazebos/gazebo-id/photo.webp"))
+      .toBe("/uploads/gazebos/gazebo-id/photo.webp");
   });
 });

@@ -22,7 +22,7 @@ function bookedService(index: number, overrides: Partial<BookingServiceItem> = {
     extensionPrice: index === 1 ? 15 : null,
     quantity: index === 1 ? 2 : index === 2 ? 4 : 1,
     unitPrice: index === 1 ? 40 : index === 2 ? 15 : 10,
-    totalPrice: index === 1 ? 80 : index === 2 ? 60 : 10,
+    totalPrice: index === 1 ? 40 : index === 2 ? 60 : 10,
     ...overrides
   };
 }
@@ -62,7 +62,15 @@ describe("booking services editor", () => {
     expect(screen.getByText("Минимум: 2 часа")).toBeTruthy();
     expect(container.querySelector(".booking-service-extension")?.textContent).toContain("15");
     const prices = [...container.querySelectorAll(".currency-value")].map((element) => element.textContent);
-    expect(prices.some((price) => price?.startsWith("80"))).toBe(true);
-    expect(prices.some((price) => price?.startsWith("380"))).toBe(true);
+    expect(prices.some((price) => price?.startsWith("40"))).toBe(true);
+    expect(prices.some((price) => price?.startsWith("340"))).toBe(true);
+  });
+
+  it("adds the extension rate instead of repeating the base price", () => {
+    const { container } = renderEditor([bookedService(1, { quantity: 4 })]);
+    fireEvent.click(screen.getByRole("button", { name: /Баня × 4 часа/ }));
+    const prices = [...container.querySelectorAll(".currency-value")].map((element) => element.textContent);
+    expect(prices.some((price) => price?.startsWith("70"))).toBe(true);
+    expect(prices.some((price) => price?.startsWith("370"))).toBe(true);
   });
 });

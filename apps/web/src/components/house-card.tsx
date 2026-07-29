@@ -15,7 +15,7 @@ function roomLabel(count: number) {
 export function HouseCard({ house }: { house: House }) {
   const priceRange = normalizeHousePriceRange(house);
   return (
-    <article className="house-card">
+    <Link className="house-card" href={`/domiki/${house.slug}`} aria-label={`Подробнее о домике «${house.name}»`}>
       <div className="house-image">
         <PublicImage src={house.images[0]} context={`house-card:${house.id}`} alt={`${house.name} в усадьбе «Юдилен»`} fill sizes="(max-width: 650px) 100vw, (max-width: 950px) 50vw, 33vw" />
         {house.badgeText && <span className="house-tag">{house.badgeText}</span>}
@@ -27,8 +27,8 @@ export function HouseCard({ house }: { house: House }) {
           <span>Максимум {house.guests} человек</span>
           <span>{house.rooms} {roomLabel(house.rooms)}</span>
         </div>
-        <div className="house-footer">{priceRange && <span className={`price ${priceRange.maxPrice && priceRange.minPrice !== priceRange.maxPrice ? "house-price-range" : ""}`}><HousePriceRangeText range={priceRange} /></span>}<Link className="text-link" href={`/domiki/${house.slug}`}>Подробнее →</Link></div>
+        <div className="house-footer">{priceRange && <span className={`price ${priceRange.maxPrice && priceRange.minPrice !== priceRange.maxPrice ? "house-price-range" : ""}`}><HousePriceRangeText range={priceRange} /></span>}<span className="text-link">Подробнее →</span></div>
       </div>
-    </article>
+    </Link>
   );
 }

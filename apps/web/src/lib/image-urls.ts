@@ -10,7 +10,7 @@ function safeLocalImagePath(value: string) {
     return null;
   }
   if (decoded.includes("..") || decoded.includes("\\") || decoded.includes("\0")) return null;
-  if (/^\/uploads\/(houses|services|content)\/[a-z0-9-]+\/[a-z0-9-]+\.(jpe?g|png|webp)$/i.test(decoded)) return decoded;
+  if (/^\/uploads\/(houses|services|content|gazebos)\/[a-z0-9-]+\/[a-z0-9-]+\.(jpe?g|png|webp)$/i.test(decoded)) return decoded;
   if (/^\/images\/[a-z0-9_./-]+\.(jpe?g|png|webp|avif)$/i.test(decoded)) return decoded;
   return null;
 }

@@ -4,7 +4,8 @@ import { formatCurrency } from "@/components/currency";
 import { ImageGallery } from "@/components/image-gallery";
 import { PublicShell } from "@/components/public-shell";
 import { DEFAULT_IMAGE_URL } from "@/lib/image-urls";
-import { getPublicServiceBySlug, priceUnitLabels } from "@/lib/services";
+import { getPublicServiceBySlug } from "@/lib/services";
+import { servicePriceUnitLabel } from "@/lib/service-types";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const defaultOption = service.options.find((option) => option.isDefault) ?? service.options[0];
   const price = defaultOption?.price ?? service.basePrice;
   return <PublicShell>
-    <section className="page-hero"><div className="container"><div className="breadcrumbs">Главная / Услуги / {service.title}</div><span className="eyebrow">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span><h1 className="page-title">{service.title}</h1><p className="page-intro">{service.description}</p></div></section>
+    <section className="page-hero"><div className="container"><div className="breadcrumbs">Главная / Услуги / {service.title}</div><span className="eyebrow">от {formatCurrency(price)} {servicePriceUnitLabel(service)}</span><h1 className="page-title">{service.title}</h1><p className="page-intro">{service.description}</p></div></section>
     <section className="section" style={{ paddingTop: 45 }}><div className="container">
       <ImageGallery galleryId={`service:${service.id}`} images={service.images} fallbackImage={DEFAULT_IMAGE_URL} alt={service.title} preserveAspectRatio />
       {(service.minRentalHours || service.extensionPrice !== null) && <div className="public-service-options"><h2>Условия аренды</h2>{service.minRentalHours && <div className="summary-row"><span>Минимальный срок аренды</span><strong>{service.minRentalHours} часа</strong></div>}{service.extensionPrice !== null && <div className="summary-row"><span>Продление</span><strong>{formatCurrency(service.extensionPrice)} / час</strong></div>}</div>}

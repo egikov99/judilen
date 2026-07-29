@@ -6,7 +6,8 @@ import { formatCurrency } from "@/components/currency";
 import { HousePriceRangeText } from "@/components/house-price-range";
 import { formatPrice, type House } from "@/lib/catalog";
 import { normalizeHousePriceRange } from "@/lib/house-price-range";
-import { priceUnitLabels, type PublicService } from "@/lib/service-types";
+import { servicePriceUnitLabel, type PublicService } from "@/lib/service-types";
+import { calculateServiceLineTotal } from "@/lib/service-pricing";
 import { calculateStayTotal, roundMoney, weekdayLabels } from "@/lib/weekday-prices";
 
 function guestLabel(count: number) {
@@ -27,7 +28,13 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
     const state = selected[service.id];
     if (!state?.enabled) return sum;
     const option = service.options.find((item) => item.id === state.optionId) ?? service.options.find((item) => item.isDefault) ?? service.options[0];
-    return sum + (option?.price ?? service.basePrice) * state.quantity;
+    return sum + calculateServiceLineTotal({
+      unitPrice: option?.price ?? service.basePrice,
+      quantity: state.quantity,
+      priceUnit: service.priceUnit,
+      minRentalHours: service.minRentalHours,
+      extensionPrice: service.extensionPrice
+    });
   }, 0));
   const total = roundMoney(stay.total + servicesTotal);
   const priceRange = normalizeHousePriceRange(house);
@@ -98,13 +105,14 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
           {services.map((service) => {
             const item = serviceSelection(service);
             const option = service.options.find((current) => current.id === item.optionId) ?? service.options[0];
+            const minimumQuantity = service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1;
             return <div className="notice" key={service.id} style={{ display: "grid", gap: 10 }}>
               <label style={{ display: "flex", gap: 9 }}><input type="checkbox" checked={item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label>
               <div className="form-grid">
                 <div className="field"><label htmlFor={`option-${service.id}`}>Вариант</label><select id={`option-${service.id}`} value={item.optionId} disabled={!item.enabled || !service.options.length} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title} - {formatPrice(current.price)}</option>)}</select></div>
-                <div className="field"><label htmlFor={`quantity-${service.id}`}>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input id={`quantity-${service.id}`} type="number" min={service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div>
+                <div className="field"><label htmlFor={`quantity-${service.id}`}>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input id={`quantity-${service.id}`} type="number" min={minimumQuantity} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, quantity: Math.max(minimumQuantity, Number(event.target.value) || minimumQuantity) } }))} /></div>
               </div>
-              <small>{formatCurrency(option?.price ?? service.basePrice)} {priceUnitLabels[service.priceUnit]}</small>
+              <small>Базовая стоимость: {formatCurrency(option?.price ?? service.basePrice)} {servicePriceUnitLabel(service)}{service.extensionPrice !== null && <> · продление {formatCurrency(service.extensionPrice)}/час</>}</small>
             </div>;
           })}
         </div>}

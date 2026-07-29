@@ -13,7 +13,7 @@ export default async function CustomersPage() {
     email: customers.email,
     phone: customers.phone,
     bookingsCount: count(bookings.id),
-    paid: sql<string>`coalesce(sum(${bookings.paidAmount}), 0)`
+    paid: sql<string>`coalesce(sum(case when ${bookings.status} not in ('cancelled','declined','blocked','import_removed') and ${bookings.paymentStatus} <> 'refunded' then ${bookings.paidAmount} else 0 end), 0)`
   }).from(customers).leftJoin(bookings, eq(customers.id, bookings.customerId)).groupBy(customers.id).orderBy(desc(customers.createdAt));
   return <main className="admin-content"><h1 className="admin-title">Клиенты</h1><p className="admin-subtitle">Контакты и агрегированная история бронирований.</p><section className="panel"><div className="button-row" style={{ justifyContent: "flex-end", marginBottom: 16 }}><Link className="button button-ghost" href="/api/admin/exports/customers?format=xls">Excel</Link><Link className="button button-ghost" href="/api/admin/exports/customers?format=csv">CSV</Link></div><table className="data-table"><thead><tr><th>Клиент</th><th>Контакты</th><th>Бронирований</th><th>Оплачено</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td data-label="Клиент"><Link className="text-link" href={`/admin/customers/${row.id}`}><strong>{row.firstName} {row.lastName}</strong></Link></td><td data-label="Контакты">{row.email}<br />{row.phone}</td><td data-label="Бронирований">{row.bookingsCount}</td><td data-label="Оплачено">{formatCurrency(Number(row.paid))}</td></tr>)}</tbody></table>{!rows.length && <p className="notice">Клиентов пока нет.</p>}</section></main>;
 }

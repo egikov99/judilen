@@ -81,6 +81,8 @@ describe("house weekday prices", () => {
     const card = readFileSync(resolve(process.cwd(), "src/components/house-card.tsx"), "utf8");
     expect(card).toContain("HousePriceRangeText");
     expect(card).toContain("normalizeHousePriceRange");
+    expect(card).toContain('<Link className="house-card"');
+    expect(card).toContain('<span className="text-link">Подробнее →</span>');
     expect(card).not.toContain("house.minPrice === house.maxPrice");
   });
 

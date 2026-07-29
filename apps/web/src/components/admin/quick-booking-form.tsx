@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { formatCurrency } from "@/components/currency";
+import { calculateServiceLineTotal } from "@/lib/service-pricing";
+import { servicePriceUnitLabel } from "@/lib/service-types";
 import type { PublicService } from "@/lib/service-types";
 
 export function QuickBookingForm({ houses, channels, services, defaults, initiallyOpen = false }: {
@@ -23,7 +25,13 @@ export function QuickBookingForm({ houses, channels, services, defaults, initial
     const selected = selectedServices[service.id];
     if (!selected?.enabled) return sum;
     const option = service.options.find((item) => item.id === selected.optionId) ?? service.options[0];
-    return sum + (option?.price ?? service.basePrice) * selected.quantity;
+    return sum + calculateServiceLineTotal({
+      unitPrice: option?.price ?? service.basePrice,
+      quantity: selected.quantity,
+      priceUnit: service.priceUnit,
+      minRentalHours: service.minRentalHours,
+      extensionPrice: service.extensionPrice
+    });
   }, 0);
   function selection(service: PublicService) {
     return selectedServices[service.id] ?? {
@@ -61,7 +69,7 @@ export function QuickBookingForm({ houses, channels, services, defaults, initial
     <div className="form-grid"><div className="field"><label>Имя</label><input name="firstName" required /></div><div className="field"><label>Фамилия</label><input name="lastName" /></div></div>
     <div className="form-grid"><div className="field"><label>Email</label><input name="email" type="email" required /></div><div className="field"><label>Телефон</label><input name="phone" required /></div></div>
     <div className="form-grid"><div className="field"><label>Гостей (максимум {capacity})</label><select name="guests" defaultValue="1">{Array.from({ length: capacity }, (_, index) => index + 1).map((count) => <option value={count} key={count}>{count}</option>)}</select></div><div className="field"><label>Стоимость проживания</label><input name="totalAmount" type="number" min="0" step="0.01" defaultValue="0" required /></div></div>
-    {!!availableServices.length && <section className="form-stack"><strong>Дополнительные услуги</strong>{availableServices.map((service) => { const item = selection(service); const option = service.options.find((current) => current.id === item.optionId) ?? service.options[0]; return <div className="notice" key={service.id}><label><input type="checkbox" checked={item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label><div className="form-grid">{!!service.options.length && <div className="field"><label>Вариант</label><select value={item.optionId} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title}</option>)}</select></div>}<div className="field"><label>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input type="number" min={service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div></div><small>{formatCurrency(option?.price ?? service.basePrice)} за единицу</small></div>; })}<div className="summary-row"><span>Итого по услугам</span><strong>{formatCurrency(servicesTotal)}</strong></div></section>}
+    {!!availableServices.length && <section className="form-stack"><strong>Дополнительные услуги</strong>{availableServices.map((service) => { const item = selection(service); const option = service.options.find((current) => current.id === item.optionId) ?? service.options[0]; const minimumQuantity = service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1; return <div className="notice" key={service.id}><label><input type="checkbox" checked={item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label><div className="form-grid">{!!service.options.length && <div className="field"><label>Вариант</label><select value={item.optionId} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title}</option>)}</select></div>}<div className="field"><label>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input type="number" min={minimumQuantity} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, quantity: Math.max(minimumQuantity, Number(event.target.value) || minimumQuantity) } }))} /></div></div><small>Базовая стоимость: {formatCurrency(option?.price ?? service.basePrice)} {servicePriceUnitLabel(service)}{service.extensionPrice !== null && <> · продление {formatCurrency(service.extensionPrice)}/час</>}</small></div>; })}<div className="summary-row"><span>Итого по услугам</span><strong>{formatCurrency(servicesTotal)}</strong></div></section>}
     <div className="field"><label>Комментарий</label><textarea name="managerComment" /></div>
     <button className="button button-primary">Создать бронирование</button>
   </form></div>}

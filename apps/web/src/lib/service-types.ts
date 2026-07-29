@@ -30,3 +30,10 @@ export const priceUnitLabels: Record<PublicService["priceUnit"], string> = {
   person: "за человека",
   item: "за штуку"
 };
+
+export function servicePriceUnitLabel(service: Pick<PublicService, "priceUnit" | "minRentalHours">) {
+  if (service.priceUnit === "hour" && service.minRentalHours !== null) {
+    return `за ${service.minRentalHours} ч.`;
+  }
+  return priceUnitLabels[service.priceUnit];
+}

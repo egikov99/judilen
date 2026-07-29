@@ -9,7 +9,8 @@ import { getTerritoryGallery, TERRITORY_GALLERY_FALLBACK } from "@/lib/homepage-
 import { DEFAULT_IMAGE_URL } from "@/lib/image-urls";
 import { getPublishedHouses } from "@/lib/houses";
 import { getPublishedReviews, getPublishedReviewStats } from "@/lib/reviews";
-import { getPublicServices, priceUnitLabels } from "@/lib/services";
+import { getPublicServices } from "@/lib/services";
+import { servicePriceUnitLabel } from "@/lib/service-types";
 import { safeJsonForHtml } from "@/lib/safe-json";
 
 export const dynamic = "force-dynamic";
@@ -102,7 +103,7 @@ export default async function HomePage() {
                   <article className="home-service-card" key={service.id}>
                     <PublicImage className="home-service-image" src={service.images[0] ?? DEFAULT_IMAGE_URL} context={`home-service:${service.id}`} alt={service.title} width={512} height={384} loading="lazy" />
                     <div className="home-service-copy">
-                      <span className="home-service-price">от {formatCurrency(price)} {priceUnitLabels[service.priceUnit]}</span>
+                      <span className="home-service-price">от {formatCurrency(price)} {servicePriceUnitLabel(service)}</span>
                       <h3>{service.title}</h3>
                       <p>{service.description}</p>
                       <Link className="text-link" href={`/uslugi/${service.slug}`}>Подробнее →</Link>

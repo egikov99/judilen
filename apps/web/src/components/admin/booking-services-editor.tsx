@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminModal } from "@/components/admin/admin-modal";
 import { formatCurrency } from "@/components/currency";
 import type { BookingServiceItem } from "@/lib/booking-services";
+import { calculateServiceLineTotal } from "@/lib/service-pricing";
 import type { PublicService } from "@/lib/service-types";
 import { roundMoney } from "@/lib/weekday-prices";
 
@@ -107,7 +108,13 @@ export function BookingServicesEditor({
       priceUnit,
       minRentalHours,
       extensionPrice,
-      totalPrice: roundMoney(unitPrice * line.quantity)
+      totalPrice: calculateServiceLineTotal({
+        unitPrice,
+        quantity: line.quantity,
+        priceUnit,
+        minRentalHours,
+        extensionPrice
+      })
     };
   }
 
@@ -181,7 +188,7 @@ export function BookingServicesEditor({
             return <tr key={line.key}>
               <td data-label="Название"><div className="field"><select aria-label="Услуга" value={line.serviceId} disabled={!canEdit || !item.service} onChange={(event) => changeService(line.key, event.target.value)}>{!item.service && <option value={line.serviceId}>{item.title} (недоступна)</option>}{selectableServices.map((service) => <option key={service.id} value={service.id}>{service.id === line.serviceId ? item.title : service.title}</option>)}</select>{item.service && item.service.options.length > 0 && <select aria-label="Вариант услуги" value={line.serviceOptionId ?? ""} disabled={!canEdit} onChange={(event) => setLines((current) => current.map((currentLine) => currentLine.key === line.key ? { ...currentLine, serviceOptionId: event.target.value || null } : currentLine))}>{item.service.options.map((option) => <option key={option.id} value={option.id}>{option.id === line.serviceOptionId ? item.optionTitle ?? option.title : option.title}</option>)}</select>}{item.optionTitle && !item.service && <small>Вариант: {item.optionTitle}</small>}{item.minRentalHours && <small>Минимум: {quantityText("hour", item.minRentalHours)}</small>}</div></td>
               <td data-label={quantityLabels[item.priceUnit]}><input aria-label={quantityLabels[item.priceUnit]} type="number" min={minimum} max="100" value={line.quantity} disabled={!canEdit} onChange={(event) => setLines((current) => current.map((currentLine) => currentLine.key === line.key ? { ...currentLine, quantity: Math.max(minimum, Number(event.target.value) || minimum) } : currentLine))} /></td>
-              <td data-label="Цена за единицу"><strong>{formatCurrency(item.unitPrice)}{unitSuffix(item.priceUnit)}</strong>{item.extensionPrice !== null && <small className="booking-service-extension">Продление: {formatCurrency(item.extensionPrice)}/час</small>}</td>
+              <td data-label="Цена за единицу"><strong>{formatCurrency(item.unitPrice)}{item.priceUnit === "hour" && item.minRentalHours !== null ? ` за ${quantityText("hour", item.minRentalHours)}` : unitSuffix(item.priceUnit)}</strong>{item.extensionPrice !== null && <small className="booking-service-extension">Продление: {formatCurrency(item.extensionPrice)}/час</small>}</td>
               <td data-label="Итого"><strong>{formatCurrency(item.totalPrice)}</strong></td>
               {canEdit && <td data-label=""><button className="button button-ghost" type="button" onClick={() => setLines((current) => current.filter((currentLine) => currentLine.key !== line.key))}>Удалить</button></td>}
             </tr>;

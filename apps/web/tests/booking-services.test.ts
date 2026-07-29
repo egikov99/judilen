@@ -45,6 +45,11 @@ describe("booking-owned services", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("rejects rental hours below the catalog minimum on the server", () => {
+    const helper = source("src/lib/booking-services.ts");
+    expect(helper).toContain('selection.quantity < (service.minRentalHours ?? 1)');
+  });
+
   it("returns services from list and detail APIs and supports PUT", () => {
     const listRoute = source("src/app/api/admin/bookings/route.ts");
     const detailRoute = source("src/app/api/admin/bookings/[id]/route.ts");

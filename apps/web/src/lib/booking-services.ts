@@ -1,6 +1,7 @@
 import { bookingServices, db, serviceOptions, services } from "@judilen/db";
 import { asc, eq, inArray } from "drizzle-orm";
 import { getActiveServicesByIds } from "./services";
+import { calculateServiceLineTotal } from "./service-pricing";
 import { roundMoney } from "./weekday-prices";
 
 export type BookingServiceSelection = {
@@ -46,7 +47,13 @@ export async function resolveBookingServiceLines(
       item.serviceId === selection.serviceId &&
       item.serviceOptionId === (selection.serviceOptionId ?? null)
     ));
-    if (!service && existing && Number.isInteger(selection.quantity) && selection.quantity >= 1) {
+    if (
+      !service &&
+      existing &&
+      Number.isInteger(selection.quantity) &&
+      selection.quantity >= 1 &&
+      (existing.priceUnit !== "hour" || selection.quantity >= (existing.minRentalHours ?? 1))
+    ) {
       const identity = `${existing.serviceId}:${existing.serviceOptionId ?? "base"}`;
       if (seen.has(identity)) {
         invalid = true;
@@ -63,7 +70,13 @@ export async function resolveBookingServiceLines(
         extensionPrice: existing.extensionPrice,
         quantity: selection.quantity,
         unitPrice: existing.unitPrice,
-        totalPrice: roundMoney(existing.unitPrice * selection.quantity)
+        totalPrice: calculateServiceLineTotal({
+          unitPrice: existing.unitPrice,
+          quantity: selection.quantity,
+          priceUnit: existing.priceUnit,
+          minRentalHours: existing.minRentalHours,
+          extensionPrice: existing.extensionPrice
+        })
       });
       continue;
     }
@@ -100,7 +113,13 @@ export async function resolveBookingServiceLines(
       extensionPrice: service.extensionPrice,
       quantity: selection.quantity,
       unitPrice,
-      totalPrice: roundMoney(unitPrice * selection.quantity)
+      totalPrice: calculateServiceLineTotal({
+        unitPrice,
+        quantity: selection.quantity,
+        priceUnit: service.priceUnit,
+        minRentalHours: service.minRentalHours,
+        extensionPrice: service.extensionPrice
+      })
     });
   }
   return { lines, invalid };

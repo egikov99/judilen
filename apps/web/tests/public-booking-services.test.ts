@@ -36,7 +36,7 @@ const service: PublicService = {
   description: "Баня",
   images: [],
   basePrice: 40,
-  minRentalHours: 2,
+  minRentalHours: 3,
   extensionPrice: 15,
   priceUnit: "hour",
   sortOrder: 1,
@@ -54,7 +54,8 @@ describe("public booking services payload", () => {
     render(createElement(HouseBookingCard, { house, services: [service] }));
 
     fireEvent.click(screen.getByRole("checkbox", { name: /Баня/ }));
-    fireEvent.change(screen.getByLabelText("Часы"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("Часы"), { target: { value: "1" } });
+    expect((screen.getByLabelText("Часы") as HTMLInputElement).value).toBe("3");
     const submit = screen.getByRole("button", { name: "Отправить заявку" });
     fireEvent.submit(submit.closest("form")!);
 

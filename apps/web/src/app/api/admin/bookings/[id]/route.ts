@@ -7,6 +7,7 @@ import { requirePermission } from "@/lib/session";
 import { bookingUpdateSchema, problem } from "@/lib/validation";
 import { sendBookingCustomerEmail } from "@/lib/booking-emails";
 import { roundMoney } from "@/lib/weekday-prices";
+import { calculateServiceLineTotal } from "@/lib/service-pricing";
 
 async function authorize(permission: "bookings.read" | "bookings.update") {
   const auth = await requirePermission(permission);
@@ -88,7 +89,13 @@ async function updateBooking(request: Request, context: { params: Promise<{ id: 
         minRentalHours: existing.minRentalHours,
         extensionPrice: existing.extensionPrice,
         unitPrice: existing.unitPrice,
-        totalPrice: roundMoney(existing.unitPrice * line.quantity)
+        totalPrice: calculateServiceLineTotal({
+          unitPrice: existing.unitPrice,
+          quantity: line.quantity,
+          priceUnit: existing.priceUnit,
+          minRentalHours: existing.minRentalHours,
+          extensionPrice: existing.extensionPrice
+        })
       } : line;
     })
   } : null;
@@ -102,6 +109,7 @@ async function updateBooking(request: Request, context: { params: Promise<{ id: 
   const accommodationAmount = parsed.data.accommodationAmount ?? Number(before.accommodationAmount);
   const totalAmount = roundMoney(accommodationAmount + servicesTotal);
   const paidAmount = parsed.data.paidAmount;
+  const effectivePaidAmount = paidAmount ?? (parsed.data.status === "paid" ? totalAmount : undefined);
   const data = {
     ...(parsed.data.status === undefined ? {} : { status: parsed.data.status }),
     ...(parsed.data.salesChannelId === undefined ? {} : { salesChannelId: parsed.data.salesChannelId }),
@@ -132,7 +140,7 @@ async function updateBooking(request: Request, context: { params: Promise<{ id: 
       ...data,
       accommodationAmount: String(accommodationAmount),
       totalAmount: String(totalAmount),
-      ...(paidAmount === undefined ? {} : { paidAmount: String(paidAmount) }),
+      ...(effectivePaidAmount === undefined ? {} : { paidAmount: String(effectivePaidAmount) }),
       ...(parsed.data.status === "paid" ? { paymentStatus: "paid" } : {}),
       updatedAt: new Date()
     }).where(eq(bookings.id, id)).returning();

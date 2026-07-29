@@ -16,7 +16,7 @@ export async function GET() {
       phone: customers.phone,
       notes: customers.notes,
       bookingsCount: count(bookings.id),
-      totalRevenue: sql<string>`coalesce(sum(${bookings.paidAmount}), 0)`
+      totalRevenue: sql<string>`coalesce(sum(case when ${bookings.status} not in ('cancelled','declined','blocked','import_removed') and ${bookings.paymentStatus} <> 'refunded' then ${bookings.paidAmount} else 0 end), 0)`
     })
     .from(customers)
     .leftJoin(bookings, eq(customers.id, bookings.customerId))
@@ -25,4 +25,3 @@ export async function GET() {
     .limit(500);
   return Response.json({ items });
 }
-
