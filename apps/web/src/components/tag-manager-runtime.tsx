@@ -14,7 +14,7 @@ function executableClone(node: Node): Node {
   return clone;
 }
 
-function injectSnippet(target: HTMLElement, html: string) {
+function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLElement) {
   if (!html.trim()) return () => undefined;
   const template = document.createElement("template");
   template.innerHTML = html;
@@ -27,7 +27,10 @@ function injectSnippet(target: HTMLElement, html: string) {
       clone.dataset.judilenTagManager = "true";
       if (clone.tagName === "DIV") clone.hidden = true;
     }
-    target.appendChild(clone);
+    const destination = bodyFallback && clone instanceof HTMLElement && ["NOSCRIPT", "IFRAME", "IMG", "DIV"].includes(clone.tagName)
+      ? bodyFallback
+      : target;
+    destination.appendChild(clone);
     injected.push(clone);
   }
   return () => injected.forEach((node) => node.parentNode?.removeChild(node));
@@ -35,7 +38,7 @@ function injectSnippet(target: HTMLElement, html: string) {
 
 export function TagManagerRuntime({ headCode, bodyCode }: { headCode: string; bodyCode: string }) {
   useEffect(() => {
-    const removeHead = injectSnippet(document.head, headCode);
+    const removeHead = injectSnippet(document.head, headCode, document.body);
     const removeBody = injectSnippet(document.body, bodyCode);
     return () => {
       removeHead();

@@ -23,4 +23,16 @@ describe("tag manager runtime", () => {
     expect(document.head.querySelector('meta[name="tag-manager-test"]')).toBeNull();
     expect(document.body.querySelector('img[data-tag-manager-test="body"]')).toBeNull();
   });
+
+  it("moves a noscript fallback from a complete head snippet into the body", async () => {
+    const view = render(createElement(TagManagerRuntime, {
+      headCode: '<meta name="complete-snippet" content="head"><noscript><div><img alt="" src="data:," /></div></noscript>',
+      bodyCode: ""
+    }));
+
+    await waitFor(() => expect(document.head.querySelector('meta[name="complete-snippet"]')).toBeTruthy());
+    expect(document.head.querySelector("noscript")).toBeNull();
+    expect(document.body.querySelector("noscript")).toBeTruthy();
+    view.unmount();
+  });
 });

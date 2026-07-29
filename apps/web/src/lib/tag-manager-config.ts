@@ -13,8 +13,11 @@ const stylesheetLink = /<\s*link\b[^>]*\brel\s*=\s*["']?stylesheet\b/i;
 const allowedTagNames = new Set(["script", "noscript", "iframe", "img", "meta", "link", "div"]);
 
 function safeTagManagerMarkup(code: string) {
-  if (layoutBreakingMarkup.test(code) || stylesheetLink.test(code) || /<!doctype\b/i.test(code)) return false;
-  return [...code.matchAll(/<\s*\/?\s*([a-z][\w:-]*)\b/gi)]
+  const markup = code
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/(<script\b[^>]*>)[\s\S]*?(<\/script\s*>)/gi, "$1$2");
+  if (layoutBreakingMarkup.test(markup) || stylesheetLink.test(markup) || /<!doctype\b/i.test(markup)) return false;
+  return [...markup.matchAll(/<\s*\/?\s*([a-z][\w:-]*)\b/gi)]
     .every((match) => allowedTagNames.has(match[1].toLowerCase()));
 }
 

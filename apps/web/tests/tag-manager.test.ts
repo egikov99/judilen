@@ -12,6 +12,20 @@ function source(path: string) {
 }
 
 describe("tag manager settings", () => {
+  const yandexMetrikaSnippet = `<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=111138129', 'ym');
+
+    ym(111138129, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/111138129" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->`;
+
   it("defaults to disabled and rejects oversized code", () => {
     expect(tagManagerSettingsSchema.parse({})).toEqual(DEFAULT_TAG_MANAGER_SETTINGS);
     expect(tagManagerSettingsSchema.safeParse({
@@ -35,6 +49,15 @@ describe("tag manager settings", () => {
         tagManagerBodyCode: ""
       }).success).toBe(false);
     }
+  });
+
+  it("accepts the standard Yandex Metrika counter snippet", () => {
+    const result = tagManagerSettingsSchema.safeParse({
+      tagManagerEnabled: true,
+      tagManagerHeadCode: yandexMetrikaSnippet,
+      tagManagerBodyCode: ""
+    });
+    expect(result.success, result.success ? "" : JSON.stringify(result.error.issues)).toBe(true);
   });
 
   it("stores tag manager settings in the global settings table with cache invalidation", () => {
@@ -102,6 +125,8 @@ describe("tag manager settings", () => {
     expect(config).toContain("https://www.googletagmanager.com");
     expect(config).toContain("https://www.google-analytics.com");
     expect(config).toContain("https://region1.google-analytics.com");
+    expect(config).toContain("https://mc.yandex.ru");
+    expect(config).toContain("https://mc.yandex.com");
     expect(config).not.toContain("script-src *");
   });
 });

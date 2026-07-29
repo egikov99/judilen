@@ -18,12 +18,16 @@ const publicImageSources = Array.from(new Set([
 ]));
 const tagManagerScriptSources = [
   "https://www.googletagmanager.com",
-  "https://www.google-analytics.com"
+  "https://www.google-analytics.com",
+  "https://mc.yandex.ru",
+  "https://mc.yandex.com"
 ];
 const tagManagerConnectSources = [
   "https://www.googletagmanager.com",
   "https://www.google-analytics.com",
-  "https://region1.google-analytics.com"
+  "https://region1.google-analytics.com",
+  "https://mc.yandex.ru",
+  "https://mc.yandex.com"
 ];
 const tagManagerFrameSources = ["https://www.googletagmanager.com"];
 const contentSecurityPolicy = [
