@@ -17,7 +17,7 @@ describe("tag manager runtime", () => {
     await waitFor(() => expect(document.head.querySelector('meta[name="tag-manager-test"]')).toBeTruthy());
     expect(document.head.firstElementChild).toBe(document.head.querySelector('meta[name="tag-manager-test"]'));
     expect(document.body.firstElementChild).toBe(document.body.querySelector('img[data-tag-manager-test="body"]'));
-    expect((document.body.querySelector('div[data-tag-manager-test="fallback"]') as HTMLDivElement).hidden).toBe(true);
+    expect((document.body.querySelector('div[data-tag-manager-test="fallback"]') as HTMLDivElement).hidden).toBe(false);
     expect(view.container.innerHTML).toBe("");
 
     view.unmount();
@@ -25,16 +25,20 @@ describe("tag manager runtime", () => {
     expect(document.body.querySelector('img[data-tag-manager-test="body"]')).toBeNull();
   });
 
-  it("moves a noscript fallback from a complete head snippet into the body", async () => {
+  it("keeps a complete head snippet together and in its original order", async () => {
     const view = render(createElement(TagManagerRuntime, {
-      headCode: '<meta name="complete-snippet" content="head"><noscript><div><img alt="" src="data:," /></div></noscript>',
+      headCode: '<!-- snippet-start --><script type="application/json">{"counter":1}</script><noscript><div><img alt="" src="data:," /></div></noscript><!-- snippet-end -->',
       bodyCode: ""
     }));
 
-    await waitFor(() => expect(document.head.querySelector('meta[name="complete-snippet"]')).toBeTruthy());
-    expect(document.head.firstElementChild).toBe(document.head.querySelector('meta[name="complete-snippet"]'));
-    expect(document.head.querySelector("noscript")).toBeNull();
-    expect(document.body.firstElementChild).toBe(document.body.querySelector("noscript"));
+    await waitFor(() => expect(document.head.querySelector('script[type="application/json"]')).toBeTruthy());
+    expect(document.head.childNodes[0].nodeType).toBe(Node.COMMENT_NODE);
+    expect(document.head.childNodes[0].textContent?.trim()).toBe("snippet-start");
+    expect((document.head.childNodes[1] as HTMLElement).tagName).toBe("SCRIPT");
+    expect((document.head.childNodes[2] as HTMLElement).tagName).toBe("NOSCRIPT");
+    expect(document.head.childNodes[3].nodeType).toBe(Node.COMMENT_NODE);
+    expect(document.head.childNodes[3].textContent?.trim()).toBe("snippet-end");
+    expect(document.body.querySelector("noscript")).toBeNull();
     view.unmount();
   });
 });

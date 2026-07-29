@@ -14,7 +14,7 @@ function executableClone(node: Node): Node {
   return clone;
 }
 
-function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLElement) {
+function injectSnippet(target: HTMLElement, html: string) {
   if (!html.trim()) return () => undefined;
   const template = document.createElement("template");
   template.innerHTML = html;
@@ -32,14 +32,7 @@ function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLEle
     if (node.nodeType === Node.TEXT_NODE && !node.textContent?.trim()) continue;
     if (node.nodeType === Node.TEXT_NODE) continue;
     const clone = executableClone(node);
-    if (clone instanceof HTMLElement) {
-      clone.dataset.judilenTagManager = "true";
-      if (clone.tagName === "DIV") clone.hidden = true;
-    }
-    const destination = bodyFallback && clone instanceof HTMLElement && ["NOSCRIPT", "IFRAME", "IMG", "DIV"].includes(clone.tagName)
-      ? bodyFallback
-      : target;
-    destination.insertBefore(clone, anchorFor(destination));
+    target.insertBefore(clone, anchorFor(target));
     injected.push(clone);
   }
   return () => {
@@ -50,7 +43,7 @@ function injectSnippet(target: HTMLElement, html: string, bodyFallback?: HTMLEle
 
 export function TagManagerRuntime({ headCode, bodyCode }: { headCode: string; bodyCode: string }) {
   useEffect(() => {
-    const removeHead = injectSnippet(document.head, headCode, document.body);
+    const removeHead = injectSnippet(document.head, headCode);
     const removeBody = injectSnippet(document.body, bodyCode);
     return () => {
       removeHead();
