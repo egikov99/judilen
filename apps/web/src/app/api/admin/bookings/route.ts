@@ -1,4 +1,4 @@
-import { bookingNightlyPrices, bookingStatusHistory, bookings, customers, db, houses, houseWeekdayPrices, salesChannels } from "@judilen/db";
+import { bookingNightlyPrices, bookingServices, bookingStatusHistory, bookings, customers, db, houses, houseWeekdayPrices, salesChannels } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { writeAudit } from "@/lib/audit";
@@ -6,8 +6,9 @@ import { createAdminNotification } from "@/lib/admin-notifications";
 import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { findOverlappingBooking } from "@/lib/booking-availability-db";
 import { requirePermission } from "@/lib/session";
-import { problem } from "@/lib/validation";
-import { calculateNightlyPrices, weekdayPricesFromRows } from "@/lib/weekday-prices";
+import { bookingServiceSelectionSchema, problem } from "@/lib/validation";
+import { bookingServicesTotal, getBookingServicesMap, resolveBookingServiceLines } from "@/lib/booking-services";
+import { calculateNightlyPrices, roundMoney, weekdayPricesFromRows } from "@/lib/weekday-prices";
 
 const manualBookingSchema = z.object({
   houseId: z.uuid(),
@@ -22,7 +23,8 @@ const manualBookingSchema = z.object({
   totalAmount: z.coerce.number().nonnegative(),
   status: z.enum(["confirmed", "blocked"]).default("confirmed"),
   salesChannelId: z.uuid().nullable().optional(),
-  managerComment: z.string().trim().max(5000).optional()
+  managerComment: z.string().trim().max(5000).optional(),
+  services: z.array(bookingServiceSelectionSchema).max(50).default([])
 }).refine((value) => value.checkOut > value.checkIn, { message: "Некорректный период" })
   .refine((value) => value.customerId || (value.firstName && value.email && value.phone), {
     message: "Укажите customerId либо данные нового клиента"
@@ -41,10 +43,12 @@ export async function GET() {
     .select({
       id: bookings.id,
       publicNumber: bookings.publicNumber,
+      houseId: bookings.houseId,
       status: bookings.status,
       checkIn: bookings.checkIn,
       checkOut: bookings.checkOut,
       guests: bookings.guests,
+      accommodationAmount: bookings.accommodationAmount,
       totalAmount: bookings.totalAmount,
       paidAmount: bookings.paidAmount,
       customerName: customers.firstName,
@@ -60,7 +64,11 @@ export async function GET() {
     .leftJoin(salesChannels, eq(bookings.salesChannelId, salesChannels.id))
     .orderBy(desc(bookings.createdAt))
     .limit(200);
-  return Response.json({ items });
+  const serviceMap = await getBookingServicesMap(items.map((item) => item.id));
+  return Response.json({ items: items.map((item) => {
+    const itemServices = serviceMap.get(item.id) ?? [];
+    return { ...item, servicesTotal: bookingServicesTotal(itemServices), services: itemServices };
+  }) });
 }
 
 export async function POST(request: Request) {
@@ -88,6 +96,11 @@ export async function POST(request: Request) {
     parsed.data.checkOut,
     weekdayPricesFromRows(weekdayPriceRows, Number(house.basePrice))
   );
+  const { lines: serviceLines, invalid: invalidService } = await resolveBookingServiceLines(parsed.data.services, parsed.data.houseId);
+  if (invalidService) return problem(422, "Выбранная услуга или вариант недоступны для этого домика");
+  const accommodationAmount = parsed.data.totalAmount;
+  const servicesTotal = bookingServicesTotal(serviceLines);
+  const totalAmount = roundMoney(accommodationAmount + servicesTotal);
   const publicNumber = bookingNumber();
   try {
     const created = await db.transaction(async (tx) => {
@@ -116,7 +129,8 @@ export async function POST(request: Request) {
         checkIn: parsed.data.checkIn,
         checkOut: parsed.data.checkOut,
         guests: parsed.data.guests,
-        totalAmount: String(parsed.data.totalAmount),
+        accommodationAmount: String(accommodationAmount),
+        totalAmount: String(totalAmount),
         status: parsed.data.status,
         source: "crm_manual",
         managerComment: parsed.data.managerComment,
@@ -128,6 +142,19 @@ export async function POST(request: Request) {
         weekday: night.weekday,
         price: String(night.price)
       })));
+      if (serviceLines.length) {
+        await tx.insert(bookingServices).values(serviceLines.map((line) => ({
+          bookingId: booking.id,
+          serviceId: line.serviceId,
+          serviceOptionId: line.serviceOptionId,
+          serviceTitle: line.title,
+          optionTitle: line.optionTitle,
+          priceUnit: line.priceUnit,
+          quantity: line.quantity,
+          unitPrice: String(line.unitPrice),
+          totalPrice: String(line.totalPrice)
+        })));
+      }
       await tx.insert(bookingStatusHistory).values({
         bookingId: booking.id,
         toStatus: parsed.data.status,
@@ -136,7 +163,8 @@ export async function POST(request: Request) {
       });
       return booking;
     });
-    await writeAudit({ session: auth.session, request, action: "booking.create", entityType: "booking", entityId: created.id, after: created });
+    const createdServices = (await getBookingServicesMap([created.id])).get(created.id) ?? [];
+    await writeAudit({ session: auth.session, request, action: "booking.create", entityType: "booking", entityId: created.id, after: { ...created, services: createdServices } });
     await createAdminNotification({
       eventType: "booking_created",
       title: "Новое бронирование",
@@ -144,7 +172,15 @@ export async function POST(request: Request) {
       href: "/admin/bookings",
       dedupeKey: `booking-created:${created.id}`
     });
-    return Response.json({ item: created }, { status: 201 });
+    return Response.json({
+      item: {
+        ...created,
+        accommodationAmount,
+        servicesTotal,
+        totalAmount,
+        services: createdServices
+      }
+    }, { status: 201 });
   } catch (error) {
     if (hasDatabaseErrorCode(error, "23P01")) {
       return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");

@@ -2,6 +2,7 @@ import { bookings, customers, db, houses } from "@judilen/db";
 import { desc, eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { problem } from "@/lib/validation";
+import { bookingServicesTotal, getBookingServicesMap } from "@/lib/booking-services";
 
 export async function GET() {
   const session = await getSession();
@@ -12,6 +13,7 @@ export async function GET() {
     status: bookings.status,
     checkIn: bookings.checkIn,
     checkOut: bookings.checkOut,
+    accommodationAmount: bookings.accommodationAmount,
     totalAmount: bookings.totalAmount,
     paidAmount: bookings.paidAmount,
     houseName: houses.name,
@@ -21,6 +23,9 @@ export async function GET() {
     .innerJoin(houses, eq(bookings.houseId, houses.id))
     .where(eq(customers.userId, session.userId))
     .orderBy(desc(bookings.checkIn));
-  return Response.json({ items });
+  const serviceMap = await getBookingServicesMap(items.map((item) => item.id));
+  return Response.json({ items: items.map((item) => {
+    const itemServices = serviceMap.get(item.id) ?? [];
+    return { ...item, servicesTotal: bookingServicesTotal(itemServices), services: itemServices };
+  }) });
 }
-

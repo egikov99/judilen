@@ -4,9 +4,12 @@ import { asc, desc, eq } from "drizzle-orm";
 import { BookingSalesChannelControl } from "@/components/admin/booking-sales-channel-control";
 import { BookingDocumentsControl } from "@/components/admin/booking-documents-control";
 import { BookingStatusControl } from "@/components/admin/booking-status-control";
+import { BookingServicesEditor } from "@/components/admin/booking-services-editor";
 import { QuickBookingForm } from "@/components/admin/quick-booking-form";
 import { formatCurrency } from "@/components/currency";
 import { requirePageAccess } from "@/lib/session";
+import { getBookingServicesMap } from "@/lib/booking-services";
+import { getPublicServices } from "@/lib/services";
 
 export default async function AdminBookingsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePageAccess("bookings.read");
@@ -14,11 +17,13 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
   const [rows, houseRows, channelRows] = await Promise.all([db.select({
     id: bookings.id,
     publicNumber: bookings.publicNumber,
+    houseId: bookings.houseId,
     customerFirstName: customers.firstName,
     customerLastName: customers.lastName,
     houseName: houses.name,
     checkIn: bookings.checkIn,
     checkOut: bookings.checkOut,
+    accommodationAmount: bookings.accommodationAmount,
     totalAmount: bookings.totalAmount,
     status: bookings.status,
     salesChannelId: bookings.salesChannelId,
@@ -29,6 +34,10 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
     .leftJoin(salesChannels, eq(bookings.salesChannelId, salesChannels.id))
     .orderBy(desc(bookings.createdAt))
     .limit(200), db.select({ id: houses.id, name: houses.name, guests: houses.guests }).from(houses).orderBy(houses.name), db.select({ id: salesChannels.id, name: salesChannels.name }).from(salesChannels).where(eq(salesChannels.isActive, true)).orderBy(asc(salesChannels.sortOrder))]);
+  const [serviceMap, serviceCatalog] = await Promise.all([
+    getBookingServicesMap(rows.map((row) => row.id)),
+    getPublicServices()
+  ]);
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.parse(`${today}T00:00:00.000Z`) + 86_400_000).toISOString().slice(0, 10);
   const defaults = {
@@ -38,5 +47,5 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
   };
   const canCreate = access.permissions.includes("bookings.create");
   const canUpdate = access.permissions.includes("bookings.update");
-  return <main className="admin-content"><h1 className="admin-title">Бронирования</h1><p className="admin-subtitle">Заявки со всех каналов, оплаты и история статусов.</p>{canCreate && (houseRows.length ? <QuickBookingForm houses={houseRows} channels={channelRows} defaults={defaults} initiallyOpen={typeof params.checkIn === "string"} /> : <p className="notice">Сначала добавьте домик.</p>)}<section className="panel" style={{ marginTop: 20 }}><div style={{ display: "flex", justifyContent: "space-between", gap: 20, marginBottom: 20 }}><div className="field" style={{ width: 330, maxWidth: "100%" }}><label htmlFor="search">Поиск</label><input id="search" placeholder="Номер, имя или телефон" /></div><div className="button-row"><Link className="button button-ghost" href="/api/admin/exports/bookings?format=xls">Excel</Link><Link className="button button-ghost" href="/api/admin/exports/bookings?format=csv">CSV</Link></div></div><table className="data-table"><thead><tr><th>Номер</th><th>Гость</th><th>Дом</th><th>Даты</th><th>Сумма</th><th>Канал</th><th>Статус</th><th>Файлы</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td data-label="Номер">{row.publicNumber}</td><td data-label="Гость">{row.customerFirstName} {row.customerLastName}</td><td data-label="Дом">{row.houseName}</td><td data-label="Даты">{row.checkIn} — {row.checkOut}</td><td data-label="Сумма">{formatCurrency(Number(row.totalAmount))}</td><td data-label="Канал">{canUpdate ? <BookingSalesChannelControl bookingId={row.id} value={row.salesChannelId} channels={channelRows} /> : row.salesChannelName ?? "—"}</td><td data-label="Статус">{canUpdate ? <BookingStatusControl id={row.id} status={row.status} /> : <span className="badge">{row.status}</span>}</td><td data-label="Файлы"><BookingDocumentsControl bookingId={row.id} canUpload={canUpdate} /></td></tr>)}</tbody></table>{!rows.length && <p className="notice">Бронирований пока нет.</p>}</section></main>;
+  return <main className="admin-content"><h1 className="admin-title">Бронирования</h1><p className="admin-subtitle">Заявки со всех каналов, оплаты и история статусов.</p>{canCreate && (houseRows.length ? <QuickBookingForm houses={houseRows} channels={channelRows} services={serviceCatalog} defaults={defaults} initiallyOpen={typeof params.checkIn === "string"} /> : <p className="notice">Сначала добавьте домик.</p>)}<section className="panel" style={{ marginTop: 20 }}><div style={{ display: "flex", justifyContent: "space-between", gap: 20, marginBottom: 20 }}><div className="field" style={{ width: 330, maxWidth: "100%" }}><label htmlFor="search">Поиск</label><input id="search" placeholder="Номер, имя или телефон" /></div><div className="button-row"><Link className="button button-ghost" href="/api/admin/exports/bookings?format=xls">Excel</Link><Link className="button button-ghost" href="/api/admin/exports/bookings?format=csv">CSV</Link></div></div><table className="data-table"><thead><tr><th>Номер</th><th>Гость</th><th>Дом</th><th>Даты</th><th>Сумма</th><th>Услуги</th><th>Канал</th><th>Статус</th><th>Файлы</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td data-label="Номер">{row.publicNumber}</td><td data-label="Гость">{row.customerFirstName} {row.customerLastName}</td><td data-label="Дом">{row.houseName}</td><td data-label="Даты">{row.checkIn} — {row.checkOut}</td><td data-label="Сумма">{formatCurrency(Number(row.totalAmount))}</td><td data-label="Услуги"><BookingServicesEditor bookingId={row.id} publicNumber={row.publicNumber} houseId={row.houseId} initialAccommodationAmount={Number(row.accommodationAmount)} initialServices={serviceMap.get(row.id) ?? []} catalog={serviceCatalog} canEdit={canUpdate} /></td><td data-label="Канал">{canUpdate ? <BookingSalesChannelControl bookingId={row.id} value={row.salesChannelId} channels={channelRows} /> : row.salesChannelName ?? "—"}</td><td data-label="Статус">{canUpdate ? <BookingStatusControl id={row.id} status={row.status} /> : <span className="badge">{row.status}</span>}</td><td data-label="Файлы"><BookingDocumentsControl bookingId={row.id} canUpload={canUpdate} /></td></tr>)}</tbody></table>{!rows.length && <p className="notice">Бронирований пока нет.</p>}</section></main>;
 }

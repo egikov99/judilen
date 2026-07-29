@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { bookingDocuments, bookingServices, bookings, customers, db, houseImages, houses, reviews, serviceOptions, services } from "@judilen/db";
+import { bookingDocuments, bookingServices, bookings, customers, db, houseImages, houses, reviews } from "@judilen/db";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
@@ -42,12 +42,11 @@ export default async function TripsPage() {
     .orderBy(desc(bookings.checkIn));
   const [serviceRows, documentRows] = trips.length ? await Promise.all([db.select({
     bookingId: bookingServices.bookingId,
-    title: services.title,
-    optionTitle: serviceOptions.title,
+    title: bookingServices.serviceTitle,
+    optionTitle: bookingServices.optionTitle,
     quantity: bookingServices.quantity,
     totalPrice: bookingServices.totalPrice
-  }).from(bookingServices).innerJoin(services, eq(bookingServices.serviceId, services.id))
-    .leftJoin(serviceOptions, eq(bookingServices.serviceOptionId, serviceOptions.id))
+  }).from(bookingServices)
     .where(inArray(bookingServices.bookingId, trips.map((trip) => trip.id))),
   db.select({ id: bookingDocuments.id, bookingId: bookingDocuments.bookingId, title: bookingDocuments.title, mimeType: bookingDocuments.mimeType })
     .from(bookingDocuments).where(inArray(bookingDocuments.bookingId, trips.map((trip) => trip.id)))

@@ -30,11 +30,18 @@
   "lastName": "Иванова",
   "email": "anna@example.com",
   "phone": "+79990000000",
-  "consent": true
+  "consent": true,
+  "services": [
+    {
+      "serviceId": "7a5cc1f6-8b2e-42d2-b7c9-fb29f93f1001",
+      "serviceOptionId": null,
+      "quantity": 2
+    }
+  ]
 }
 ```
 
-Создает клиента, бронирование и первую запись истории одной транзакцией. Конфликт дат возвращает `409`.
+Создает клиента, бронирование, снимок стоимости проживания, выбранные услуги и первую запись истории одной транзакцией. Ответ содержит `services`, `servicesTotal`, `accommodationAmount` и общую `totalAmount`. Конфликт дат возвращает `409`.
 
 ### `GET /api/calendar/:houseId`
 
@@ -68,7 +75,7 @@ Permission: `houses.write`. Создает домик после Zod-валид�
 
 Дополнительные CRM endpoints:
 
-- `GET|POST /api/admin/bookings`, `PATCH /api/admin/bookings/:id`;
+- `GET|POST /api/admin/bookings`, `GET|PATCH|PUT /api/admin/bookings/:id` — ответы содержат услуги конкретного бронирования; `PUT/PATCH` принимают `services` и пересчитывают `totalAmount` как стоимость проживания плюс услуги;
 - `GET /api/admin/customers`;
 - `GET|POST /api/admin/users`, `PATCH /api/admin/users/:id`;
 - `GET|POST /api/admin/content`, `PATCH /api/admin/content/:id`;

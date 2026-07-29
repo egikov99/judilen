@@ -36,7 +36,7 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
     return selected[service.id] ?? {
       enabled: false,
       optionId: service.options.find((item) => item.isDefault)?.id ?? service.options[0]?.id ?? "",
-      quantity: 1
+      quantity: service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1
     };
   }
 
@@ -102,13 +102,14 @@ export function HouseBookingCard({ house, services }: { house: House; services: 
               <label style={{ display: "flex", gap: 9 }}><input type="checkbox" checked={item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label>
               <div className="form-grid">
                 <div className="field"><label htmlFor={`option-${service.id}`}>Вариант</label><select id={`option-${service.id}`} value={item.optionId} disabled={!item.enabled || !service.options.length} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title} - {formatPrice(current.price)}</option>)}</select></div>
-                <div className="field"><label htmlFor={`quantity-${service.id}`}>Количество</label><input id={`quantity-${service.id}`} type="number" min="1" max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div>
+                <div className="field"><label htmlFor={`quantity-${service.id}`}>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input id={`quantity-${service.id}`} type="number" min={service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelected((value) => ({ ...value, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div>
               </div>
               <small>{formatCurrency(option?.price ?? service.basePrice)} {priceUnitLabels[service.priceUnit]}</small>
             </div>;
           })}
         </div>}
         {!!stay.breakdown.length && <details className="booking-price-breakdown"><summary>{stay.breakdown.length} ноч. · проживание {formatCurrency(stay.total)}</summary>{stay.breakdown.map((night) => <div className="summary-row" key={night.date}><span>{night.date} · {weekdayLabels[night.weekday].toLowerCase()}</span><strong>{formatCurrency(night.price)}</strong></div>)}</details>}
+        {servicesTotal > 0 && <div className="summary-row"><span>Дополнительные услуги</span><strong>{formatCurrency(servicesTotal)}</strong></div>}
         <div className="summary-row"><span>Итого</span><strong>{total > 0 ? formatCurrency(total) : "Выберите даты"}</strong></div>
         <label style={{ display: "flex", gap: 9, marginTop: 16, fontSize: 12 }}><input name="consent" type="checkbox" required /> <span>Согласен с <Link href="/privacy" target="_blank">политикой конфиденциальности</Link></span></label>
         <button className="button button-primary" disabled={state === "loading"}>{state === "loading" ? "Отправляем…" : "Отправить заявку"}</button>

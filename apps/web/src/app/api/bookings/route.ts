@@ -5,7 +5,7 @@ import { hasDatabaseErrorCode } from "@/lib/booking-availability";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import { bookingSchema, problem } from "@/lib/validation";
 import { getPublishedHouses } from "@/lib/houses";
-import { getActiveServicesByIds } from "@/lib/services";
+import { bookingServicesTotal, resolveBookingServiceLines } from "@/lib/booking-services";
 import { sendNewBookingEmails } from "@/lib/booking-emails";
 import { calculateStayTotal, roundMoney } from "@/lib/weekday-prices";
 import { checkRateLimit, rateLimitProblem } from "@/lib/rate-limit";
@@ -34,28 +34,9 @@ export async function POST(request: Request) {
     return problem(409, "Домик уже занят на выбранные даты", "Выберите другой домик или период");
   }
   const stay = calculateStayTotal(parsed.data.checkIn, parsed.data.checkOut, house.weekdayPrices);
-  const activeServices = await getActiveServicesByIds([...new Set(parsed.data.services.map((item) => item.serviceId))], house.id);
-  let invalidService = false;
-  const serviceLines = parsed.data.services.map((line) => {
-    const service = activeServices.find((item) => item.id === line.serviceId);
-    if (!service) {
-      invalidService = true;
-      return null;
-    }
-    const option = line.serviceOptionId
-      ? service.options.find((item) => item.id === line.serviceOptionId)
-      : service.options.find((item) => item.isDefault) ?? service.options[0];
-    const unitPrice = option ? option.price : service.basePrice;
-    return {
-      serviceId: service.id,
-      serviceOptionId: option?.id ?? null,
-      quantity: line.quantity,
-      unitPrice,
-      totalPrice: roundMoney(unitPrice * line.quantity)
-    };
-  }).filter((line) => line !== null);
-  if (invalidService) return problem(422, "Выбранная услуга недоступна для этого домика");
-  const servicesTotal = roundMoney(serviceLines.reduce((sum, line) => sum + line.totalPrice, 0));
+  const { lines: serviceLines, invalid: invalidService } = await resolveBookingServiceLines(parsed.data.services, house.id);
+  if (invalidService) return problem(422, "Выбранная услуга или вариант недоступны для этого домика");
+  const servicesTotal = bookingServicesTotal(serviceLines);
   const totalAmount = roundMoney(stay.total + servicesTotal);
   const publicNumber = bookingNumber();
   const [siteChannel] = await db.select({ id: salesChannels.id }).from(salesChannels)
@@ -85,6 +66,7 @@ export async function POST(request: Request) {
         guests: parsed.data.guests,
         status: "awaiting_confirmation",
         salesChannelId: siteChannel?.id,
+        accommodationAmount: String(stay.total),
         totalAmount: String(totalAmount)
       }).returning({ id: bookings.id });
       await tx.insert(bookingNightlyPrices).values(stay.breakdown.map((night) => ({
@@ -98,6 +80,9 @@ export async function POST(request: Request) {
           bookingId: booking.id,
           serviceId: line.serviceId,
           serviceOptionId: line.serviceOptionId,
+          serviceTitle: line.title,
+          optionTitle: line.optionTitle,
+          priceUnit: line.priceUnit,
           quantity: line.quantity,
           unitPrice: String(line.unitPrice),
           totalPrice: String(line.totalPrice)
@@ -125,6 +110,9 @@ export async function POST(request: Request) {
       paymentMethod: "on_arrival",
       paymentStatus: "unpaid",
       totalAmount,
+      accommodationAmount: stay.total,
+      servicesTotal,
+      services: serviceLines,
       nightlyPrices: stay.breakdown
     }, { status: 201 });
   } catch (error) {

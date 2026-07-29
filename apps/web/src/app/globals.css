@@ -547,6 +547,15 @@ img { display: block; max-width: 100%; }
 .option-editor { display: grid; gap: 16px; margin-top: 14px; padding: 18px; border: 1px solid var(--forest-700); border-radius: 8px; background: var(--sage-100); }
 .option-editor h4 { margin: 0; font-size: 17px; }
 .compact-checks { align-content: end; gap: 8px; }
+.booking-services-section { display: grid; gap: 18px; }
+.booking-services-table-wrap { overflow-x: auto; }
+.booking-services-table { min-width: 720px; }
+.booking-services-table .field { display: grid; min-width: 220px; gap: 7px; }
+.booking-services-table input[type="number"] { width: 100px; }
+.booking-cost-summary { display: grid; gap: 4px; margin-left: auto; width: min(440px, 100%); padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--sage-100); }
+.booking-cost-summary input { width: 150px; text-align: right; }
+.booking-grand-total { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 16px; }
+.compact-list { margin: 0; padding-left: 18px; }
 .user-filters { display: flex; flex: 1; flex-wrap: wrap; gap: 10px; }
 .user-filters input, .user-filters select { min-height: 44px; border: 1px solid var(--line); background: white; padding: 8px 11px; }
 .user-filters input { flex: 1 1 260px; }

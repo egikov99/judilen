@@ -2,10 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { formatCurrency } from "@/components/currency";
+import type { PublicService } from "@/lib/service-types";
 
-export function QuickBookingForm({ houses, channels, defaults, initiallyOpen = false }: {
+export function QuickBookingForm({ houses, channels, services, defaults, initiallyOpen = false }: {
   houses: Array<{ id: string; name: string; guests: number }>;
   channels: Array<{ id: string; name: string }>;
+  services: PublicService[];
   defaults: { houseId: string; checkIn: string; checkOut: string };
   initiallyOpen?: boolean;
 }) {
@@ -13,7 +16,22 @@ export function QuickBookingForm({ houses, channels, defaults, initiallyOpen = f
   const [open, setOpen] = useState(initiallyOpen);
   const [message, setMessage] = useState("");
   const [houseId, setHouseId] = useState(defaults.houseId);
+  const [selectedServices, setSelectedServices] = useState<Record<string, { enabled: boolean; optionId: string; quantity: number }>>({});
   const capacity = houses.find((house) => house.id === houseId)?.guests ?? 1;
+  const availableServices = services.filter((service) => !service.houseIds.length || service.houseIds.includes(houseId));
+  const servicesTotal = availableServices.reduce((sum, service) => {
+    const selected = selectedServices[service.id];
+    if (!selected?.enabled) return sum;
+    const option = service.options.find((item) => item.id === selected.optionId) ?? service.options[0];
+    return sum + (option?.price ?? service.basePrice) * selected.quantity;
+  }, 0);
+  function selection(service: PublicService) {
+    return selectedServices[service.id] ?? {
+      enabled: false,
+      optionId: service.options.find((item) => item.isDefault)?.id ?? service.options[0]?.id ?? "",
+      quantity: service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1
+    };
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -23,7 +41,11 @@ export function QuickBookingForm({ houses, channels, defaults, initiallyOpen = f
         houseId: form.get("houseId"), checkIn: form.get("checkIn"), checkOut: form.get("checkOut"),
         firstName: form.get("firstName"), lastName: form.get("lastName"), email: form.get("email"),
         phone: form.get("phone"), guests: Number(form.get("guests")), totalAmount: Number(form.get("totalAmount")),
-        status: form.get("status"), salesChannelId: form.get("salesChannelId") || null, managerComment: form.get("managerComment")
+        status: form.get("status"), salesChannelId: form.get("salesChannelId") || null, managerComment: form.get("managerComment"),
+        services: availableServices.flatMap((service) => {
+          const item = selection(service);
+          return item.enabled ? [{ serviceId: service.id, serviceOptionId: item.optionId || null, quantity: item.quantity }] : [];
+        })
       })
     });
     const body = await response.json().catch(() => ({}));
@@ -38,7 +60,8 @@ export function QuickBookingForm({ houses, channels, defaults, initiallyOpen = f
     <div className="form-grid"><div className="field"><label>Заезд</label><input name="checkIn" type="date" defaultValue={defaults.checkIn} required /></div><div className="field"><label>Выезд</label><input name="checkOut" type="date" defaultValue={defaults.checkOut} required /></div></div>
     <div className="form-grid"><div className="field"><label>Имя</label><input name="firstName" required /></div><div className="field"><label>Фамилия</label><input name="lastName" /></div></div>
     <div className="form-grid"><div className="field"><label>Email</label><input name="email" type="email" required /></div><div className="field"><label>Телефон</label><input name="phone" required /></div></div>
-    <div className="form-grid"><div className="field"><label>Гостей (максимум {capacity})</label><select name="guests" defaultValue="1">{Array.from({ length: capacity }, (_, index) => index + 1).map((count) => <option value={count} key={count}>{count}</option>)}</select></div><div className="field"><label>Сумма</label><input name="totalAmount" type="number" min="0" defaultValue="0" required /></div></div>
+    <div className="form-grid"><div className="field"><label>Гостей (максимум {capacity})</label><select name="guests" defaultValue="1">{Array.from({ length: capacity }, (_, index) => index + 1).map((count) => <option value={count} key={count}>{count}</option>)}</select></div><div className="field"><label>Стоимость проживания</label><input name="totalAmount" type="number" min="0" step="0.01" defaultValue="0" required /></div></div>
+    {!!availableServices.length && <section className="form-stack"><strong>Дополнительные услуги</strong>{availableServices.map((service) => { const item = selection(service); const option = service.options.find((current) => current.id === item.optionId) ?? service.options[0]; return <div className="notice" key={service.id}><label><input type="checkbox" checked={item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, enabled: event.target.checked } }))} /> {service.title}</label><div className="form-grid">{!!service.options.length && <div className="field"><label>Вариант</label><select value={item.optionId} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, optionId: event.target.value } }))}>{service.options.map((current) => <option key={current.id} value={current.id}>{current.title}</option>)}</select></div>}<div className="field"><label>{service.priceUnit === "hour" ? "Часы" : "Количество"}</label><input type="number" min={service.priceUnit === "hour" ? service.minRentalHours ?? 1 : 1} max="100" value={item.quantity} disabled={!item.enabled} onChange={(event) => setSelectedServices((current) => ({ ...current, [service.id]: { ...item, quantity: Number(event.target.value) || 1 } }))} /></div></div><small>{formatCurrency(option?.price ?? service.basePrice)} за единицу</small></div>; })}<div className="summary-row"><span>Итого по услугам</span><strong>{formatCurrency(servicesTotal)}</strong></div></section>}
     <div className="field"><label>Комментарий</label><textarea name="managerComment" /></div>
     <button className="button button-primary">Создать бронирование</button>
   </form></div>}
