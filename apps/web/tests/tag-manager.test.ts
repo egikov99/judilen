@@ -21,6 +21,22 @@ describe("tag manager settings", () => {
     }).success).toBe(false);
   });
 
+  it("rejects structural markup and styles that can break the public layout", () => {
+    for (const code of [
+      "<head><script src='/analytics.js'></script></head>",
+      "</body><script>track()</script>",
+      "<style>body { display: none }</style>",
+      "<section class='analytics'>visible content</section>",
+      "<link rel='stylesheet' href='/analytics.css'>"
+    ]) {
+      expect(tagManagerSettingsSchema.safeParse({
+        tagManagerEnabled: true,
+        tagManagerHeadCode: code,
+        tagManagerBodyCode: ""
+      }).success).toBe(false);
+    }
+  });
+
   it("stores tag manager settings in the global settings table with cache invalidation", () => {
     const server = source("src/lib/tag-manager.ts");
     expect(server).toContain('TAG_MANAGER_SETTINGS_KEY = "site.tag_manager"');
@@ -57,13 +73,18 @@ describe("tag manager settings", () => {
     }
   });
 
-  it("supports separate head and body snippets and documents raw HTML injection", () => {
+  it("injects separate head and body snippets without rendering structural wrappers", () => {
     const injector = source("src/components/tag-manager-injector.tsx");
+    const runtime = source("src/components/tag-manager-runtime.tsx");
     expect(injector).toContain("tagManagerEnabled");
     expect(injector).toContain("tagManagerHeadCode.trim()");
     expect(injector).toContain("tagManagerBodyCode.trim()");
-    expect(injector).toContain("dangerouslySetInnerHTML");
-    expect(injector).toContain("administrator-provided analytics code");
+    expect(injector).toContain("TagManagerRuntime");
+    expect(injector).not.toContain("dangerouslySetInnerHTML");
+    expect(injector).not.toContain("<head");
+    expect(runtime).toContain("document.head");
+    expect(runtime).toContain("document.body");
+    expect(runtime).toContain("return null");
   });
 
   it("provides admin controls for saving and clearing code", () => {

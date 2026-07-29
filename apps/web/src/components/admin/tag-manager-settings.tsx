@@ -66,7 +66,7 @@ export function TagManagerSettings() {
   return <section className="panel settings-panel tag-manager-settings">
     <div className="settings-heading"><div><h2>Аналитика и менеджер тегов</h2><p>Код подключается только на публичных страницах сайта.</p></div></div>
     <p className="notice warning">Вставленный код выполняется в браузере посетителей. Добавляйте код только из доверенных источников.</p>
-    <p className="theme-help">Вставьте код, предоставленный Google Tag Manager, Яндекс Метрикой или другим сервисом аналитики. Код будет подключён только на публичных страницах сайта и не будет работать в админке и личном кабинете клиента.</p>
+    <p className="theme-help">Вставьте содержимое сниппета Google Tag Manager, Яндекс Метрики или другого сервиса аналитики без внешних тегов &lt;head&gt;, &lt;body&gt; и без CSS. Код будет подключён только на публичных страницах сайта.</p>
     <label className="toggle-row">
       <input
         type="checkbox"
@@ -104,7 +104,7 @@ export function TagManagerSettings() {
       </button>
       <button className="button button-ghost" type="button" disabled={busy || loading} onClick={clear}>Очистить код</button>
     </div>
-    {!parsed.success && <p className="notice error">Каждое поле кода должно быть не длиннее 20 000 символов.</p>}
+    {!parsed.success && <p className="notice error">{parsed.error.issues[0]?.message ?? "Проверьте код менеджера тегов."}</p>}
     {message && <p className="notice" role="status">{message}</p>}
   </section>;
 }
