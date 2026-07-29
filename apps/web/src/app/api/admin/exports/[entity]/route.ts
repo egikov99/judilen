@@ -1,5 +1,5 @@
-import { bookings, customers, db, expenseCategories, expenses, houses, salesChannels, users } from "@judilen/db";
-import { and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { bookings, customers, db, employees, expenseCategories, expenses, houses, salesChannels, users } from "@judilen/db";
+import { and, count, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import type { Permission } from "@judilen/auth";
 import { requireAllPermissions } from "@/lib/session";
 import { csvExport, excelHtmlExport, simplePdfExport, type ExportRow } from "@/lib/tabular-export";
@@ -54,21 +54,31 @@ export async function GET(request: Request, { params }: { params: Promise<{ enti
       paidTotal: sql<string>`coalesce(sum(case when ${bookings.paymentStatus} = 'paid' and ${bookings.status} not in ('cancelled','declined','blocked','import_removed') then ${bookings.paidAmount} else 0 end), 0)`
     }).from(customers).leftJoin(bookings, eq(customers.id, bookings.customerId)).groupBy(customers.id);
   } else if (entity === "expenses") {
+    const employeeId = query.get("employeeId");
+    const houseId = query.get("houseId");
+    const categoryId = query.get("categoryId");
     rows = await db.select({
       date: expenses.expenseDate,
       category: expenseCategories.name,
       house: houses.name,
       amount: expenses.amount,
       comment: expenses.comment,
-      employee: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+      employee: employees.fullName,
+      author: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
       receipt: expenses.receiptFile
-    }).from(expenses).innerJoin(expenseCategories, eq(expenses.expenseCategoryId, expenseCategories.id)).leftJoin(houses, eq(expenses.houseId, houses.id)).leftJoin(users, eq(expenses.createdBy, users.id)).where(period(expenses.expenseDate));
+    }).from(expenses).innerJoin(expenseCategories, eq(expenses.expenseCategoryId, expenseCategories.id)).leftJoin(houses, eq(expenses.houseId, houses.id)).leftJoin(employees, eq(expenses.employeeId, employees.id)).leftJoin(users, eq(expenses.createdBy, users.id)).where(and(
+      period(expenses.expenseDate),
+      employeeId === "none" ? isNull(expenses.employeeId) : employeeId ? eq(expenses.employeeId, employeeId) : undefined,
+      houseId ? eq(expenses.houseId, houseId) : undefined,
+      categoryId ? eq(expenses.expenseCategoryId, categoryId) : undefined
+    ));
   } else {
+    const employeeId = query.get("employeeId");
     const [financeRows, expenseRows, channelRows] = await Promise.all([db.select({
       paidRevenue: sql<string>`coalesce(sum(case when ${bookings.paymentStatus} = 'paid' and ${bookings.status} not in ('cancelled','declined','blocked','import_removed') then ${bookings.paidAmount} else 0 end), 0)`,
       bookings: count(bookings.id)
     }).from(bookings).where(period(bookings.checkIn)),
-    db.select({ total: sql<string>`coalesce(sum(${expenses.amount}), 0)` }).from(expenses).where(period(expenses.expenseDate)),
+    db.select({ total: sql<string>`coalesce(sum(${expenses.amount}), 0)` }).from(expenses).where(and(period(expenses.expenseDate), employeeId ? eq(expenses.employeeId, employeeId) : undefined)),
     db.select({
       channel: sql<string>`coalesce(${salesChannels.name}, 'Не указан')`,
       bookings: count(bookings.id),

@@ -1,4 +1,4 @@
-import { db, expenses } from "@judilen/db";
+import { db, employees, expenseCategories, expenses, houses } from "@judilen/db";
 import { eq } from "drizzle-orm";
 import { writeAudit } from "@/lib/audit";
 import { expenseSchema } from "@/lib/crm-validation";
@@ -15,6 +15,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const [before] = await db.select().from(expenses).where(eq(expenses.id, id)).limit(1);
   if (!before) return problem(404, "Расход не найден");
+  if (parsed.data.employeeId) {
+    const [employee] = await db.select({ id: employees.id }).from(employees).where(eq(employees.id, parsed.data.employeeId)).limit(1);
+    if (!employee) return problem(422, "Сотрудник не найден");
+  }
+  if (parsed.data.houseId) {
+    const [house] = await db.select({ id: houses.id }).from(houses).where(eq(houses.id, parsed.data.houseId)).limit(1);
+    if (!house) return problem(422, "Домик не найден");
+  }
+  if (parsed.data.expenseCategoryId) {
+    const [category] = await db.select({ id: expenseCategories.id }).from(expenseCategories).where(eq(expenseCategories.id, parsed.data.expenseCategoryId)).limit(1);
+    if (!category) return problem(422, "Статья расхода не найдена");
+  }
   const { type, amount, ...data } = parsed.data;
   const [item] = await db.update(expenses).set({
     ...data,

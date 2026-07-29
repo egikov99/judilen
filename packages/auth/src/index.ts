@@ -63,6 +63,8 @@ export type Permission =
   | "expense_categories.manage"
   | "expenses.read"
   | "expenses.write"
+  | "employees.read"
+  | "employees.write"
   | "client_notes.read"
   | "client_notes.write"
   | "exports.read"
@@ -92,7 +94,7 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "integrations.update", "integrations.delete", "external_calendars.read", "external_calendars.create",
     "external_calendars.update", "external_calendars.delete", "external_calendars.sync",
     "calendar_conflicts.read", "calendar_conflicts.update", "chats.read", "chats.write",
-    "sales_channels.manage", "expense_categories.manage", "expenses.read", "expenses.write",
+    "sales_channels.manage", "expense_categories.manage", "expenses.read", "expenses.write", "employees.read", "employees.write",
     "client_notes.read", "client_notes.write", "exports.read", "settings.manage"
   ],
   admin: [
@@ -148,6 +150,8 @@ const rolePermissions: Record<Role, readonly Permission[]> = {
     "expense_categories.manage",
     "expenses.read",
     "expenses.write",
+    "employees.read",
+    "employees.write",
     "client_notes.read",
     "client_notes.write",
     "exports.read",
@@ -229,6 +233,7 @@ export function adminNavigation(role: Role) {
     { href: "/admin/calendar", label: "Календарь", permission: "calendar.read" },
     { href: "/admin/chats", label: "Чаты", permission: "chats.read" },
     { href: "/admin/customers", label: "Клиенты", permission: "customers.read" },
+    { href: "/admin/employees", label: "Сотрудники", permission: "employees.read" },
     { href: "/admin/expenses", label: "Расходы", permission: "expenses.read" },
     { href: "/admin/houses", label: "Домики", permission: "houses.read" },
     { href: "/admin/services", label: "Услуги", permission: "services.read" },

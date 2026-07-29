@@ -64,6 +64,8 @@ const permissionRows = [
   ["expense_categories.manage", "Управление статьями расходов"],
   ["expenses.read", "Просмотр расходов"],
   ["expenses.write", "Изменение расходов"],
+  ["employees.read", "Просмотр сотрудников"],
+  ["employees.write", "Изменение сотрудников"],
   ["client_notes.read", "Просмотр внутренних заметок клиентов"],
   ["client_notes.write", "Изменение внутренних заметок клиентов"],
   ["exports.read", "Экспорт данных CRM"],

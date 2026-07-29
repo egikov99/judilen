@@ -87,6 +87,12 @@ export const houseWeekday = pgEnum("house_weekday", [
   "saturday",
   "sunday"
 ]);
+export const employeeStatus = pgEnum("employee_status", [
+  "working",
+  "temporarily_inactive",
+  "dismissed",
+  "archived"
+]);
 
 export const roles = pgTable("roles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -391,6 +397,34 @@ export const expenseCategories = pgTable(
   ]
 );
 
+export const employees = pgTable(
+  "employees",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fullName: text("full_name").notNull(),
+    position: text("position"),
+    phone: text("phone"),
+    email: text("email"),
+    birthDate: date("birth_date"),
+    startDate: date("start_date"),
+    endDate: date("end_date"),
+    status: employeeStatus("status").notNull().default("working"),
+    comment: text("comment"),
+    personnelNumber: text("personnel_number"),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    isActive: boolean("is_active").notNull().default(true),
+    ...timestamps
+  },
+  (table) => [
+    uniqueIndex("employees_user_unique").on(table.userId).where(sql`${table.userId} is not null`),
+    uniqueIndex("employees_personnel_number_unique").on(table.personnelNumber).where(sql`${table.personnelNumber} is not null`),
+    index("employees_name_idx").on(table.fullName),
+    index("employees_position_idx").on(table.position),
+    index("employees_status_idx").on(table.status),
+    index("employees_start_date_idx").on(table.startDate)
+  ]
+);
+
 export const expenses = pgTable(
   "expenses",
   {
@@ -399,6 +433,7 @@ export const expenses = pgTable(
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     expenseCategoryId: uuid("expense_category_id").references(() => expenseCategories.id).notNull(),
     houseId: uuid("house_id").references(() => houses.id, { onDelete: "set null" }),
+    employeeId: uuid("employee_id").references(() => employees.id, { onDelete: "restrict" }),
     comment: text("comment"),
     receiptFile: text("receipt_file"),
     createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
@@ -407,6 +442,7 @@ export const expenses = pgTable(
   (table) => [
     index("expenses_date_idx").on(table.expenseDate),
     index("expenses_house_idx").on(table.houseId),
+    index("expenses_employee_idx").on(table.employeeId),
     index("expenses_category_idx").on(table.expenseCategoryId),
     index("expenses_created_by_idx").on(table.createdBy)
   ]

@@ -1,5 +1,5 @@
-import { db, expenseCategories, expenses, houses, users } from "@judilen/db";
-import { and, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
+import { db, employees, expenseCategories, expenses, houses, users } from "@judilen/db";
+import { and, desc, eq, gte, ilike, isNull, lte, or } from "drizzle-orm";
 import { writeAudit } from "@/lib/audit";
 import { expenseSchema } from "@/lib/crm-validation";
 import { requirePermission } from "@/lib/session";
@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     query.get("houseId") ? eq(expenses.houseId, query.get("houseId")!) : undefined,
     query.get("categoryId") ? eq(expenses.expenseCategoryId, query.get("categoryId")!) : undefined,
     query.get("createdBy") ? eq(expenses.createdBy, query.get("createdBy")!) : undefined,
+    query.get("employeeId") === "none" ? isNull(expenses.employeeId) : query.get("employeeId") ? eq(expenses.employeeId, query.get("employeeId")!) : undefined,
     query.get("search") ? or(ilike(expenses.comment, `%${query.get("search")}%`), ilike(expenseCategories.name, `%${query.get("search")}%`)) : undefined
   ];
   const items = await db.select({
@@ -29,6 +30,8 @@ export async function GET(request: Request) {
     categoryColor: expenseCategories.color,
     houseId: houses.id,
     houseName: houses.name,
+    employeeId: employees.id,
+    employeeName: employees.fullName,
     createdBy: users.id,
     authorFirstName: users.firstName,
     authorLastName: users.lastName,
@@ -36,6 +39,7 @@ export async function GET(request: Request) {
   }).from(expenses)
     .innerJoin(expenseCategories, eq(expenses.expenseCategoryId, expenseCategories.id))
     .leftJoin(houses, eq(expenses.houseId, houses.id))
+    .leftJoin(employees, eq(expenses.employeeId, employees.id))
     .leftJoin(users, eq(expenses.createdBy, users.id))
     .where(and(...conditions))
     .orderBy(desc(expenses.expenseDate), desc(expenses.createdAt))
@@ -56,11 +60,16 @@ export async function POST(request: Request) {
     const [house] = await db.select({ id: houses.id }).from(houses).where(eq(houses.id, parsed.data.houseId)).limit(1);
     if (!house) return problem(422, "Домик не найден");
   }
+  if (parsed.data.employeeId) {
+    const [employee] = await db.select({ id: employees.id }).from(employees).where(eq(employees.id, parsed.data.employeeId)).limit(1);
+    if (!employee) return problem(422, "Сотрудник не найден");
+  }
   const [item] = await db.insert(expenses).values({
     expenseDate: parsed.data.expenseDate,
     amount: String(parsed.data.amount),
     expenseCategoryId: parsed.data.expenseCategoryId,
     houseId: parsed.data.type === "general" ? null : parsed.data.houseId,
+    employeeId: parsed.data.employeeId,
     comment: parsed.data.comment,
     receiptFile: parsed.data.receiptFile,
     createdBy: auth.session.userId

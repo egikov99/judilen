@@ -23,6 +23,7 @@ const groupDefinitions = [
   { label: "Фотографии", prefixes: ["house_images.", "uploads."] },
   { label: "Отзывы", prefixes: ["reviews."] },
   { label: "Пользователи", prefixes: ["users."] },
+  { label: "Сотрудники", prefixes: ["employees."] },
   { label: "Настройки", prefixes: ["settings."] },
   { label: "Интеграции", prefixes: ["integrations.", "external_calendars.", "calendar_conflicts."] },
   { label: "Клиенты и контент", prefixes: ["customers.", "content.", "reports."] }
